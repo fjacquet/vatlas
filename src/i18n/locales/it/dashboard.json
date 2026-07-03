@@ -34,6 +34,17 @@
     "cpuReadyMax": "CPU Ready (max)",
     "vmsAboveReady": "VM > 5% CPU Ready"
   },
+  "avgVm": {
+    "title": "Dimensione media VM",
+    "aria": "Dimensione media VM",
+    "axis": "Asse",
+    "axisVcpu": "vCPU",
+    "axisVram": "vRAM",
+    "axisStorage": "Storage (in uso)",
+    "mean": "Media",
+    "median": "Mediana",
+    "max": "Max"
+  },
   "os": {
     "windows": "Windows",
     "linux": "Linux",

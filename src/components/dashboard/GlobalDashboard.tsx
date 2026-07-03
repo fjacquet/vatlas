@@ -11,6 +11,7 @@ import {
 import type { AccountingMode } from '@/types/estate'
 import { ClusterDetail } from '../cluster/ClusterDetail'
 import { AccountingModeToggle } from './AccountingModeToggle'
+import { AverageVmSizeCard } from './AverageVmSizeCard'
 import { CpuReadyPanel } from './CpuReadyPanel'
 import { GlobalSummaryCard } from './GlobalSummaryCard'
 import { OperationalInsights } from './OperationalInsights'
@@ -109,6 +110,7 @@ export function GlobalDashboard() {
           {/* G1: the factual "N clusters marked stretched" echo now lives in
               the cluster table header, co-located with the per-row toggles. */}
           <GlobalSummaryCard globals={view.globals} mode={mode} capturedDate={capturedDate} />
+          <AverageVmSizeCard vmSize={view.vmSize} />
           <OperationalInsights insights={view.operationalInsights} />
           <OsBreakdownDonut osBreakdown={view.osBreakdown} />
           <PerClusterColumns

@@ -21,6 +21,15 @@ export const fmtInt = (n: number, locale = 'fr-FR'): string =>
   Number.isFinite(n) ? n.toLocaleString(locale, { maximumFractionDigits: 0 }) : '—'
 
 /**
+ * Locale-aware decimal formatter (up to `maxDigits` fraction digits, default
+ * 1). Integers render clean (`"8"`); fractional values show the decimal
+ * (`"5.5"`). Em-dash for non-finite inputs. Used for average vCPU (a
+ * fractional count). Distinct from `fmtInt` (always 0 decimals).
+ */
+export const fmtDecimal = (n: number, locale = 'fr-FR', maxDigits = 1): string =>
+  Number.isFinite(n) ? n.toLocaleString(locale, { maximumFractionDigits: maxDigits }) : '—'
+
+/**
  * Renders a unit-bearing GHz value from MHz (RVTools' native speed unit).
  * One decimal of precision is enough for cluster-level reporting.
  */

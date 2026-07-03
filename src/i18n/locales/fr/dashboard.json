@@ -34,6 +34,17 @@
     "cpuReadyMax": "CPU Ready (max)",
     "vmsAboveReady": "VM > 5 % CPU Ready"
   },
+  "avgVm": {
+    "title": "Taille moyenne des VM",
+    "aria": "Taille moyenne des VM",
+    "axis": "Axe",
+    "axisVcpu": "vCPU",
+    "axisVram": "vRAM",
+    "axisStorage": "Stockage (utilisé)",
+    "mean": "Moyenne",
+    "median": "Médiane",
+    "max": "Max"
+  },
   "os": {
     "windows": "Windows",
     "linux": "Linux",

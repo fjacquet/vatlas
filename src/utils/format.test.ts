@@ -1,5 +1,13 @@
 import { describe, expect, it } from 'vitest'
-import { fmtDate, fmtGhzValue, fmtInt, fmtMemMb, fmtPercentValue, fmtRatio } from './format'
+import {
+  fmtDate,
+  fmtDecimal,
+  fmtGhzValue,
+  fmtInt,
+  fmtMemMb,
+  fmtPercentValue,
+  fmtRatio,
+} from './format'
 
 describe('fmtInt', () => {
   it('formats locale-aware integers', () => {
@@ -8,6 +16,17 @@ describe('fmtInt', () => {
   it('returns the em-dash sentinel for non-finite input', () => {
     expect(fmtInt(Number.NaN)).toBe('—')
     expect(fmtInt(Number.POSITIVE_INFINITY)).toBe('—')
+  })
+})
+
+describe('fmtDecimal', () => {
+  it('renders integers without a decimal and fractionals to 1 place', () => {
+    expect(fmtDecimal(8, 'en-US')).toBe('8')
+    expect(fmtDecimal(5.5, 'en-US')).toBe('5.5')
+    expect(fmtDecimal(14 / 3, 'en-US')).toBe('4.7')
+  })
+  it('returns em-dash for non-finite input', () => {
+    expect(fmtDecimal(Number.NaN, 'en-US')).toBe('—')
   })
 })
 
