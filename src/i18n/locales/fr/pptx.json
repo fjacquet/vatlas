@@ -19,6 +19,16 @@
     "provisioned": "Provisionné",
     "usedStorage": "Stockage utilisé"
   },
+  "avgVm": {
+    "title": "Taille moyenne des VM",
+    "axis": "Axe",
+    "axisVcpu": "vCPU",
+    "axisVram": "vRAM",
+    "axisStorage": "Stockage (utilisé)",
+    "mean": "Moyenne",
+    "median": "Médiane",
+    "max": "Max"
+  },
   "cluster": {
     "stretched": "Étendu",
     "drReserved": "Réservé PRA",

@@ -242,4 +242,11 @@ describe('buildPptx — golden structural snapshot', () => {
     expect(txt).toContain('vCPU allocated')
     expect(txt).toContain('Reserved capacity')
   })
+
+  it('emits a deck carrying average-VM-size data without throwing', async () => {
+    const s = snap('s1', 2, TODAY)
+    const ev = buildExportView(s, [s], MODE, TODAY)
+    expect(ev.view.vmSize.vmCount).toBeGreaterThan(0)
+    await expect(buildPptx(ev.view, ev.trends, strings, 'en')).resolves.toBeDefined()
+  })
 })
