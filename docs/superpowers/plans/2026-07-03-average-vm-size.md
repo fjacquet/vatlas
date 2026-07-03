@@ -12,7 +12,7 @@
 
 - **Storage basis = in-use / committed** (`VInfoRow.inUseMib`). vCPU/vRAM = configured (`vcpu`, `vramMib`). This mixed basis is deliberate; the storage row/column MUST be labelled "Storage (in-use)" (localized) so it is not read as provisioned.
 - **`max` is per-axis** — each axis reports its own maximum; the largest-vCPU VM may differ from the largest-storage VM. Not a single "biggest VM" row.
-- **VM population = all VMs** (powered-on, off, suspended, templates) — matches `globals.vmCount`. No power-state filter.
+- **VM population = all VMs** (powered-on, off, suspended, templates), **mode-independent** — `avgVmSize(merged.vinfo)` with NO power-state or accounting-mode filter. The average is a physical inventory fact and must not shift when the accounting toggle changes. `vmSize.vmCount` = raw VM count (equals `globals.vmCount` only under `configured`; other modes filter to powered-on). (Corrected 2026-07-03; the earlier "matches globals.vmCount" wording was a contradiction.)
 - **Median convention:** odd N → middle element of the sorted axis; even N → mean of the two middle elements.
 - **Surfaces:** web dashboard + PPTX deck only. **No HTML report.**
 - **Factual, brand-free:** plain numbers; no editorial verbs (`recommend/should/good/bad/healthy`); no verdict colors.
@@ -256,10 +256,21 @@ Append a new `describe` to `src/engines/aggregation/estateView.test.ts`. This fi
 
 ```ts
 describe('buildEstateView — vmSize (average VM size)', () => {
-  it('populates vmSize with a vmCount matching globals.vmCount', () => {
+  it('counts ALL VMs regardless of accounting mode (mode-independent)', () => {
+    // Fixture has 4 VMs (2 on, 2 off). vmSize counts all 4 under every mode
+    // and the projection is identical; globals.vmCount is 2 under 'active'.
+    const active = buildEstateView(snapshot(), 'active')
+    const configured = buildEstateView(snapshot(), 'configured')
+    expect(active.vmSize.vmCount).toBe(4)
+    expect(configured.vmSize.vmCount).toBe(4)
+    expect(active.globals.vmCount).toBe(2)
+    expect(active.vmSize).toEqual(configured.vmSize)
+  })
+
+  it('computes per-axis stats over all VMs (max ≥ mean, storage > 0)', () => {
     const view = buildEstateView(snapshot(), 'active')
-    expect(view.vmSize.vmCount).toBe(view.globals.vmCount)
     expect(view.vmSize.vcpu.max).toBeGreaterThanOrEqual(view.vmSize.vcpu.mean)
+    expect(view.vmSize.storageMib.mean).toBeGreaterThan(0)
   })
 
   it('EMPTY_VIEW.vmSize is the frozen empty projection', () => {
@@ -303,10 +314,14 @@ In `src/engines/aggregation/estateView.ts`:
 import { avgVmSize, EMPTY_VM_SIZE } from './avgVmSize'
 ```
 
-(b) Compute it next to `monsters` (right after the `computeMonsters(...)` block, ~line 340):
+(b) Compute it next to `monsters` (right after the `computeMonsters(...)` block, ~line 340). ALL VMs, mode-independent — no power-state/mode filter:
 
 ```ts
-  // Average VM size (mean/median/max) over ALL VMs — same single pass.
+  // Average VM size (mean/median/max) — same single pass. ALWAYS over ALL
+  // VMs (mode-independent): "average VM size" is a physical inventory fact,
+  // not an accounting figure, so it must not shift with the accounting mode
+  // (user decision 2026-07-03). vmSize.vmCount = raw VM count, not the
+  // mode-filtered globals.vmCount.
   const vmSize = avgVmSize(merged.vinfo)
 ```
 

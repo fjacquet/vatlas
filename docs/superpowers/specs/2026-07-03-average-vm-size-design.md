@@ -25,8 +25,12 @@ the right-sizing view already owns that lens with user-editable thresholds).
 1. **Surfaces:** web dashboard + PPTX deck. **Not** the HTML report.
 2. **Statistics:** mean, median, and max per axis.
 3. **Storage basis:** **in-use / committed** (`vInfo.inUseMib`).
-4. **VM population:** **all VMs** (powered-on, off, suspended, templates) —
-   matches `globals.vmCount`.
+4. **VM population:** **all VMs** (powered-on, off, suspended, templates),
+   **mode-independent**. The average is a physical inventory fact and does
+   NOT shift with the accounting toggle. `vmSize.vmCount` is the raw VM count
+   — it equals `globals.vmCount` only under `configured` mode (other modes
+   filter to powered-on, so `globals.vmCount` is lower). Resolved 2026-07-03
+   after the mode-dependence contradiction surfaced in implementation.
 
 ## Constraints (binding)
 
