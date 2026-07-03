@@ -226,10 +226,24 @@ describe('buildEstateView', () => {
 })
 
 describe('buildEstateView — vmSize (average VM size)', () => {
-  it('populates vmSize with a vmCount matching globals.vmCount', () => {
+  it('counts ALL VMs regardless of accounting mode (mode-independent)', () => {
+    // Fixture has 4 VMs (2 powered-on, 2 powered-off). Average VM size is a
+    // physical fact about the inventory, so it must NOT filter by mode:
+    // vmCount = 4 under every mode, and the whole projection is identical
+    // (user decision 2026-07-03). Contrast globals.vmCount, which is 2 under
+    // 'active' (powered-on only).
+    const active = buildEstateView(snapshot(), 'active')
+    const configured = buildEstateView(snapshot(), 'configured')
+    expect(active.vmSize.vmCount).toBe(4)
+    expect(configured.vmSize.vmCount).toBe(4)
+    expect(active.globals.vmCount).toBe(2)
+    expect(active.vmSize).toEqual(configured.vmSize)
+  })
+
+  it('computes per-axis stats over all VMs (max ≥ mean, storage > 0)', () => {
     const view = buildEstateView(snapshot(), 'active')
-    expect(view.vmSize.vmCount).toBe(view.globals.vmCount)
     expect(view.vmSize.vcpu.max).toBeGreaterThanOrEqual(view.vmSize.vcpu.mean)
+    expect(view.vmSize.storageMib.mean).toBeGreaterThan(0)
   })
 
   it('EMPTY_VIEW.vmSize is the frozen empty projection', () => {

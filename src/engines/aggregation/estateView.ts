@@ -340,13 +340,13 @@ export function buildEstateView(
     opts?.monsterThresholds ?? DEFAULT_MONSTER_THRESHOLDS,
   )
 
-  // Average VM size (mean/median/max) — same single pass. Same accounting-
-  // mode VM filter as `perEsx`/`groupByCluster` (Critical-6): configured =
-  // all VMs; active/storage-realistic = powered-on only. Keeps vmCount
-  // equal to globals.vmCount (avgVmSize's own documented contract).
-  const vmSize = avgVmSize(
-    mode === 'configured' ? merged.vinfo : merged.vinfo.filter((v) => v.poweredOn),
-  )
+  // Average VM size (mean/median/max) — same single pass. ALWAYS over ALL
+  // VMs (powered-on, off, suspended, templates), MODE-INDEPENDENT by design:
+  // "average VM size" is a physical fact about the inventory, not an
+  // accounting-capacity figure, so it must not shift when the accounting
+  // mode toggles (user decision, 2026-07-03). `vmSize.vmCount` therefore
+  // equals the raw VM count, NOT the mode-filtered `globals.vmCount`.
+  const vmSize = avgVmSize(merged.vinfo)
 
   return {
     globals,
