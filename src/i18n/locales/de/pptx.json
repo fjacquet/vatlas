@@ -19,6 +19,16 @@
     "provisioned": "Bereitgestellt",
     "usedStorage": "Belegter Speicher"
   },
+  "avgVm": {
+    "title": "Durchschnittliche VM-Größe",
+    "axis": "Achse",
+    "axisVcpu": "vCPU",
+    "axisVram": "vRAM",
+    "axisStorage": "Speicher (belegt)",
+    "mean": "Mittel",
+    "median": "Median",
+    "max": "Max"
+  },
   "cluster": {
     "stretched": "Stretched",
     "drReserved": "DR-reserviert",

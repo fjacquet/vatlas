@@ -19,6 +19,16 @@
     "provisioned": "Provisionato",
     "usedStorage": "Spazio utilizzato"
   },
+  "avgVm": {
+    "title": "Dimensione media VM",
+    "axis": "Asse",
+    "axisVcpu": "vCPU",
+    "axisVram": "vRAM",
+    "axisStorage": "Storage (in uso)",
+    "mean": "Media",
+    "median": "Mediana",
+    "max": "Max"
+  },
   "cluster": {
     "stretched": "Stretched",
     "drReserved": "Riservato DR",

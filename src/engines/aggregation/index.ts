@@ -3,6 +3,7 @@
  * future export import `buildEstateView`/`EMPTY_VIEW` from here.
  */
 export { aggregateClusters } from './aggregateClusters'
+export { type AxisStats, avgVmSize, EMPTY_VM_SIZE, type VmSizeStats } from './avgVmSize'
 export { CONTENTION_THRESHOLDS, TOP_N_DEFAULT } from './contention'
 export { buildDatastoreDetail, buildVmDetail } from './detailIndex'
 export { buildEstateView, EMPTY_VIEW } from './estateView'

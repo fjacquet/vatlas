@@ -4,16 +4,18 @@
  *  (off-brand) and were redundant with the Avg CPU/Mem cards — both dropped
  *  for readable text. Pure, factual, brand-free. */
 import type PptxGenJS from 'pptxgenjs'
+import type { VmSizeStats } from '@/engines/aggregation/avgVmSize'
 import type { GlobalSummary, OperationalInsights, OsBreakdown } from '@/types/estate'
 import type { ExportStrings } from '../../types'
 import { type ExportLocale, pptxMemMib, pptxNumber, pptxSafeFormat } from '../format'
 import { PPTX_COLORS } from '../primitives/colors'
-import { addHeader, addKpiRow, M } from './_layout'
+import { addHeader, addKpiRow, CONTENT_W, M } from './_layout'
 
 export interface OverviewData {
   globals: GlobalSummary
   insights: OperationalInsights
   osBreakdown: OsBreakdown
+  vmSize: VmSizeStats
 }
 
 export function addOverviewSlide(
@@ -111,4 +113,64 @@ export function addOverviewSlide(
     ],
     y3 + 0.45,
   )
+
+  // Average VM size — a native table (native text renders fine; the resvg
+  // trap only affects rasterized chart images). Rows = vCPU / vRAM / storage
+  // (in-use); columns = mean / median / max. Factual, brand-free.
+  const vs = d.vmSize
+  const cell = (text: string, opts: Record<string, unknown> = {}) => ({
+    text: pptxSafeFormat(text),
+    options: { fontFace: 'Arial', fontSize: 11, color: PPTX_COLORS.ink, ...opts },
+  })
+  const hOpts = { bold: true, color: PPTX_COLORS.inkMuted }
+  const rOpts = { align: 'right' as const }
+  const num = (n: number) => pptxNumber(n, locale, 1)
+  const mem = (n: number) => pptxMemMib(n, locale)
+  const avgHeader = [
+    cell(strings['avgVm.axis'] ?? 'Axis', hOpts),
+    cell(strings['avgVm.mean'] ?? 'Mean', { ...hOpts, align: 'right' }),
+    cell(strings['avgVm.median'] ?? 'Median', { ...hOpts, align: 'right' }),
+    cell(strings['avgVm.max'] ?? 'Max', { ...hOpts, align: 'right' }),
+  ]
+  const avgRows = [
+    [
+      cell(strings['avgVm.axisVcpu'] ?? 'vCPU'),
+      cell(num(vs.vcpu.mean), rOpts),
+      cell(num(vs.vcpu.median), rOpts),
+      cell(num(vs.vcpu.max), rOpts),
+    ],
+    [
+      cell(strings['avgVm.axisVram'] ?? 'vRAM'),
+      cell(mem(vs.vramMib.mean), rOpts),
+      cell(mem(vs.vramMib.median), rOpts),
+      cell(mem(vs.vramMib.max), rOpts),
+    ],
+    [
+      cell(strings['avgVm.axisStorage'] ?? 'Storage (in-use)'),
+      cell(mem(vs.storageMib.mean), rOpts),
+      cell(mem(vs.storageMib.median), rOpts),
+      cell(mem(vs.storageMib.max), rOpts),
+    ],
+  ]
+  s.addText(pptxSafeFormat(strings['avgVm.title'] ?? 'Average VM size'), {
+    x: M,
+    y: 5.7,
+    w: 6,
+    h: 0.3,
+    fontFace: 'Arial',
+    fontSize: 13,
+    bold: true,
+    color: PPTX_COLORS.ink,
+    margin: 0,
+  })
+  s.addTable([avgHeader, ...avgRows], {
+    x: M,
+    y: 6.05,
+    w: CONTENT_W,
+    colW: [CONTENT_W * 0.4, CONTENT_W * 0.2, CONTENT_W * 0.2, CONTENT_W * 0.2],
+    rowH: 0.3,
+    valign: 'middle',
+    border: { type: 'solid', pt: 0.5, color: PPTX_COLORS.hairline },
+    autoPage: false,
+  })
 }

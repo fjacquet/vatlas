@@ -77,6 +77,7 @@ export async function buildPptx(
       globals: view.globals,
       insights: view.operationalInsights,
       osBreakdown: view.osBreakdown,
+      vmSize: view.vmSize,
     },
     strings,
     locale,

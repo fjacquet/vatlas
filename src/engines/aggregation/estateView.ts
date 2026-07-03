@@ -16,6 +16,7 @@ import type {
 } from '@/types/estate'
 import type { Snapshot } from '@/types/snapshot'
 import { aggregateClusters } from './aggregateClusters'
+import { avgVmSize, EMPTY_VM_SIZE } from './avgVmSize'
 import { buildDatastoreDetail, buildVmDetail } from './detailIndex'
 import { aggregateGlobals, emptySummary } from './globals'
 import { aggregateGuestData, type GuestData } from './guestData'
@@ -339,6 +340,14 @@ export function buildEstateView(
     opts?.monsterThresholds ?? DEFAULT_MONSTER_THRESHOLDS,
   )
 
+  // Average VM size (mean/median/max) — same single pass. ALWAYS over ALL
+  // VMs (powered-on, off, suspended, templates), MODE-INDEPENDENT by design:
+  // "average VM size" is a physical fact about the inventory, not an
+  // accounting-capacity figure, so it must not shift when the accounting
+  // mode toggles (user decision, 2026-07-03). `vmSize.vmCount` therefore
+  // equals the raw VM count, NOT the mode-filtered `globals.vmCount`.
+  const vmSize = avgVmSize(merged.vinfo)
+
   return {
     globals,
     clusters,
@@ -363,6 +372,7 @@ export function buildEstateView(
     flags,
     sizing,
     monsters,
+    vmSize,
     datastoreDetail,
     vmDetail,
   }
@@ -501,6 +511,7 @@ export const EMPTY_VIEW: EstateView = Object.freeze({
   flags: EMPTY_FLAGS,
   sizing: EMPTY_SIZING,
   monsters: EMPTY_MONSTERS,
+  vmSize: EMPTY_VM_SIZE,
   datastoreDetail: new Map(),
   vmDetail: new Map(),
 })

@@ -242,4 +242,19 @@ describe('buildPptx — golden structural snapshot', () => {
     expect(txt).toContain('vCPU allocated')
     expect(txt).toContain('Reserved capacity')
   })
+
+  it('renders the average-VM-size table (title + in-use storage label) into the deck', async () => {
+    const s = snap('s1', 2, TODAY)
+    const ev = buildExportView(s, [s], MODE, TODAY)
+    expect(ev.view.vmSize.vmCount).toBeGreaterThan(0)
+    const ab = await buildPptx(ev.view, ev.trends, strings, 'en')
+    // The minimal `strings` map has no `avgVm.*` keys, so the slide emits its
+    // ASCII fallback labels — assert they actually land in the deck XML (the
+    // zip is latin1-decoded; ASCII-only substrings, per the sibling tests).
+    const txt = new TextDecoder('latin1').decode(new Uint8Array(ab))
+    expect(txt).toContain('Average VM size')
+    // The storage row must read "in-use", never "provisioned" — the exact
+    // regression this feature guards against.
+    expect(txt).toContain('Storage (in-use)')
+  })
 })
