@@ -52,8 +52,9 @@ the right-sizing view already owns that lens with user-editable thresholds).
   `useMemo` (the single `useEstateView` memo is untouched — the engine runs
   inside the existing `buildEstateView` pass); the PPTX table is a pure sync
   function; the dashboard card is presentational (props only).
-- **Branded units (ADR-0010):** vRAM/storage stay `MiB`-branded via `mib()`;
-  vCPU stays `cores`-branded via `cores()`; no raw `* 1.048576`.
+- **Branded units (ADR-0010):** branded inputs (`Cores`/`MiB` on `VInfoRow`)
+  are unwrapped at the boundary via `as number`; `AxisStats` averages are
+  plain numbers with units documented in comments; no raw `* 1.048576`.
 - **i18n parity gate:** every new key lands in **en / fr / de / it** or
   `keyParity.test.ts` fails the build. DE/IT remain pending native review
   (existing project risk); new technical terms inherit that caveat. No
@@ -74,8 +75,8 @@ export interface AxisStats {
 export interface VmSizeStats {
   vmCount: number
   vcpu: AxisStats        // cores (configured)
-  vramMib: AxisStats     // MiB (configured), branded
-  storageMib: AxisStats  // MiB (in-use / committed), branded
+  vramMib: AxisStats     // plain numbers; unit is MiB (configured)
+  storageMib: AxisStats  // plain numbers; unit is MiB (in-use / committed)
 }
 ```
 
@@ -88,8 +89,10 @@ export interface VmSizeStats {
 - Empty estate (`n === 0`) → `EMPTY_VM_SIZE`, a frozen all-zeros constant
   (same idiom as `emptySummary` / `EMPTY_SIZING`). Guards divide-by-zero and
   `Math.max()` of an empty list.
-- Branded-unit fields are re-wrapped with `mib()` / `cores()` on the way out;
-  the internal arithmetic is on raw numbers.
+- `AxisStats` carries plain `number`s (not branded): averages are display-only
+  and every consumer (card, PPTX table) takes a bare number. Branded inputs are
+  unwrapped at the boundary via `as number`; units are documented in the
+  `VmSizeStats` field comments (satisfies ADR-0010 — no raw `* 1.048576`).
 
 The extra O(n) pass + three O(n log n) sorts are negligible at vatlas
 cardinality (VM counts in the low thousands) and keep the engine isolated and
@@ -155,7 +158,7 @@ land as best-effort, flagged under the standing native-review risk.
 - `avgVmSize.test.ts` (engine, feeds the ≥75 % gate): empty → `EMPTY_VM_SIZE`;
   single VM (mean = median = max = that VM); **odd** N median = middle element;
   **even** N median = mean of two middles; per-axis max picks the right value
-  independently across axes; branded-unit types preserved on output.
+  independently across axes; storage axis reads `inUseMib` (not provisioned).
 - `estateView` test extension: `view.vmSize` is populated and matches a hand
   computation on a small fixture; `EMPTY_VIEW.vmSize === EMPTY_VM_SIZE`.
 - `AverageVmSizeCard` render test: 3×3 grid renders, storage row carries its

@@ -145,8 +145,9 @@ export interface AxisStats {
  * Estate-wide average VM size. `vcpu`/`vramMib` are CONFIGURED allocation;
  * `storageMib` is IN-USE / committed (`VInfoRow.inUseMib`) — a deliberate
  * mixed basis. `max` is per-axis (the largest-vCPU VM may differ from the
- * largest-storage VM). Population = ALL VMs (no power-state filter), so
- * `vmCount` equals `GlobalSummary.vmCount`.
+ * largest-storage VM). Population = ALL VMs (no power-state or accounting-
+ * mode filter), mode-independent. `vmCount` is the raw VM count; it equals
+ * `GlobalSummary.vmCount` only under `configured` mode.
  */
 export interface VmSizeStats {
   vmCount: number
