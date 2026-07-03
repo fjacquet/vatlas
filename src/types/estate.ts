@@ -2,6 +2,7 @@
 // aggregation engines — no runtime coupling, no cycle (the engines import
 // their input types from here; these are produced in the single
 // `buildEstateView` pass and surfaced on `EstateView`).
+import type { VmSizeStats } from '@/engines/aggregation/avgVmSize'
 import type { MonsterEstate } from '@/engines/aggregation/monsterVm'
 import type { NetworkRollup } from '@/engines/aggregation/network'
 import type { EstateSizing } from '@/engines/aggregation/sizing'
@@ -540,6 +541,12 @@ export interface EstateView {
    * (vCPU/vRAM ≥ user-editable lines). Same single-pass origin;
    * `EMPTY_MONSTERS` in `EMPTY_VIEW`. */
   monsters: MonsterEstate
+  /**
+   * Estate-wide average VM size (mean/median/max for vCPU, vRAM, and
+   * in-use storage) over ALL VMs. Produced in the single `buildEstateView`
+   * pass; `EMPTY_VM_SIZE` in `EMPTY_VIEW`. Web dashboard + PPTX only.
+   */
+  vmSize: VmSizeStats
   /**
    * P9 LC-4 per-datastore drill projection, keyed by the `naa ?? name`
    * datastore key. Produced in the single `buildEstateView` pass — no

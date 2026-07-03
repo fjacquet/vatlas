@@ -224,3 +224,16 @@ describe('buildEstateView', () => {
     expect(EMPTY_VIEW.flags.counts).toEqual({ fs: 0, ds: 0, lu: 0 })
   })
 })
+
+describe('buildEstateView — vmSize (average VM size)', () => {
+  it('populates vmSize with a vmCount matching globals.vmCount', () => {
+    const view = buildEstateView(snapshot(), 'active')
+    expect(view.vmSize.vmCount).toBe(view.globals.vmCount)
+    expect(view.vmSize.vcpu.max).toBeGreaterThanOrEqual(view.vmSize.vcpu.mean)
+  })
+
+  it('EMPTY_VIEW.vmSize is the frozen empty projection', () => {
+    expect(EMPTY_VIEW.vmSize.vmCount).toBe(0)
+    expect(EMPTY_VIEW.vmSize.storageMib).toEqual({ mean: 0, median: 0, max: 0 })
+  })
+})
