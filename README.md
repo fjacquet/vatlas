@@ -56,4 +56,4 @@ vatlas is built bottom-up across a 10-phase roadmap; Phases 1–6 have shipped (
 
 ## License
 
-MIT. <!-- VERIFY: LICENSE file is referenced by the badge but not present in the repository root -->
+MIT.
