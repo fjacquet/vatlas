@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+## [2.1.6] - 2026-10-02
+
+### Security
+
+- Refreshed the lockfile for the `undici` advisory **GHSA-w293-vg96-wgc3** (lockfile-only, no
+  range changes).
+- Overrode `image-size` to `^2.0.4` (the unused `pptxgenjs` transitive dependency), patching the
+  advisories behind **GHSA-5p2g-fcmc-qvqq** and **GHSA-w3rx-r6r6-pgpr**, and removed the two
+  matching `osv-scanner.toml` waivers, which `osv-scanner` now reports as unused. The `xlsx`
+  waivers are unchanged.
+
+### Changed
+
+- Added the missing MIT `LICENSE` file referenced by the README badge.
+
 ## [2.1.4] - 2026-09-13
 
 ### Security
