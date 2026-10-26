@@ -7,6 +7,15 @@ export interface VmDetailProps {
   onBack: () => void
 }
 
+const Row = ({ label, value }: { label: string; value: string }) => (
+  <div className="flex items-baseline justify-between gap-3 border-b border-slate-100 py-1.5 dark:border-surface-800">
+    <span className="text-sm text-slate-600 dark:text-slate-400">{label}</span>
+    <span className="font-mono text-sm font-semibold tabular-nums text-slate-900 dark:text-slate-100">
+      {value}
+    </span>
+  </div>
+)
+
 /**
  * P9 LC-4 per-VM drill screen. Reached by clicking a VM row. ONE-SCREEN-FIT
  * (`overflow-hidden`, no internal scroll) — export-ready for Phase 10. Pure
@@ -19,15 +28,6 @@ export function VmDetail({ detail: d, onBack }: VmDetailProps) {
   const { t, i18n } = useTranslation('storage')
   const loc = i18n.language
   const na = '—'
-
-  const Row = ({ label, value }: { label: string; value: string }) => (
-    <div className="flex items-baseline justify-between gap-3 border-b border-slate-100 py-1.5 dark:border-surface-800">
-      <span className="text-sm text-slate-600 dark:text-slate-400">{label}</span>
-      <span className="font-mono text-sm font-semibold tabular-nums text-slate-900 dark:text-slate-100">
-        {value}
-      </span>
-    </div>
-  )
 
   return (
     <main className="flex-1 overflow-hidden p-8">

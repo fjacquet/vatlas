@@ -1,5 +1,5 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.5.8/schema.json",
+  "$schema": "https://biomejs.dev/schemas/2.6.3/schema.json",
   "vcs": {
     "enabled": true,
     "clientKind": "git",
@@ -7,7 +7,15 @@
   },
   "files": {
     "ignoreUnknown": false,
-    "includes": ["**", "!public"]
+    "includes": [
+      "**",
+      "!public",
+      "!.planning/phases/01-foundation-invariants/01-01-PLAN.md",
+      "!.planning/phases/01-foundation-invariants/01-02-PLAN.md",
+      "!.planning/phases/03-inventory-navigation/03-RESEARCH.md",
+      "!.planning/research/ARCHITECTURE.md",
+      "!docs/CONFIGURATION.md"
+    ]
   },
   "overrides": [
     {
