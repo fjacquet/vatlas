@@ -13,40 +13,40 @@
 
 ## File Classification
 
-| New/Modified File | Role | Data Flow | Closest Analog | Match Quality |
-|-------------------|------|-----------|----------------|---------------|
-| `src/engines/aggregation/ghz.ts` | engine | transform | vsizer `engines/aggregation/ghz.ts` + vatlas `engines/units/converters.ts` | exact (port + DRY-collapse) |
-| `src/engines/aggregation/perCluster.ts` | engine | batch (group+reduce) | vsizer `engines/aggregation/perCluster.ts` | exact (port + brand retrofit) |
-| `src/engines/aggregation/vinfoMerge.ts` | engine | batch (group+reduce) | vsizer `engines/aggregation/vinfoMerge.ts` | exact + 1 logic add (mode param) |
-| `src/engines/aggregation/aggregateClusters.ts` | engine | transform (join) | vsizer `engines/aggregation/aggregateClusters.ts` | exact (port verbatim) |
-| `src/engines/aggregation/globals.ts` | engine | batch (reduce) | vsizer `engines/aggregation/globals.ts` | exact (port + 2 sums) |
-| `src/engines/aggregation/contention.ts` | engine (constants) | — | vsizer `engines/aggregation/contention.ts` | exact (port verbatim) |
-| `src/engines/aggregation/osFamily.ts` | engine | transform (classify) | RESEARCH §Code Examples + vatlas `engines/units/converters.ts` (purity shape) | partial (new; pattern given) |
-| `src/engines/aggregation/perDatastore.ts` | engine | batch (group/dedupe) | vsizer `perCluster.ts` `groupByCluster` shape | partial (new; pattern given) |
-| `src/engines/aggregation/perEsx.ts` | engine | batch (group+reduce) | vsizer `perCluster.ts` + `vinfoMerge.ts` `readinessStats` | role-match (new; compose existing) |
-| `src/engines/aggregation/estateView.ts` | engine | transform (assembler) | vsizer `engines/aggregation/index.ts` (barrel) + own composition | role-match (new assembler) |
-| `src/engines/aggregation/index.ts` | engine (barrel) | — | vsizer `engines/aggregation/index.ts` | exact |
-| `src/types/estate.ts` | type | — | vsizer `types/cluster.ts` + `types/global.ts`; vatlas `types/vhost.ts` (brand-import header) | exact (port types + brand retrofit) |
-| `src/hooks/useEstateView.ts` | hook | request-response | vatlas `components/SnapshotListSidebar.tsx` (the `useMemo`-off-store idiom) + RESEARCH Pattern 3 | exact (idiom shipped) |
-| `src/hooks/useEstateView.test.ts` | test | — | vatlas `store/snapshotStore.test.ts` + `__tests__/e2e-smoke.test.tsx` (`renderHook`/store-seed) | role-match |
-| `src/components/Chart.tsx` | chart (component) | — | RESEARCH Pattern 2 (no vatlas analog yet) + vatlas `components/FallbackError.tsx` (memo/component shape) | partial (new infra) |
-| `src/theme/echartsTheme.ts` | chart (config) | — | vatlas `src/index.css` `@theme` tokens (the token source of truth) | role-match (token map) |
-| `scripts/check-bundle-size.mjs` | script (CI gate) | — | vatlas `scripts/check-supply-chain.mjs` | exact (same probe shape) |
-| `src/components/dashboard/GlobalDashboard.tsx` | component | request-response | vatlas `App.tsx` (state-branch layout) + `SnapshotListSidebar.tsx` | exact (idiom shipped) |
-| `src/components/dashboard/GlobalSummaryCard.tsx` | component | request-response | vatlas `components/SnapshotCard.tsx` (`.panel` stat block + i18n) | exact |
-| `src/components/dashboard/PerClusterColumns.tsx` | component | request-response | vatlas `SnapshotListSidebar.tsx` (list→card map) | exact |
-| `src/components/dashboard/ClusterColumn.tsx` | component | request-response | vatlas `components/SnapshotCard.tsx` | exact |
-| `src/components/dashboard/OsBreakdownDonut.tsx` | component (chart host) | request-response | new `Chart.tsx` consumer; vatlas `SnapshotCard.tsx` (panel wrapper) | role-match |
-| `src/components/dashboard/CpuReadyPanel.tsx` | component | request-response | vatlas `SnapshotCard.tsx` (panel + conditional render) | exact |
-| `src/components/dashboard/AccountingModeToggle.tsx` | component | event-driven | vatlas `components/ThemeToggle.tsx` (segmented `aria-pressed`) | exact |
-| `src/components/dashboard/UtilizationGauge.tsx` | component (chart host) | request-response | new `Chart.tsx` consumer | role-match |
-| `src/i18n/locales/en/dashboard.json` | i18n | — | vatlas `i18n/locales/en/common.json` | exact |
-| `src/i18n/locales/fr/dashboard.json` | i18n | — | vatlas `i18n/locales/fr/common.json` | exact |
-| `src/i18n/index.ts` (MODIFY) | i18n (registry) | — | vatlas `i18n/index.ts` (self — extend namespace list) | exact |
-| `src/App.tsx` (MODIFY) | component (wiring) | — | vatlas `App.tsx` (self — swap `<main>` placeholder) | exact |
-| `src/__tests__/dashboard-smoke.test.tsx` | test | — | vatlas `__tests__/e2e-smoke.test.tsx` | exact |
-| `package.json` (MODIFY) | infra (manifest) | — | self (add echarts deps + `check:bundle-size` script) | exact |
-| engine `*.test.ts` (×8) | test | — | vsizer `engines/aggregation/*.test.ts` + vatlas `engines/units/converters.test.ts` | exact (port + brand fixtures) |
+| New/Modified File                                   | Role                   | Data Flow             | Closest Analog                                                                                           | Match Quality                       |
+| --------------------------------------------------- | ---------------------- | --------------------- | -------------------------------------------------------------------------------------------------------- | ----------------------------------- |
+| `src/engines/aggregation/ghz.ts`                    | engine                 | transform             | vsizer `engines/aggregation/ghz.ts` + vatlas `engines/units/converters.ts`                               | exact (port + DRY-collapse)         |
+| `src/engines/aggregation/perCluster.ts`             | engine                 | batch (group+reduce)  | vsizer `engines/aggregation/perCluster.ts`                                                               | exact (port + brand retrofit)       |
+| `src/engines/aggregation/vinfoMerge.ts`             | engine                 | batch (group+reduce)  | vsizer `engines/aggregation/vinfoMerge.ts`                                                               | exact + 1 logic add (mode param)    |
+| `src/engines/aggregation/aggregateClusters.ts`      | engine                 | transform (join)      | vsizer `engines/aggregation/aggregateClusters.ts`                                                        | exact (port verbatim)               |
+| `src/engines/aggregation/globals.ts`                | engine                 | batch (reduce)        | vsizer `engines/aggregation/globals.ts`                                                                  | exact (port + 2 sums)               |
+| `src/engines/aggregation/contention.ts`             | engine (constants)     | —                     | vsizer `engines/aggregation/contention.ts`                                                               | exact (port verbatim)               |
+| `src/engines/aggregation/osFamily.ts`               | engine                 | transform (classify)  | RESEARCH §Code Examples + vatlas `engines/units/converters.ts` (purity shape)                            | partial (new; pattern given)        |
+| `src/engines/aggregation/perDatastore.ts`           | engine                 | batch (group/dedupe)  | vsizer `perCluster.ts` `groupByCluster` shape                                                            | partial (new; pattern given)        |
+| `src/engines/aggregation/perEsx.ts`                 | engine                 | batch (group+reduce)  | vsizer `perCluster.ts` + `vinfoMerge.ts` `readinessStats`                                                | role-match (new; compose existing)  |
+| `src/engines/aggregation/estateView.ts`             | engine                 | transform (assembler) | vsizer `engines/aggregation/index.ts` (barrel) + own composition                                         | role-match (new assembler)          |
+| `src/engines/aggregation/index.ts`                  | engine (barrel)        | —                     | vsizer `engines/aggregation/index.ts`                                                                    | exact                               |
+| `src/types/estate.ts`                               | type                   | —                     | vsizer `types/cluster.ts` + `types/global.ts`; vatlas `types/vhost.ts` (brand-import header)             | exact (port types + brand retrofit) |
+| `src/hooks/useEstateView.ts`                        | hook                   | request-response      | vatlas `components/SnapshotListSidebar.tsx` (the `useMemo`-off-store idiom) + RESEARCH Pattern 3         | exact (idiom shipped)               |
+| `src/hooks/useEstateView.test.ts`                   | test                   | —                     | vatlas `store/snapshotStore.test.ts` + `__tests__/e2e-smoke.test.tsx` (`renderHook`/store-seed)          | role-match                          |
+| `src/components/Chart.tsx`                          | chart (component)      | —                     | RESEARCH Pattern 2 (no vatlas analog yet) + vatlas `components/FallbackError.tsx` (memo/component shape) | partial (new infra)                 |
+| `src/theme/echartsTheme.ts`                         | chart (config)         | —                     | vatlas `src/index.css` `@theme` tokens (the token source of truth)                                       | role-match (token map)              |
+| `scripts/check-bundle-size.mjs`                     | script (CI gate)       | —                     | vatlas `scripts/check-supply-chain.mjs`                                                                  | exact (same probe shape)            |
+| `src/components/dashboard/GlobalDashboard.tsx`      | component              | request-response      | vatlas `App.tsx` (state-branch layout) + `SnapshotListSidebar.tsx`                                       | exact (idiom shipped)               |
+| `src/components/dashboard/GlobalSummaryCard.tsx`    | component              | request-response      | vatlas `components/SnapshotCard.tsx` (`.panel` stat block + i18n)                                        | exact                               |
+| `src/components/dashboard/PerClusterColumns.tsx`    | component              | request-response      | vatlas `SnapshotListSidebar.tsx` (list→card map)                                                         | exact                               |
+| `src/components/dashboard/ClusterColumn.tsx`        | component              | request-response      | vatlas `components/SnapshotCard.tsx`                                                                     | exact                               |
+| `src/components/dashboard/OsBreakdownDonut.tsx`     | component (chart host) | request-response      | new `Chart.tsx` consumer; vatlas `SnapshotCard.tsx` (panel wrapper)                                      | role-match                          |
+| `src/components/dashboard/CpuReadyPanel.tsx`        | component              | request-response      | vatlas `SnapshotCard.tsx` (panel + conditional render)                                                   | exact                               |
+| `src/components/dashboard/AccountingModeToggle.tsx` | component              | event-driven          | vatlas `components/ThemeToggle.tsx` (segmented `aria-pressed`)                                           | exact                               |
+| `src/components/dashboard/UtilizationGauge.tsx`     | component (chart host) | request-response      | new `Chart.tsx` consumer                                                                                 | role-match                          |
+| `src/i18n/locales/en/dashboard.json`                | i18n                   | —                     | vatlas `i18n/locales/en/common.json`                                                                     | exact                               |
+| `src/i18n/locales/fr/dashboard.json`                | i18n                   | —                     | vatlas `i18n/locales/fr/common.json`                                                                     | exact                               |
+| `src/i18n/index.ts` (MODIFY)                        | i18n (registry)        | —                     | vatlas `i18n/index.ts` (self — extend namespace list)                                                    | exact                               |
+| `src/App.tsx` (MODIFY)                              | component (wiring)     | —                     | vatlas `App.tsx` (self — swap `<main>` placeholder)                                                      | exact                               |
+| `src/__tests__/dashboard-smoke.test.tsx`            | test                   | —                     | vatlas `__tests__/e2e-smoke.test.tsx`                                                                    | exact                               |
+| `package.json` (MODIFY)                             | infra (manifest)       | —                     | self (add echarts deps + `check:bundle-size` script)                                                     | exact                               |
+| engine`*.test.ts` (×8)                              | test                   | —                     | vsizer `engines/aggregation/*.test.ts` + vatlas `engines/units/converters.test.ts`                       | exact (port + brand fixtures)       |
 
 ---
 
@@ -182,7 +182,8 @@ export type OsFamily = 'windows' | 'linux' | 'other'
 export function classifyOsFamily(osConfig: string, osTools: string): OsFamily {
   const s = (osConfig || osTools).toLowerCase()
   if (/windows|microsoft/.test(s)) return 'windows'
-  if (/linux|rhel|red hat|centos|ubuntu|debian|suse|sles|oracle|rocky|alma|photon|coreos/.test(s)) return 'linux'
+  if (/linux|rhel|red hat|centos|ubuntu|debian|suse|sles|oracle|rocky|alma|photon|coreos/.test(s))
+    return 'linux'
   return 'other'
 }
 ```
@@ -193,7 +194,7 @@ Inputs are `VInfoRow.osConfig`/`osTools` (vatlas `src/types/vinfo.ts:29,31` — 
 
 ### `src/engines/aggregation/perDatastore.ts` (engine, group/dedupe) — NEW (Moderate-11)
 
-**Pattern source:** vsizer `perCluster.ts:41-50` `groupByCluster` Map-accumulate idiom (reuse the *shape*, key on `naa ?? name`).
+**Pattern source:** vsizer `perCluster.ts:41-50` `groupByCluster` Map-accumulate idiom (reuse the _shape_, key on `naa ?? name`).
 
 **Inputs:** vatlas `VDatastoreRow` (`src/types/snapshot.ts:36-45`): `name`, `capacityMib: MiB`, `freeMib: MiB`, `provisionedMib: MiB`, `naa: string | null`, `type: string`.
 
@@ -252,10 +253,7 @@ import type { AccountingMode, EstateView } from '@/types/estate'
 
 export function useEstateView(mode: AccountingMode): EstateView {
   const snapshot = useSnapshotStore(selectActiveSnapshot)
-  return useMemo(
-    () => (snapshot ? buildEstateView(snapshot, mode) : EMPTY_VIEW),
-    [snapshot, mode],
-  )
+  return useMemo(() => (snapshot ? buildEstateView(snapshot, mode) : EMPTY_VIEW), [snapshot, mode])
 }
 ```
 
@@ -419,11 +417,11 @@ Extend the same pattern to `parseSnapshot → buildEstateView → render <Global
 
 ## No Analog Found
 
-| File | Role | Data Flow | Reason / Mitigation |
-|------|------|-----------|---------------------|
-| `src/engines/aggregation/osFamily.ts` | engine | classify | No existing classifier in vatlas. Mitigation: RESEARCH §Code Examples gives the verbatim-ready implementation; purity shape from `engines/units/converters.ts`. |
+| File                                      | Role   | Data Flow    | Reason / Mitigation                                                                                                                                                                                                                                          |
+| ----------------------------------------- | ------ | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `src/engines/aggregation/osFamily.ts`     | engine | classify     | No existing classifier in vatlas. Mitigation: RESEARCH §Code Examples gives the verbatim-ready implementation; purity shape from `engines/units/converters.ts`.                                                                                              |
 | `src/engines/aggregation/perDatastore.ts` | engine | group/dedupe | No NAA-dedupe engine exists (vsizer has none either — confirmed: vsizer aggregation dir has no perDatastore). Mitigation: reuse vsizer `perCluster.ts` `groupByCluster` Map-accumulate shape; full `DatastoreAggregate` interface in RESEARCH §perDatastore. |
-| `src/components/Chart.tsx` | chart | — | First chart in vatlas — no prior ECharts wrapper. Mitigation: RESEARCH Pattern 1 + 2 are the verbatim spec; component-shape conventions from `FallbackError.tsx`. |
+| `src/components/Chart.tsx`                | chart  | —            | First chart in vatlas — no prior ECharts wrapper. Mitigation: RESEARCH Pattern 1 + 2 are the verbatim spec; component-shape conventions from `FallbackError.tsx`.                                                                                            |
 
 (Partial-match files have a documented pattern source above and are NOT blocked — the planner has a concrete target for each.)
 

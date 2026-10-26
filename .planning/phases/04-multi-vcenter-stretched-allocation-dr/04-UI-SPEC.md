@@ -1,4 +1,5 @@
 ---
+
 phase: 4
 slug: multi-vcenter-stretched-allocation-dr
 status: approved
@@ -20,15 +21,15 @@ Scope: the analytics-core surfaces — multi-vCenter merge labelling (cluster-co
 
 ## Design System
 
-| Property | Value |
-|----------|-------|
-| Tool | none (shadcn gate **not applicable** — no `components.json`, no `tailwind.config.*`; the manual Tailwind v4 `@theme` design system was shipped Phase 1 and frozen-approved through Phases 2–3) |
-| Preset | not applicable |
-| Component library | none (Tailwind v4 CSS-first `@theme` + hand-rolled `.panel`/`.label` utilities in `src/index.css`; inherited verbatim) |
-| Icon library | inherited from Phases 1–3 — inline SVG only (matches `ThemeToggle` precedent). Phase 4 adds **no** new icon dependency; the only new glyphs are inline-SVG status ticks/chips drawn with `stroke="currentColor"` |
-| Font | inherited from Phase 2 — UI `system-ui` stack; numerics `--font-mono` (`JetBrains Mono`…), `tabular-nums`, right-aligned in metric columns |
-| Theme strategy | inherited — class-strategy dark (`@custom-variant dark`), light + dark BOTH mandatory, every color utility carries its `dark:` twin |
-| Charting | inherited `<Chart>` wrapper (`echarts-for-react/lib/core`, `{ renderer: 'svg' }`, `midnight-executive` ECharts theme). **Phase-4 decision: NUMBERS-FIRST, NO new chart.** DR before/after is rendered as paired numeric figures + the EXISTING gauge family only (KISS, resolves RESEARCH Open-Question 4). No treemap/heatmap/sunburst/calendar — those are later-phase families and are explicitly out of this contract. |
+| Property          | Value                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Tool              | none (shadcn gate **not applicable** — no `components.json`, no `tailwind.config.*`; the manual Tailwind v4 `@theme` design system was shipped Phase 1 and frozen-approved through Phases 2–3)                                                                                                                                                                                                                             |
+| Preset            | not applicable                                                                                                                                                                                                                                                                                                                                                                                                             |
+| Component library | none (Tailwind v4 CSS-first `@theme` + hand-rolled `.panel`/`.label` utilities in `src/index.css`; inherited verbatim)                                                                                                                                                                                                                                                                                                     |
+| Icon library      | inherited from Phases 1–3 — inline SVG only (matches `ThemeToggle` precedent). Phase 4 adds **no** new icon dependency; the only new glyphs are inline-SVG status ticks/chips drawn with `stroke="currentColor"`                                                                                                                                                                                                           |
+| Font              | inherited from Phase 2 — UI `system-ui` stack; numerics `--font-mono` (`JetBrains Mono`…), `tabular-nums`, right-aligned in metric columns                                                                                                                                                                                                                                                                                 |
+| Theme strategy    | inherited — class-strategy dark (`@custom-variant dark`), light + dark BOTH mandatory, every color utility carries its `dark:` twin                                                                                                                                                                                                                                                                                        |
+| Charting          | inherited `<Chart>` wrapper (`echarts-for-react/lib/core`, `{ renderer: 'svg' }`, `midnight-executive` ECharts theme). **Phase-4 decision: NUMBERS-FIRST, NO new chart.** DR before/after is rendered as paired numeric figures + the EXISTING gauge family only (KISS, resolves RESEARCH Open-Question 4). No treemap/heatmap/sunburst/calendar — those are later-phase families and are explicitly out of this contract. |
 
 **Source of truth:** `src/index.css` Midnight Executive `@theme` tokens (shipped Phase 1, mapped into `src/theme/echartsTheme.ts` Phase 2). Phase 4 adds **no** palette tokens and **no** ECharts series mappings.
 
@@ -38,15 +39,15 @@ Scope: the analytics-core surfaces — multi-vCenter merge labelling (cluster-co
 
 Declared values (multiples of 4 — the inherited Phase-2/3 scale, unchanged):
 
-| Token | Value | Usage |
-|-------|-------|-------|
-| xs | 4px | Chip icon-to-text gap, pill inner gap, slider tick gap, label-to-value inline gap |
-| sm | 8px | Compact stat-row spacing, chip padding, segmented-control inner padding, snapshot-card meta-line spacing |
-| md | 16px | Default — `.panel` padding, allocation-toolbar gaps, DR-panel internal padding, grid gap between cluster columns |
-| lg | 24px | Section vertical rhythm (allocation toolbar → dashboard → DR panel), assumptions-panel block spacing |
-| xl | 32px | Dashboard outer horizontal padding on wide viewports; DR before/after column gap |
-| 2xl | 48px | Major break between dashboard region and the DR-simulation region |
-| 3xl | 64px | Reserved; not used Phase 4 |
+| Token | Value | Usage                                                                                                            |
+| ----- | ----- | ---------------------------------------------------------------------------------------------------------------- |
+| xs    | 4px   | Chip icon-to-text gap, pill inner gap, slider tick gap, label-to-value inline gap                                |
+| sm    | 8px   | Compact stat-row spacing, chip padding, segmented-control inner padding, snapshot-card meta-line spacing         |
+| md    | 16px  | Default — `.panel` padding, allocation-toolbar gaps, DR-panel internal padding, grid gap between cluster columns |
+| lg    | 24px  | Section vertical rhythm (allocation toolbar → dashboard → DR panel), assumptions-panel block spacing             |
+| xl    | 32px  | Dashboard outer horizontal padding on wide viewports; DR before/after column gap                                 |
+| 2xl   | 48px  | Major break between dashboard region and the DR-simulation region                                                |
+| 3xl   | 64px  | Reserved; not used Phase 4                                                                                       |
 
 Exceptions:
 
@@ -60,12 +61,12 @@ Exceptions:
 
 EXACTLY 4 sizes, EXACTLY 2 weights — inherited from Phase 3 **verbatim** (this is the block that must NOT regress to 5 sizes / 3 weights; the Phase-2 5/3 block is permanently superseded).
 
-| Role | Size | Weight | Line Height | Phase-4 Usage |
-|------|------|--------|-------------|---------------|
-| Caption | 12px | 400 | 1.5 | RVTools-version + vCenter `Server` provenance line in snapshot card; allocation hash echo; assumptions-panel footnotes; `—` sentinel captions; the "(Active)" accounting-mode echo |
-| Body | 14px | 400 | 1.5 | DR before/after metric values, evacuee-total figures, slider current-value readout, per-site reservation values, caveat list items |
-| Label | 16px | 600 | 1.5 | Stat labels ("Reservation", "Site A", "Confidence"), pill text ("Étendu / Stretched"), DR-mode option labels, allocation preset labels, section sub-headers, slider field labels |
-| Heading | 20px | 600 | 1.2 | Region titles ("DR simulation", "Allocation", "Stretched cluster"), DR-panel header |
+| Role    | Size | Weight | Line Height | Phase-4 Usage                                                                                                                                                                      |
+| ------- | ---- | ------ | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Caption | 12px | 400    | 1.5         | RVTools-version + vCenter `Server` provenance line in snapshot card; allocation hash echo; assumptions-panel footnotes; `—` sentinel captions; the "(Active)" accounting-mode echo |
+| Body    | 14px | 400    | 1.5         | DR before/after metric values, evacuee-total figures, slider current-value readout, per-site reservation values, caveat list items                                                 |
+| Label   | 16px | 600    | 1.5         | Stat labels ("Reservation", "Site A", "Confidence"), pill text ("Étendu / Stretched"), DR-mode option labels, allocation preset labels, section sub-headers, slider field labels   |
+| Heading | 20px | 600    | 1.2         | Region titles ("DR simulation", "Allocation", "Stretched cluster"), DR-panel header                                                                                                |
 
 Notes:
 
@@ -79,15 +80,15 @@ Notes:
 
 60/30/10 split, stated explicitly against the inherited Midnight Executive tokens. Light value given; dark counterpart is the shipped `dark:` twin (never re-chosen).
 
-| Role | Token / Value | Usage |
-|------|---------------|-------|
-| Dominant (~60%) | `bg-slate-50` (light) / `bg-surface-900` (dark) | App background, DR-panel canvas, allocation-toolbar negative space |
-| Secondary (~30%) | `.panel` = `bg-white` border `slate-200` (light) / `bg-surface-800` border `surface-700` (dark) | Cluster card (Stretched pill host), snapshot card, allocation toolbar, DR panel, assumptions panel, every chip/pill background |
-| Accent (~10%) | `--color-accent-500` gold (`oklch(78% 0.16 75)` ≈ `#F9B935`) | RESERVED — explicit closed list below |
-| Primary brand | `--color-primary-*` navy scale | Active segment of DR-mode segmented selector + active allocation preset (`bg-primary-600 text-white`, same as `AccountingModeToggle`); slider thumb/fill (`primary-600`); focus ring `ring-2 ring-primary-500` |
-| Status — neutral muted | `--color-surface-*` grey scale (NOT util-low/mid/high, NOT red) | The **simulated-failed** treatment: a failed host/cluster/vCenter renders struck-through (`line-through`) + dimmed (`text-slate-400 dark:text-slate-500`) on its existing card, with a neutral grey "simulated failed" status chip. This is a reversible what-if input, not a destructive event — see Interaction Contract. |
-| Status — low/mid/high | `--color-util-low/mid/high` | UNCHANGED Phase-2 usage only (CPU%/RAM% gauges). **NOT** repurposed for DR verdicts or stretched confidence — those are neutral (see below). |
-| Destructive | `--color-util-high` red | **NOT used Phase 4.** Phase 4 has no destructive action: DR "failed" is a reversible simulation toggle, not a delete; there is NO confirmation dialog and NO red framing. Declared only for token-table completeness. |
+| Role                   | Token / Value                                                                                   | Usage                                                                                                                                                                                                                                                                                                                       |
+| ---------------------- | ----------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Dominant (~60%)        | `bg-slate-50` (light) / `bg-surface-900` (dark)                                                 | App background, DR-panel canvas, allocation-toolbar negative space                                                                                                                                                                                                                                                          |
+| Secondary (~30%)       | `.panel` = `bg-white` border `slate-200` (light) / `bg-surface-800` border `surface-700` (dark) | Cluster card (Stretched pill host), snapshot card, allocation toolbar, DR panel, assumptions panel, every chip/pill background                                                                                                                                                                                              |
+| Accent (~10%)          | `--color-accent-500` gold (`oklch(78% 0.16 75)` ≈ `#F9B935`)                                    | RESERVED — explicit closed list below                                                                                                                                                                                                                                                                                       |
+| Primary brand          | `--color-primary-*` navy scale                                                                  | Active segment of DR-mode segmented selector + active allocation preset (`bg-primary-600 text-white`, same as `AccountingModeToggle`); slider thumb/fill (`primary-600`); focus ring `ring-2 ring-primary-500`                                                                                                              |
+| Status — neutral muted | `--color-surface-*` grey scale (NOT util-low/mid/high, NOT red)                                 | The **simulated-failed** treatment: a failed host/cluster/vCenter renders struck-through (`line-through`) + dimmed (`text-slate-400 dark:text-slate-500`) on its existing card, with a neutral grey "simulated failed" status chip. This is a reversible what-if input, not a destructive event — see Interaction Contract. |
+| Status — low/mid/high  | `--color-util-low/mid/high`                                                                     | UNCHANGED Phase-2 usage only (CPU%/RAM% gauges). **NOT** repurposed for DR verdicts or stretched confidence — those are neutral (see below).                                                                                                                                                                                |
+| Destructive            | `--color-util-high` red                                                                         | **NOT used Phase 4.** Phase 4 has no destructive action: DR "failed" is a reversible simulation toggle, not a delete; there is NO confirmation dialog and NO red framing. Declared only for token-table completeness.                                                                                                       |
 
 Accent (gold `--color-accent-500`) reserved for — explicit closed list (nothing else; gold is a factual attention marker, never an editorial flourish, never "anything interactive"):
 
@@ -225,41 +226,41 @@ All Phase-4 numbers render through the SHIPPED `utils/format.ts` (Phase-2 contra
 
 All strings i18n-keyed in NEW namespaces — recommend **three** small namespaces `mvc`, `stretched`/`str`, `alloc`, `dr` added beside the shipped `common`/`upload`/`dashboard`/`inventory` (FR + EN; the CI FR↔EN key-diff gate applies). No editorial verbs anywhere ("recommend/should/poor/good/healthy/critical" denylisted — D12 / ADR-0003). No pre-formatted numbers.
 
-| Element | Copy (EN) | Copy (FR) |
-|---------|-----------|-----------|
-| Primary CTA | (none — Phase 4 surfaces are read-only analytical lenses; the only interactions are the Stretched pill, allocation sliders/presets, DR-mode selector, and fail-selection — all toggles/inputs, no primary action button. CTA row intentionally empty.) | — |
-| Stretched pill label | "Étendu / Stretched" | "Étendu / Stretched" |
-| Stretched pill group label (sr-only) | "Stretched-cluster status" | "Statut cluster étendu" |
-| Site labels | "Site A" / "Site B" | "Site A" / "Site B" |
-| Reservation row label | "Reservation" | "Réservation" |
-| Confidence label | "Confidence" | "Confiance" |
-| Confidence values | "high" / "medium" / "low" | "élevée" / "moyenne" / "faible" |
-| Low-confidence chip | "Site metadata absent — symmetric split assumed" | "Métadonnées de site absentes — répartition symétrique supposée" |
-| Allocation section title | "Allocation" | "Allocation" |
-| CPU slider label | "CPU ratio (vCPU per physical core)" | "Ratio CPU (vCPU par cœur physique)" |
-| RAM slider label | "RAM ratio (vRAM per physical RAM)" | "Ratio RAM (vRAM par RAM physique)" |
-| Preset labels | "1:1" / "4:1" / "8:1" / "VDI 10:1" | "1:1" / "4:1" / "8:1" / "VDI 10:1" |
-| Allocation echo caption | "CPU {{cpu}} · RAM {{ram}}" | "CPU {{cpu}} · RAM {{ram}}" |
-| Snapshot vCenter line (MVC-04) | "{{count}} vCenters" / "1 vCenter" | "{{count}} vCenters" / "1 vCenter" |
-| Snapshot RVTools version line | "RVTools {{version}}" | "RVTools {{version}}" |
-| DR section title | "DR simulation" | "Simulation PRA" |
-| DR mode group label | "Loss scenario" | "Scénario de perte" |
-| DR mode options | "Host loss" / "Cluster loss" / "vCenter loss" | "Perte d'hôte" / "Perte de cluster" / "Perte de vCenter" |
-| Simulated-failed chip | "simulated failed" | "panne simulée" |
-| Before / After headers | "Before" / "After" | "Avant" / "Après" |
-| Evacuee total label | "Evacuee total" | "Total à réhéberger" |
-| Per-survivor verdict values | "absorbs" / "tight" / "overflows" | "absorbe" / "juste" / "dépassé" |
-| Assumptions panel title | "Assumptions" | "Hypothèses" |
-| Assumptions — models | "Models: capacity subtraction; respects the active accounting mode." | "Modélise : soustraction de capacité ; respecte le mode de comptabilisation actif." |
-| Assumptions — does not model | "Does not model: HA admission control, anti-affinity rules, VM restart priority, stretched-cluster split-brain." | "Ne modélise pas : le contrôle d'admission HA, les règles d'anti-affinité, la priorité de redémarrage des VM, le split-brain de cluster étendu." |
-| Caveats list label | "Caveats" | "Réserves" |
-| Empty — no snapshot | "No snapshot loaded" | "Aucun instantané chargé" |
-| Empty body — no snapshot | "Drop one or more RVTools .xlsx exports in the sidebar to run the analysis." | "Déposez un ou plusieurs exports RVTools .xlsx dans la barre latérale pour lancer l'analyse." |
-| Merge-in-progress (loading) | "Merging the estate…" | "Fusion du parc en cours…" |
-| Single-vCenter (no merge applicable) | "Single vCenter — no cross-vCenter merge applied." | "vCenter unique — aucune fusion inter-vCenter appliquée." |
-| DR — no failed component selected | "Select one or more components to simulate a loss." | "Sélectionnez un ou plusieurs composants pour simuler une panne." |
-| Error state | "This estate could not be analysed: {{message}}. Try re-dropping the workbook(s) in the sidebar." | "Ce parc n'a pas pu être analysé : {{message}}. Réessayez en redéposant le(s) classeur(s) dans la barre latérale." |
-| Destructive confirmation | (none — Phase 4 has ZERO destructive actions; DR "failed" is a reversible simulation input with NO confirmation dialog, by explicit locked-constraint design) | — |
+| Element                              | Copy (EN)                                                                                                                                                                                                                                              | Copy (FR)                                                                                                                                        |
+| ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Primary CTA                          | (none — Phase 4 surfaces are read-only analytical lenses; the only interactions are the Stretched pill, allocation sliders/presets, DR-mode selector, and fail-selection — all toggles/inputs, no primary action button. CTA row intentionally empty.) | —                                                                                                                                                |
+| Stretched pill label                 | "Étendu / Stretched"                                                                                                                                                                                                                                   | "Étendu / Stretched"                                                                                                                             |
+| Stretched pill group label (sr-only) | "Stretched-cluster status"                                                                                                                                                                                                                             | "Statut cluster étendu"                                                                                                                          |
+| Site labels                          | "Site A" / "Site B"                                                                                                                                                                                                                                    | "Site A" / "Site B"                                                                                                                              |
+| Reservation row label                | "Reservation"                                                                                                                                                                                                                                          | "Réservation"                                                                                                                                    |
+| Confidence label                     | "Confidence"                                                                                                                                                                                                                                           | "Confiance"                                                                                                                                      |
+| Confidence values                    | "high" / "medium" / "low"                                                                                                                                                                                                                              | "élevée" / "moyenne" / "faible"                                                                                                                  |
+| Low-confidence chip                  | "Site metadata absent — symmetric split assumed"                                                                                                                                                                                                       | "Métadonnées de site absentes — répartition symétrique supposée"                                                                                 |
+| Allocation section title             | "Allocation"                                                                                                                                                                                                                                           | "Allocation"                                                                                                                                     |
+| CPU slider label                     | "CPU ratio (vCPU per physical core)"                                                                                                                                                                                                                   | "Ratio CPU (vCPU par cœur physique)"                                                                                                             |
+| RAM slider label                     | "RAM ratio (vRAM per physical RAM)"                                                                                                                                                                                                                    | "Ratio RAM (vRAM par RAM physique)"                                                                                                              |
+| Preset labels                        | "1:1" / "4:1" / "8:1" / "VDI 10:1"                                                                                                                                                                                                                     | "1:1" / "4:1" / "8:1" / "VDI 10:1"                                                                                                               |
+| Allocation echo caption              | "CPU {{cpu}} · RAM {{ram}}"                                                                                                                                                                                                                            | "CPU {{cpu}} · RAM {{ram}}"                                                                                                                      |
+| Snapshot vCenter line (MVC-04)       | "{{count}} vCenters" / "1 vCenter"                                                                                                                                                                                                                     | "{{count}} vCenters" / "1 vCenter"                                                                                                               |
+| Snapshot RVTools version line        | "RVTools {{version}}"                                                                                                                                                                                                                                  | "RVTools {{version}}"                                                                                                                            |
+| DR section title                     | "DR simulation"                                                                                                                                                                                                                                        | "Simulation PRA"                                                                                                                                 |
+| DR mode group label                  | "Loss scenario"                                                                                                                                                                                                                                        | "Scénario de perte"                                                                                                                              |
+| DR mode options                      | "Host loss" / "Cluster loss" / "vCenter loss"                                                                                                                                                                                                          | "Perte d'hôte" / "Perte de cluster" / "Perte de vCenter"                                                                                         |
+| Simulated-failed chip                | "simulated failed"                                                                                                                                                                                                                                     | "panne simulée"                                                                                                                                  |
+| Before / After headers               | "Before" / "After"                                                                                                                                                                                                                                     | "Avant" / "Après"                                                                                                                                |
+| Evacuee total label                  | "Evacuee total"                                                                                                                                                                                                                                        | "Total à réhéberger"                                                                                                                             |
+| Per-survivor verdict values          | "absorbs" / "tight" / "overflows"                                                                                                                                                                                                                      | "absorbe" / "juste" / "dépassé"                                                                                                                  |
+| Assumptions panel title              | "Assumptions"                                                                                                                                                                                                                                          | "Hypothèses"                                                                                                                                     |
+| Assumptions — models                 | "Models: capacity subtraction; respects the active accounting mode."                                                                                                                                                                                   | "Modélise : soustraction de capacité ; respecte le mode de comptabilisation actif."                                                              |
+| Assumptions — does not model         | "Does not model: HA admission control, anti-affinity rules, VM restart priority, stretched-cluster split-brain."                                                                                                                                       | "Ne modélise pas : le contrôle d'admission HA, les règles d'anti-affinité, la priorité de redémarrage des VM, le split-brain de cluster étendu." |
+| Caveats list label                   | "Caveats"                                                                                                                                                                                                                                              | "Réserves"                                                                                                                                       |
+| Empty — no snapshot                  | "No snapshot loaded"                                                                                                                                                                                                                                   | "Aucun instantané chargé"                                                                                                                        |
+| Empty body — no snapshot             | "Drop one or more RVTools .xlsx exports in the sidebar to run the analysis."                                                                                                                                                                           | "Déposez un ou plusieurs exports RVTools .xlsx dans la barre latérale pour lancer l'analyse."                                                    |
+| Merge-in-progress (loading)          | "Merging the estate…"                                                                                                                                                                                                                                  | "Fusion du parc en cours…"                                                                                                                       |
+| Single-vCenter (no merge applicable) | "Single vCenter — no cross-vCenter merge applied."                                                                                                                                                                                                     | "vCenter unique — aucune fusion inter-vCenter appliquée."                                                                                        |
+| DR — no failed component selected    | "Select one or more components to simulate a loss."                                                                                                                                                                                                    | "Sélectionnez un ou plusieurs composants pour simuler une panne."                                                                                |
+| Error state                          | "This estate could not be analysed: {{message}}. Try re-dropping the workbook(s) in the sidebar."                                                                                                                                                      | "Ce parc n'a pas pu être analysé : {{message}}. Réessayez en redéposant le(s) classeur(s) dans la barre latérale."                               |
+| Destructive confirmation             | (none — Phase 4 has ZERO destructive actions; DR "failed" is a reversible simulation input with NO confirmation dialog, by explicit locked-constraint design)                                                                                          | —                                                                                                                                                |
 
 State scope: empty / loading / single-vCenter / no-DR-selection / error states replace **only** the affected Phase-4 region (allocation toolbar, Stretched block, or DR panel) — the shipped Phase-1 sidebar, Phase-2 dashboard, and header stay interactive. A merge/DR failure renders inline using `error.message` ONLY (never the error object — shipped Critical-2 idiom); the Phase-1 `ErrorBoundary`/`FallbackError` still wraps `App`.
 
@@ -296,11 +297,11 @@ common.empty.noSnapshot       common.error.analysis
 
 ## Registry Safety
 
-| Registry | Blocks Used | Safety Gate |
-|----------|-------------|-------------|
-| none (manual Tailwind v4 `@theme` design system, shipped P1) | none | not applicable |
-| shadcn official | none — shadcn not initialized (no `components.json`); gate not applicable | not applicable |
-| third-party | none declared | not applicable |
+| Registry                                                     | Blocks Used                                                               | Safety Gate    |
+| ------------------------------------------------------------ | ------------------------------------------------------------------------- | -------------- |
+| none (manual Tailwind v4 `@theme` design system, shipped P1) | none                                                                      | not applicable |
+| shadcn official                                              | none — shadcn not initialized (no `components.json`); gate not applicable | not applicable |
+| third-party                                                  | none declared                                                             | not applicable |
 
 No registry components enter this phase. Phase 4 adds **zero new runtime dependencies** (RESEARCH §Standard Stack — all math is hand-rolled pure arithmetic; no `mathjs`/`d3-array`/`simple-statistics`). All UI is hand-built React over the shipped Tailwind v4 `@theme` tokens and the shipped `<Chart>` wrapper (no new chart family). The registry vetting gate does not apply (no `shadcn view` to run). Existing bundle gates (echarts ≤300 KB gz) stay green — no new chunk.
 

@@ -6,27 +6,27 @@
 
 ## File Classification
 
-| New/Modified File | Role | Data Flow | Closest Analog | Match Quality |
-|-------------------|------|-----------|----------------|---------------|
-| `scripts/sync-eos.mjs` | config / build tool | file-I/O (fetch → write JSON) | `scripts/check-supply-chain.mjs` | role-match (bare-Node script idiom) |
-| `src/engines/eos/catalogue.json` | data (committed artifact) | — (static input) | — (no analog — data file, not `.ts`) | no analog (expected) |
-| `src/engines/eos/catalogueSchema.ts` | model / Zod schema | transform (boundary validation) | `src/engines/parser/schemas.ts` | exact (Zod-only-at-boundary) |
-| `src/engines/eos/catalogue.ts` | service (load boundary) | transform (parse-once) | `src/engines/parser/schemas.ts` usage in parser | role-match |
-| `src/engines/eos/normalizeOs.ts` | utility (pure engine) | transform (string → slug/version) | `src/engines/aggregation/osFamily.ts` | exact (compose, don't duplicate) |
-| `src/engines/eos/classifyEsxi.ts` | utility (pure engine) | transform (version → support state) | `src/engines/aggregation/osFamily.ts` | role-match |
-| `src/engines/eos/bucketEos.ts` | utility (pure engine) | batch / transform (rows → partition) | `src/engines/aggregation/estateView.ts` (the eos compose site) | role-match |
-| `src/engines/eos/fixtures/real-os-strings.ts` | test fixture | — | RESEARCH.md §Code Examples (verbatim list provided) | exact (copy verbatim) |
-| `src/engines/eos/normalizeOs.test.ts` | test | — | `src/engines/aggregation/osFamily.test.ts` | exact |
-| `src/engines/eos/classifyEsxi.test.ts` | test | — | `src/engines/aggregation/osFamily.test.ts` | exact |
-| `src/engines/eos/bucketEos.test.ts` | test | — | `src/engines/aggregation/estateView.test.ts` | role-match |
-| `src/engines/eos/catalogue.test.ts` | test | — | `src/engines/aggregation/osFamily.test.ts` | role-match |
-| `src/engines/aggregation/estateView.ts` (MOD) | service (assembler) | batch (single-pass compose) | itself — extend the existing `plannedView`/`drSim` field idiom | exact (self-pattern) |
-| `src/types/estate.ts` (MOD) | model (type) | — | itself — `EstateView` `trends/plannedView` `T \| null` idiom | exact (self-pattern) |
-| `src/components/ViewToggle.tsx` (MOD) | component (nav) | event-driven | itself — P5 'hosts' / P6 'planning' segment add | exact (self-pattern, proven 2×) |
-| `src/components/eos/EosView.tsx` | component (view) | request-response (read-only presenter) | `src/components/hosts/HostsView.tsx` (+ `PlanningView.tsx`) | exact |
-| `src/App.tsx` (MOD) | component (shell) | event-driven | itself — the `activeView === 'planning'` branch | exact (self-pattern) |
-| `src/utils/format.ts` (MOD) | utility | transform (locale format) | itself — `fmtInt`/`fmtPercent` em-dash idiom (add `fmtDate`) | exact (self-pattern) |
-| `src/i18n/locales/{en,fr}/eos.json` | config (i18n) | — | `src/i18n/locales/en/inventory.json` | exact |
+| New/Modified File                             | Role                      | Data Flow                              | Closest Analog                                                 | Match Quality                       |
+| --------------------------------------------- | ------------------------- | -------------------------------------- | -------------------------------------------------------------- | ----------------------------------- |
+| `scripts/sync-eos.mjs`                        | config / build tool       | file-I/O (fetch → write JSON)          | `scripts/check-supply-chain.mjs`                               | role-match (bare-Node script idiom) |
+| `src/engines/eos/catalogue.json`              | data (committed artifact) | — (static input)                       | — (no analog — data file, not `.ts`)                           | no analog (expected)                |
+| `src/engines/eos/catalogueSchema.ts`          | model / Zod schema        | transform (boundary validation)        | `src/engines/parser/schemas.ts`                                | exact (Zod-only-at-boundary)        |
+| `src/engines/eos/catalogue.ts`                | service (load boundary)   | transform (parse-once)                 | `src/engines/parser/schemas.ts` usage in parser                | role-match                          |
+| `src/engines/eos/normalizeOs.ts`              | utility (pure engine)     | transform (string → slug/version)      | `src/engines/aggregation/osFamily.ts`                          | exact (compose, don't duplicate)    |
+| `src/engines/eos/classifyEsxi.ts`             | utility (pure engine)     | transform (version → support state)    | `src/engines/aggregation/osFamily.ts`                          | role-match                          |
+| `src/engines/eos/bucketEos.ts`                | utility (pure engine)     | batch / transform (rows → partition)   | `src/engines/aggregation/estateView.ts` (the eos compose site) | role-match                          |
+| `src/engines/eos/fixtures/real-os-strings.ts` | test fixture              | —                                      | RESEARCH.md §Code Examples (verbatim list provided)            | exact (copy verbatim)               |
+| `src/engines/eos/normalizeOs.test.ts`         | test                      | —                                      | `src/engines/aggregation/osFamily.test.ts`                     | exact                               |
+| `src/engines/eos/classifyEsxi.test.ts`        | test                      | —                                      | `src/engines/aggregation/osFamily.test.ts`                     | exact                               |
+| `src/engines/eos/bucketEos.test.ts`           | test                      | —                                      | `src/engines/aggregation/estateView.test.ts`                   | role-match                          |
+| `src/engines/eos/catalogue.test.ts`           | test                      | —                                      | `src/engines/aggregation/osFamily.test.ts`                     | role-match                          |
+| `src/engines/aggregation/estateView.ts` (MOD) | service (assembler)       | batch (single-pass compose)            | itself — extend the existing `plannedView`/`drSim` field idiom | exact (self-pattern)                |
+| `src/types/estate.ts` (MOD)                   | model (type)              | —                                      | itself — `EstateView` `trends/plannedView` `T \| null` idiom   | exact (self-pattern)                |
+| `src/components/ViewToggle.tsx` (MOD)         | component (nav)           | event-driven                           | itself — P5 'hosts' / P6 'planning' segment add                | exact (self-pattern, proven 2×)     |
+| `src/components/eos/EosView.tsx`              | component (view)          | request-response (read-only presenter) | `src/components/hosts/HostsView.tsx` (+ `PlanningView.tsx`)    | exact                               |
+| `src/App.tsx` (MOD)                           | component (shell)         | event-driven                           | itself — the `activeView === 'planning'` branch                | exact (self-pattern)                |
+| `src/utils/format.ts` (MOD)                   | utility                   | transform (locale format)              | itself — `fmtInt`/`fmtPercent` em-dash idiom (add `fmtDate`)   | exact (self-pattern)                |
+| `src/i18n/locales/{en,fr}/eos.json`           | config (i18n)             | —                                      | `src/i18n/locales/en/inventory.json`                           | exact                               |
 
 ## Pattern Assignments
 
@@ -34,7 +34,7 @@
 
 **Analog:** `src/engines/parser/schemas.ts`
 
-**The rule the analog establishes** (`schemas.ts` lines 5-15): Zod is applied at exactly one boundary; engines downstream never re-validate. The eos schema is the *second* such boundary (the catalogue, mirroring the parser-row boundary).
+**The rule the analog establishes** (`schemas.ts` lines 5-15): Zod is applied at exactly one boundary; engines downstream never re-validate. The eos schema is the _second_ such boundary (the catalogue, mirroring the parser-row boundary).
 
 **Schema-shape idiom to mirror** (`schemas.ts` lines 45-63 — `z.object` of typed fields, exported `z.ZodType<T>`-annotated const + inferred type):
 
@@ -75,11 +75,11 @@ export function classifyOsFamily(osConfig: string, osTools: string): OsFamily {
   const s = (osConfig || osTools).toLowerCase()
   if (/windows|microsoft/.test(s)) return 'windows'
   // ...
-  return 'other'   // a real, visible bucket — never thrown
+  return 'other' // a real, visible bucket — never thrown
 }
 ```
 
-**What to copy:** the *exact same shape* — pure function, no deps, `import type` only, lowercase-normalize then a regex cascade with a guaranteed terminal fallback (`return null` → first-class unknown, D-10). **Compose, don't duplicate:** `osFamily.ts` line 3 explicitly states it is *not* the EOS normalizer; `normalizeOs` should call `classifyOsFamily` as the coarse gate / fallback signal (RESEARCH §Pattern 2, "Don't Hand-Roll" row 1) and add a slug-specific `RULES` bank. Use the `RULES` array sketch verbatim from **RESEARCH.md §Pattern 2 (lines 205-225)**. Whitespace-normalize for *matching only*; the caller preserves the raw string verbatim (D-12).
+**What to copy:** the _exact same shape_ — pure function, no deps, `import type` only, lowercase-normalize then a regex cascade with a guaranteed terminal fallback (`return null` → first-class unknown, D-10). **Compose, don't duplicate:** `osFamily.ts` line 3 explicitly states it is _not_ the EOS normalizer; `normalizeOs` should call `classifyOsFamily` as the coarse gate / fallback signal (RESEARCH §Pattern 2, "Don't Hand-Roll" row 1) and add a slug-specific `RULES` bank. Use the `RULES` array sketch verbatim from **RESEARCH.md §Pattern 2 (lines 205-225)**. Whitespace-normalize for _matching only_; the caller preserves the raw string verbatim (D-12).
 
 ---
 
@@ -135,8 +135,8 @@ Add `eos` exactly as RESEARCH.md §Integration (lines 403-415) prescribes: `impo
 **Exact two-line change** (`ViewToggle.tsx` lines 3-5):
 
 ```typescript
-export type AppView = 'dashboard' | 'inventory' | 'hosts' | 'planning'   // → add | 'eos'
-const VIEWS = ['dashboard', 'inventory', 'hosts', 'planning'] as const   // → add 'eos'
+export type AppView = 'dashboard' | 'inventory' | 'hosts' | 'planning' // → add | 'eos'
+const VIEWS = ['dashboard', 'inventory', 'hosts', 'planning'] as const // → add 'eos'
 ```
 
 Keep EVERYTHING else verbatim: the `<fieldset role="group">` + `biome-ignore` comment (lines 48-49 — a CI grep gate asserts the literal `role="group"` presence), `<legend className="sr-only">`, the arrow-wraparound `move()`/`onKeyDown` (lines 31-45), `aria-pressed`, `bg-accent-500 text-surface-900` active styling, `h-10` button height. The segment label comes from `t(`nav.${view}`)` (line 70) — so add `nav.eos` to BOTH locale files (next pattern).
@@ -184,7 +184,7 @@ export interface DataTableProps<T> {
   data: T[]
   columns: ColumnDef<T>[]
   headerFor: (id: string) => string
-  objectKind: 'vm' | 'esx' | 'datastore'   // CSV filename driver
+  objectKind: 'vm' | 'esx' | 'datastore' // CSV filename driver
 }
 ```
 
@@ -228,7 +228,11 @@ Plus the `import { EosView } from './components/eos/EosView'` next to the existi
 ```typescript
 export const fmtDate = (iso: string, locale = 'fr-FR'): string => {
   const d = new Date(iso)
-  return Number.isNaN(d.getTime()) ? '—' : d.toLocaleDateString(locale, { /* ... */ })
+  return Number.isNaN(d.getTime())
+    ? '—'
+    : d.toLocaleDateString(locale, {
+        /* ... */
+      })
 }
 ```
 
@@ -294,8 +298,8 @@ Mirror `fmtInt` exactly: `locale` parameter (callers pass `i18n.language`), em-d
 
 ## No Analog Found
 
-| File | Role | Data Flow | Reason |
-|------|------|-----------|--------|
+| File                             | Role          | Data Flow    | Reason                                                                                                                                                                               |
+| -------------------------------- | ------------- | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `src/engines/eos/catalogue.json` | data artifact | static input | A committed JSON data file (not `.ts`) — no code analog; content shape is fully specified by `catalogueSchema.ts` + RESEARCH §Pattern 1. Outside Vitest coverage (data, not source). |
 
 All other 13 files have an exact or strong shipped analog.

@@ -6,13 +6,13 @@
 
 ## Summary
 
-Phase 8 produces a temporal series by running the **existing Phase-2 pure aggregation pipeline once per snapshot** and collecting the per-snapshot results into a `TrendSeries` shape carried on `EstateView.trends` (the field already exists, currently `null`). The central tension (DD-A) resolves cleanly: the single `useMemo` in `useEstateView.ts` keeps doing exactly what it does — merge the *active selection* into one estate via `mergeSnapshotsToEstate` then `buildEstateView` — and the temporal series is computed **inside that same memo, inside the same pure `buildEstateView` call**, by iterating each selected snapshot through `aggregateGlobals`/`aggregateClusters` a second axis of the same data. No second `useMemo`, no second memo site, no change to the Phase-4 merge path. [VERIFIED: src/hooks/useEstateView.ts, src/engines/aggregation/estateView.ts]
+Phase 8 produces a temporal series by running the **existing Phase-2 pure aggregation pipeline once per snapshot** and collecting the per-snapshot results into a `TrendSeries` shape carried on `EstateView.trends` (the field already exists, currently `null`). The central tension (DD-A) resolves cleanly: the single `useMemo` in `useEstateView.ts` keeps doing exactly what it does — merge the _active selection_ into one estate via `mergeSnapshotsToEstate` then `buildEstateView` — and the temporal series is computed **inside that same memo, inside the same pure `buildEstateView` call**, by iterating each selected snapshot through `aggregateGlobals`/`aggregateClusters` a second axis of the same data. No second `useMemo`, no second memo site, no change to the Phase-4 merge path. [VERIFIED: src/hooks/useEstateView.ts, src/engines/aggregation/estateView.ts]
 
 The temporal X-axis (TRD-02) is a solved problem in ECharts: `xAxis: { type: 'time' }` plus `series.data` as `[Date, value]` pairs renders **true non-uniform spacing keyed on the real date value, not the array index** — exactly the success-criterion-2 requirement. [CITED: echarts-doc/en/option/partial/2d-data.md] One gap: `LineChart` is **not yet registered** in `Chart.tsx`'s `echarts.use([...])` (only Bar/Pie/Gauge/Heatmap are) — the planner must add `import { LineChart } from 'echarts/charts'` and register it; the bundle-size gate (≤300 KB gz) must be re-checked after. [VERIFIED: src/components/Chart.tsx]
 
 The non-blocking warm-up (D-01/D-02) requires changing `useSnapshotUpload` from a blocking sequential `for await` to a **latest-`capturedAt`-first ordered, fire-and-forget background drain** that `addSnapshot`s each result as it lands, so the active estate (the latest snapshot) renders immediately and trend points fill progressively through the normal store→memo reactive path. The singleton Worker constraint is preserved (still one parse at a time). Memory release (DD-C) is a new inputs-only store mutation that REPLACES a snapshot's row arrays with `[]` while keeping its already-collected aggregate in the trends series.
 
-**Primary recommendation:** Add a pure `src/engines/trends/` module (`buildTrendSeries`) called *inside* `buildEstateView`; carry `TrendSeries | null` on `EstateView.trends`; timeline point = one `capturedAt` date (same-date multi-vCenter files merged spatially first — DD-A option 2); delta panel = count-deltas on existing aggregate fields between consecutive points (DD-B option 1); release raw rows oldest-first when loaded count > 4, never the active/latest (DD-C).
+**Primary recommendation:** Add a pure `src/engines/trends/` module (`buildTrendSeries`) called _inside_ `buildEstateView`; carry `TrendSeries | null` on `EstateView.trends`; timeline point = one `capturedAt` date (same-date multi-vCenter files merged spatially first — DD-A option 2); delta panel = count-deltas on existing aggregate fields between consecutive points (DD-B option 1); release raw rows oldest-first when loaded count > 4, never the active/latest (DD-C).
 
 ## User Constraints (from CONTEXT.md)
 
@@ -40,26 +40,26 @@ The non-blocking warm-up (D-01/D-02) requires changing `useSnapshotUpload` from 
 
 ## Phase Requirements
 
-| ID | Description | Research Support |
-|----|-------------|------------------|
+| ID     | Description                                                             | Research Support                                                                                                                                                                                                                                                                                |
+| ------ | ----------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | TRD-01 | Load 2–12 monthly snapshots together; headline metrics evolve over time | `buildTrendSeries` inside `buildEstateView` runs the shipped Phase-2 aggregation once per selected snapshot; series carried on `EstateView.trends`. Store already supports N snapshots (`Map<id,Snapshot>` + `selectedSnapshotIds`, default = all). [VERIFIED: snapshotStore.ts, estateView.ts] |
-| TRD-02 | Temporal X-axis (actual capture dates, not categorical labels) | ECharts `xAxis:{type:'time'}` + `[Date,value]` pairs = non-uniform real-date positioning. [CITED: echarts-doc 2d-data.md / whats-new-in-echarts-v5.md] Register `LineChart` in `Chart.tsx`. |
-| TRD-03 | Per-cluster sparklines on dashboard when 2+ snapshots loaded | Per-cluster series is a slice of the same `TrendSeries` (cluster→points map). Sparkline = same `<Chart>` line option with axes/grid/labels stripped. [VERIFIED: Chart.tsx single `option` prop; ECharts `showSymbol:false`, minimal grid] |
-| TRD-04 | Delta panel: what changed between consecutive snapshots | Consecutive-pair count-deltas computed in `buildTrendSeries` from existing aggregate fields (vmCount, poweredOn, vcpuAllocated, vramAllocatedMib, etc.). Factual, branded, no editorial verb. (DD-B) |
-| TRD-05 | Refresh ⇒ trends gone (no cross-session persistence) | Satisfied by construction: store is module-scope `new Map()`, no persist middleware, no storage writes; trends are derived, never stored. Verification = the existing PAR-05 refresh test pattern, extended to multi-snapshot. [VERIFIED: snapshotStore.ts header comment] |
+| TRD-02 | Temporal X-axis (actual capture dates, not categorical labels)          | ECharts `xAxis:{type:'time'}` + `[Date,value]` pairs = non-uniform real-date positioning. [CITED: echarts-doc 2d-data.md / whats-new-in-echarts-v5.md] Register `LineChart` in `Chart.tsx`.                                                                                                     |
+| TRD-03 | Per-cluster sparklines on dashboard when 2+ snapshots loaded            | Per-cluster series is a slice of the same `TrendSeries` (cluster→points map). Sparkline = same `<Chart>` line option with axes/grid/labels stripped. [VERIFIED: Chart.tsx single `option` prop; ECharts `showSymbol:false`, minimal grid]                                                       |
+| TRD-04 | Delta panel: what changed between consecutive snapshots                 | Consecutive-pair count-deltas computed in `buildTrendSeries` from existing aggregate fields (vmCount, poweredOn, vcpuAllocated, vramAllocatedMib, etc.). Factual, branded, no editorial verb. (DD-B)                                                                                            |
+| TRD-05 | Refresh ⇒ trends gone (no cross-session persistence)                    | Satisfied by construction: store is module-scope `new Map()`, no persist middleware, no storage writes; trends are derived, never stored. Verification = the existing PAR-05 refresh test pattern, extended to multi-snapshot. [VERIFIED: snapshotStore.ts header comment]                      |
 
 ## Architectural Responsibility Map
 
-| Capability | Primary Tier | Secondary Tier | Rationale |
-|------------|-------------|----------------|-----------|
-| Per-snapshot temporal aggregation | Pure engine (`engines/trends/`) | `engines/aggregation` (reused) | Engines are pure, Vitest-gated ≥75%; trends is a new vertical analytics capability on the same spine. No React/DOM/Zustand. |
-| Composition into `EstateView.trends` | Pure engine (`buildEstateView`) | — | Single composition point; the one memo's pure callee. No second memo. |
-| Memo orchestration | `useEstateView` hook | — | The single sanctioned `useMemo`; only orchestrates + memoizes. |
-| Snapshot inputs + capture-date edits + memory release | Zustand store (`snapshotStore`) | — | Inputs-only; `setCapturedAt` reused (D-03); release = new inputs-only mutation REPLACING the Map. |
-| Background warm-up ordering & drain | Upload hook (`useSnapshotUpload`) | parser singleton Worker | New non-blocking behavior; Worker stays singleton (one parse at a time). |
-| Trend line chart + sparklines | `<Chart>` component (reused) | `chartOptions`-style pure builders | No new chart component/renderer (CONTEXT explicit). Pure option builders off the memoized view. |
-| Capture-date edit UI + warm-up indicator + inferred-order caption | `SnapshotListSidebar` / `SnapshotCard` | — | Host for D-03 inline edit, D-02 indicator, D-05 caption. |
-| Trends view shell + dashboard sparkline slots | New `TrendsView` + dashboard cluster cards | `ViewToggle` (extend `AppView`) | New top-level segment mirrors EOS precedent (P7). |
+| Capability                                                        | Primary Tier                               | Secondary Tier                     | Rationale                                                                                                                   |
+| ----------------------------------------------------------------- | ------------------------------------------ | ---------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| Per-snapshot temporal aggregation                                 | Pure engine (`engines/trends/`)            | `engines/aggregation` (reused)     | Engines are pure, Vitest-gated ≥75%; trends is a new vertical analytics capability on the same spine. No React/DOM/Zustand. |
+| Composition into `EstateView.trends`                              | Pure engine (`buildEstateView`)            | —                                  | Single composition point; the one memo's pure callee. No second memo.                                                       |
+| Memo orchestration                                                | `useEstateView` hook                       | —                                  | The single sanctioned `useMemo`; only orchestrates + memoizes.                                                              |
+| Snapshot inputs + capture-date edits + memory release             | Zustand store (`snapshotStore`)            | —                                  | Inputs-only; `setCapturedAt` reused (D-03); release = new inputs-only mutation REPLACING the Map.                           |
+| Background warm-up ordering & drain                               | Upload hook (`useSnapshotUpload`)          | parser singleton Worker            | New non-blocking behavior; Worker stays singleton (one parse at a time).                                                    |
+| Trend line chart + sparklines                                     | `<Chart>` component (reused)               | `chartOptions`-style pure builders | No new chart component/renderer (CONTEXT explicit). Pure option builders off the memoized view.                             |
+| Capture-date edit UI + warm-up indicator + inferred-order caption | `SnapshotListSidebar` / `SnapshotCard`     | —                                  | Host for D-03 inline edit, D-02 indicator, D-05 caption.                                                                    |
+| Trends view shell + dashboard sparkline slots                     | New `TrendsView` + dashboard cluster cards | `ViewToggle` (extend `AppView`)    | New top-level segment mirrors EOS precedent (P7).                                                                           |
 
 ## Standard Stack
 
@@ -67,34 +67,34 @@ The non-blocking warm-up (D-01/D-02) requires changing `useSnapshotUpload` from 
 
 ### Core (already installed — versions verified in package.json)
 
-| Library | Version | Purpose | Why Standard |
-|---------|---------|---------|--------------|
-| echarts | `^6.0.0` | Trend line chart + sparklines via `xAxis:{type:'time'}` | Already the project chart engine; v6 time-axis API unchanged from v5. [VERIFIED: package.json] [CITED: echarts-doc] |
-| echarts-for-react | `^3.0.6` | React binding via `<Chart>` | Already the single chart import site. [VERIFIED: Chart.tsx] |
-| react | `^19.2.6` | UI runtime | Shipped. [VERIFIED: package.json] |
-| zustand | `^5.0.13` | Inputs-only store (snapshots Map + selection + new release mutation) | Shipped; `setCapturedAt` already exists. [VERIFIED: snapshotStore.ts] |
-| react-i18next / i18next | `^16.6.6` / `^26.1.0` | New `trends` namespace EN+FR | Shipped i18n chain; mirror `eos.json` precedent. |
+| Library                 | Version               | Purpose                                                              | Why Standard                                                                                                       |
+| ----------------------- | --------------------- | -------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| echarts                 | `^6.0.0`              | Trend line chart + sparklines via `xAxis:{type:'time'}`              | Already the project chart engine; v6 time-axis API unchanged from v5. [VERIFIED: package.json][CITED: echarts-doc] |
+| echarts-for-react       | `^3.0.6`              | React binding via `<Chart>`                                          | Already the single chart import site. [VERIFIED: Chart.tsx]                                                        |
+| react                   | `^19.2.6`             | UI runtime                                                           | Shipped. [VERIFIED: package.json]                                                                                  |
+| zustand                 | `^5.0.13`             | Inputs-only store (snapshots Map + selection + new release mutation) | Shipped; `setCapturedAt` already exists. [VERIFIED: snapshotStore.ts]                                              |
+| react-i18next / i18next | `^16.6.6` / `^26.1.0` | New `trends` namespace EN+FR                                         | Shipped i18n chain; mirror `eos.json` precedent.                                                                   |
 
 ### Supporting (existing internal modules — reuse, do not re-create)
 
-| Module | Purpose | When to Use |
-|--------|---------|-------------|
-| `src/engines/aggregation/{globals,aggregateClusters}.ts` | Per-snapshot headline + per-cluster aggregates | Called once per snapshot inside `buildTrendSeries`. |
-| `src/engines/snapshotMerge/mergeSnapshotsToEstate.ts` | Spatial merge of same-date multi-vCenter files | DD-A option 2: merge same-`capturedAt` files into one estate, THEN aggregate that estate as one timeline point. |
-| `src/engines/parser/captureDate.ts` `inferCaptureDate` | Capture-date chain (explicit→filename→vMetaData→mtime) | Already wired in the parser worker. P8 adds only the ordinal tiebreaker (D-05) + UI explicit override (D-03 via `setCapturedAt`). |
-| `src/engines/units/converters.ts` | Branded MiB→GiB etc. (`mibToGib`, no `*1.048576`) | Delta numbers in branded units. [VERIFIED] |
-| `src/utils/format.ts` | Locale date/number formatting (`fmtDate`, `fmtMemMb`, `fmtInt`) | Axis labels + delta numbers; no pre-formatted numbers in i18n strings. [VERIFIED] |
-| `src/components/Chart.tsx` | Single SVG ECharts primitive (`option` prop) | Trend chart + sparkline both feed it; add `LineChart` to its registry. |
-| `src/store/snapshotStore.ts` `setCapturedAt` | Inline capture-date edit | D-03 reuse verbatim — no new mutation for the edit. |
+| Module                                                   | Purpose                                                         | When to Use                                                                                                                       |
+| -------------------------------------------------------- | --------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `src/engines/aggregation/{globals,aggregateClusters}.ts` | Per-snapshot headline + per-cluster aggregates                  | Called once per snapshot inside `buildTrendSeries`.                                                                               |
+| `src/engines/snapshotMerge/mergeSnapshotsToEstate.ts`    | Spatial merge of same-date multi-vCenter files                  | DD-A option 2: merge same-`capturedAt` files into one estate, THEN aggregate that estate as one timeline point.                   |
+| `src/engines/parser/captureDate.ts` `inferCaptureDate`   | Capture-date chain (explicit→filename→vMetaData→mtime)          | Already wired in the parser worker. P8 adds only the ordinal tiebreaker (D-05) + UI explicit override (D-03 via `setCapturedAt`). |
+| `src/engines/units/converters.ts`                        | Branded MiB→GiB etc. (`mibToGib`, no `*1.048576`)               | Delta numbers in branded units. [VERIFIED]                                                                                        |
+| `src/utils/format.ts`                                    | Locale date/number formatting (`fmtDate`, `fmtMemMb`, `fmtInt`) | Axis labels + delta numbers; no pre-formatted numbers in i18n strings. [VERIFIED]                                                 |
+| `src/components/Chart.tsx`                               | Single SVG ECharts primitive (`option` prop)                    | Trend chart + sparkline both feed it; add `LineChart` to its registry.                                                            |
+| `src/store/snapshotStore.ts` `setCapturedAt`             | Inline capture-date edit                                        | D-03 reuse verbatim — no new mutation for the edit.                                                                               |
 
 ### Alternatives Considered
 
-| Instead of | Could Use | Tradeoff / Why rejected |
-|------------|-----------|-------------------------|
-| `xAxis:{type:'time'}` | `xAxis:{type:'category'}` with date strings | Category axis spaces points **evenly by index** — directly violates success criterion 2 / TRD-02. Rejected. [CITED: echarts-doc — category vs time axis] |
-| Compute trends inside `buildEstateView` | Second `useMemo` / store-cached series | Both forbidden by D-00 (grep-gated single memo; inputs-only store). Not an option. |
-| New chart component for sparkline | — | CONTEXT explicit: sparkline = minimal line variant on the same `<Chart>`. |
-| Identity-resolved churn for delta panel (DD-B) | Count-deltas only | Both viable; recommendation = count-deltas (see DD-B) — simpler, KISS, all fields already exist; churn is a v2 idea (DIF-01). |
+| Instead of                                     | Could Use                                   | Tradeoff / Why rejected                                                                                                                                  |
+| ---------------------------------------------- | ------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `xAxis:{type:'time'}`                          | `xAxis:{type:'category'}` with date strings | Category axis spaces points **evenly by index** — directly violates success criterion 2 / TRD-02. Rejected. [CITED: echarts-doc — category vs time axis] |
+| Compute trends inside `buildEstateView`        | Second `useMemo` / store-cached series      | Both forbidden by D-00 (grep-gated single memo; inputs-only store). Not an option.                                                                       |
+| New chart component for sparkline              | —                                           | CONTEXT explicit: sparkline = minimal line variant on the same `<Chart>`.                                                                                |
+| Identity-resolved churn for delta panel (DD-B) | Count-deltas only                           | Both viable; recommendation = count-deltas (see DD-B) — simpler, KISS, all fields already exist; churn is a v2 idea (DIF-01).                            |
 
 **Installation:** none.
 
@@ -181,7 +181,7 @@ src/
 
 ### Pattern 1: Per-snapshot aggregation inside the single memo (resolves DD-A central tension)
 
-**What:** `buildEstateView` already iterates the *merged active estate*. The new `buildTrendSeries` is called from inside `buildEstateView`, receiving the **same `selected: Snapshot[]`** the hook already computed. It groups snapshots by resolved capture date, merges same-date groups via the existing `mergeSnapshotsToEstate`, and runs `aggregateGlobals`/`aggregateClusters` per group. The result is attached as `EstateView.trends`. The Phase-4 active-estate path is **completely untouched** — trends is an *additional* output of the same pure pass, not a replacement.
+**What:** `buildEstateView` already iterates the _merged active estate_. The new `buildTrendSeries` is called from inside `buildEstateView`, receiving the **same `selected: Snapshot[]`** the hook already computed. It groups snapshots by resolved capture date, merges same-date groups via the existing `mergeSnapshotsToEstate`, and runs `aggregateGlobals`/`aggregateClusters` per group. The result is attached as `EstateView.trends`. The Phase-4 active-estate path is **completely untouched** — trends is an _additional_ output of the same pure pass, not a replacement.
 
 **Why this is not a second memo:** `buildEstateView` is a pure function, not a `useMemo`. Adding work to it is exactly how P5 (operational insights), P6 (planned view), and P7 (EOS) were all added — each "composes in THIS single pass (no second memo, no new file)" per the in-file comments. P8 follows the identical established pattern; the only deviation is a new pure sub-module (`engines/trends/`) for testability, mirroring `engines/eos/`. [VERIFIED: estateView.ts lines 136, 224, 258 — three prior phases used this exact pattern]
 
@@ -207,14 +207,16 @@ Note: `buildEstateView` currently receives `MergedEstate`, not `Snapshot[]`. The
 // Source: https://github.com/apache/echarts-doc/blob/master/en/option/partial/2d-data.md  [CITED]
 // + en/tutorial/whats-new-in-echarts-v5.md (time axis selects meaningful ticks, not even split)
 const option: EChartsOption = {
-  xAxis: { type: 'time' },                 // NOT 'category' — category = even index spacing
+  xAxis: { type: 'time' }, // NOT 'category' — category = even index spacing
   yAxis: { type: 'value' },
-  series: [{
-    type: 'line',
-    showSymbol: true,
-    data: points.map((p) => [p.date, p.headline.vmCount]),  // [Date, value] pairs
-  }],
-  tooltip: { trigger: 'axis' },            // per-point metadata (vCenter label + RVTools version)
+  series: [
+    {
+      type: 'line',
+      showSymbol: true,
+      data: points.map((p) => [p.date, p.headline.vmCount]), // [Date, value] pairs
+    },
+  ],
+  tooltip: { trigger: 'axis' }, // per-point metadata (vCenter label + RVTools version)
 }
 ```
 
@@ -230,8 +232,14 @@ const sparkOption: EChartsOption = {
   grid: { top: 2, bottom: 2, left: 2, right: 2 },
   xAxis: { type: 'time', show: false },
   yAxis: { type: 'value', show: false, scale: true },
-  series: [{ type: 'line', showSymbol: false, lineStyle: { width: 1.5 },
-             data: clusterPoints.map((p) => [p.date, p.value]) }],
+  series: [
+    {
+      type: 'line',
+      showSymbol: false,
+      lineStyle: { width: 1.5 },
+      data: clusterPoints.map((p) => [p.date, p.value]),
+    },
+  ],
 }
 // fed to the existing <Chart option={sparkOption} style={{ height: 36 }} />
 ```
@@ -240,7 +248,7 @@ const sparkOption: EChartsOption = {
 
 **What:** Replace the blocking `for (file of files) { await parse }` with: (1) infer each file's capture date cheaply or accept parse order, (2) parse the latest-`capturedAt` file FIRST and `addSnapshot` it (active estate live in ~5 s), (3) continue draining the remaining files latest→oldest in the background without blocking the UI thread, `addSnapshot`-ing each as it lands. The store→memo reactive path fills trend points progressively for free (each `addSnapshot` REPLACES the Map → memo recomputes → `trends` grows).
 
-**Singleton-Worker constraint preserved:** still exactly one `parseInWorker` in flight at a time (sequential drain) — the change is *non-blocking to the React render*, not parallel parsing. STRIDE T-05-07 (one Worker) holds. [VERIFIED: useSnapshotUpload.ts comment + parser singleton]
+**Singleton-Worker constraint preserved:** still exactly one `parseInWorker` in flight at a time (sequential drain) — the change is _non-blocking to the React render_, not parallel parsing. STRIDE T-05-07 (one Worker) holds. [VERIFIED: useSnapshotUpload.ts comment + parser singleton]
 
 **Capture-date ordering caveat:** `inferCaptureDate` needs the parsed workbook to read `vMetaData`/filename. For files whose date is in the filename (the common monthly-export case, `RVTools_export_..._2026-03-31.xlsx`), order can be derived from the filename BEFORE parsing via the same `ISO_DATE_RE`. For files without a filename date, fall back to drop order (the user can re-order via D-03 inline edit, which recomputes through the memo). The planner should extract the filename-ISO probe as a tiny pure helper reused by both the worker and the pre-parse ordering, to avoid duplicating `ISO_DATE_RE`. [VERIFIED: captureDate.ts ISO_DATE_RE]
 
@@ -271,26 +279,26 @@ const sparkOption: EChartsOption = {
 
 ## Don't Hand-Roll
 
-| Problem | Don't Build | Use Instead | Why |
-|---------|-------------|-------------|-----|
-| Per-snapshot headline aggregation | A new trends-specific aggregator | `aggregateGlobals` + `aggregateClusters` (Phase 2) | Identical math to the dashboard; a parallel impl would drift and double-maintain. DRY is binding. |
-| Same-date multi-vCenter combination | A new merge for trend points | `mergeSnapshotsToEstate` (Phase 4) | Already does collision-suffix + vMotion dedupe; reusing it makes timeline points reconcile with the dashboard count by construction. |
-| Non-uniform temporal axis | Manual pixel-positioning of dates | ECharts `xAxis.type:'time'` | First-class; selects meaningful ticks; SVG output trivial for P10. [CITED: echarts-doc] |
-| Capture-date inference | A new date parser | shipped `inferCaptureDate` | The chain (explicit→filename→vMetaData→mtime) is shipped + tested; P8 adds only the ordinal tiebreaker. |
-| Capture-date edit persistence to memo | A new store action | shipped `setCapturedAt` | D-03 explicitly reuses it; it already REPLACES the Map → memo recomputes. [VERIFIED: snapshotStore.ts line 139] |
-| Locale date/number formatting | `toLocaleString` scattered in components | `utils/format.ts` (`fmtDate`/`fmtInt`/`fmtMemMb`) | Centralized FR/EN; no pre-formatted numbers in i18n. |
-| Sparkline rendering | A canvas micro-chart lib | minimal `<Chart>` line option | SVG renderer mandated; one component; P10 inlining stays trivial. |
+| Problem                               | Don't Build                              | Use Instead                                        | Why                                                                                                                                  |
+| ------------------------------------- | ---------------------------------------- | -------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| Per-snapshot headline aggregation     | A new trends-specific aggregator         | `aggregateGlobals` + `aggregateClusters` (Phase 2) | Identical math to the dashboard; a parallel impl would drift and double-maintain. DRY is binding.                                    |
+| Same-date multi-vCenter combination   | A new merge for trend points             | `mergeSnapshotsToEstate` (Phase 4)                 | Already does collision-suffix + vMotion dedupe; reusing it makes timeline points reconcile with the dashboard count by construction. |
+| Non-uniform temporal axis             | Manual pixel-positioning of dates        | ECharts `xAxis.type:'time'`                        | First-class; selects meaningful ticks; SVG output trivial for P10. [CITED: echarts-doc]                                              |
+| Capture-date inference                | A new date parser                        | shipped `inferCaptureDate`                         | The chain (explicit→filename→vMetaData→mtime) is shipped + tested; P8 adds only the ordinal tiebreaker.                              |
+| Capture-date edit persistence to memo | A new store action                       | shipped `setCapturedAt`                            | D-03 explicitly reuses it; it already REPLACES the Map → memo recomputes. [VERIFIED: snapshotStore.ts line 139]                      |
+| Locale date/number formatting         | `toLocaleString` scattered in components | `utils/format.ts` (`fmtDate`/`fmtInt`/`fmtMemMb`)  | Centralized FR/EN; no pre-formatted numbers in i18n.                                                                                 |
+| Sparkline rendering                   | A canvas micro-chart lib                 | minimal `<Chart>` line option                      | SVG renderer mandated; one component; P10 inlining stays trivial.                                                                    |
 
-**Key insight:** P8 is almost entirely *composition of shipped, tested engines along a second (temporal) axis*. The only genuinely new pure code is (a) the per-snapshot loop + delta computation and (b) the ordinal-fallback helper. Everything else is reuse — which is exactly what the ROADMAP says ("nothing direct; reuses `<Chart>` from Phase 2 and the aggregation pipeline from Phase 2").
+**Key insight:** P8 is almost entirely _composition of shipped, tested engines along a second (temporal) axis_. The only genuinely new pure code is (a) the per-snapshot loop + delta computation and (b) the ordinal-fallback helper. Everything else is reuse — which is exactly what the ROADMAP says ("nothing direct; reuses `<Chart>` from Phase 2 and the aggregation pipeline from Phase 2").
 
 ## DD-A — Timeline-point identity & multi-vCenter composition (Claude's discretion)
 
 **Options:**
 
-| Option | Timeline point = | Same-date multi-vCenter files | Pros | Cons |
-|--------|------------------|-------------------------------|------|------|
-| **A1: per-file** | one snapshot file | become 2 separate points on the same date (collide → ordinal via D-05) | trivial; no merge in trends | counts DON'T reconcile with the dashboard (which merges them); same-date collision is the *common* multi-vCenter case → constant ordinal captions; conceptually wrong (two files of the same estate at the same time are one estate state) |
-| **A2 (RECOMMENDED): per-`capturedAt`-date, same-date files spatially merged first** | one resolved capture date; same-date files merged via `mergeSnapshotsToEstate` then aggregated as one point | merged spatially (Phase-4 path) into one logical-estate point | counts reconcile with the dashboard by construction; matches the "monthly snapshot of the whole estate" mental model; reuses the shipped merge; D-05 ordinal only fires for genuine ties/missing-dates, not for normal multi-vCenter months | slightly more engine code (group-by-date + per-group merge) |
+| Option                                                                              | Timeline point =                                                                                            | Same-date multi-vCenter files                                          | Pros                                                                                                                                                                                                                                        | Cons                                                                                                                                                                                                                                       |
+| ----------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **A1: per-file**                                                                    | one snapshot file                                                                                           | become 2 separate points on the same date (collide → ordinal via D-05) | trivial; no merge in trends                                                                                                                                                                                                                 | counts DON'T reconcile with the dashboard (which merges them); same-date collision is the _common_ multi-vCenter case → constant ordinal captions; conceptually wrong (two files of the same estate at the same time are one estate state) |
+| **A2 (RECOMMENDED): per-`capturedAt`-date, same-date files spatially merged first** | one resolved capture date; same-date files merged via `mergeSnapshotsToEstate` then aggregated as one point | merged spatially (Phase-4 path) into one logical-estate point          | counts reconcile with the dashboard by construction; matches the "monthly snapshot of the whole estate" mental model; reuses the shipped merge; D-05 ordinal only fires for genuine ties/missing-dates, not for normal multi-vCenter months | slightly more engine code (group-by-date + per-group merge)                                                                                                                                                                                |
 
 **Recommendation: A2.** It is the only option where the timeline-point VM count equals the dashboard VM count for that month (counts-must-reconcile hard constraint), and it reuses `mergeSnapshotsToEstate` so Phase-4 semantics compose with the temporal axis instead of fighting it. Each point carries `metadata: { vCenterLabel, rvtoolsVersion }[]` — an array, because a merged point legitimately spans multiple vCenters (criterion 6 says "each snapshot's vCenter label and RVTools version in the snapshot list"; the per-point tooltip lists all contributing vCenters/versions). The active estate (D-01, latest date) is just the most-recent point's underlying merge — same data, no duplication.
 
@@ -307,12 +315,12 @@ const sparkOption: EChartsOption = {
 
 **Options:**
 
-| Option | Content | Pros | Cons |
-|--------|---------|------|------|
-| **B1 (RECOMMENDED): consecutive-pair count-deltas on existing aggregate fields** | per consecutive pair: Δ vmCount, Δ poweredOnVms, Δ hostCount, Δ clusterCount, Δ vcpuAllocated, Δ vramAllocatedMib (→ GiB), Δ totalStorageMib (→ GiB/TiB) | all fields ALREADY exist on `GlobalSummary`/`OperationalInsights`; pure subtraction; factual; KISS; matches ROADMAP example verbatim ("+12 VMs, −3 powered-on, +480 GiB allocated") | doesn't say *which* VMs changed |
-| B2: identity-resolved churn via Phase-4 keys | per pair: VMs added/removed/moved-cluster using `(vmBiosUuid)` keys | richer | needs raw vinfo of BOTH snapshots in the pair → conflicts with DD-C memory release (released snapshots have no rows); heavier; this is the v2 `DIF-01` snapshot-diff feature, out of P8's TRD set |
+| Option                                                                           | Content                                                                                                                                                  | Pros                                                                                                                                                                                | Cons                                                                                                                                                                                              |
+| -------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **B1 (RECOMMENDED): consecutive-pair count-deltas on existing aggregate fields** | per consecutive pair: Δ vmCount, Δ poweredOnVms, Δ hostCount, Δ clusterCount, Δ vcpuAllocated, Δ vramAllocatedMib (→ GiB), Δ totalStorageMib (→ GiB/TiB) | all fields ALREADY exist on `GlobalSummary`/`OperationalInsights`; pure subtraction; factual; KISS; matches ROADMAP example verbatim ("+12 VMs, −3 powered-on, +480 GiB allocated") | doesn't say _which_ VMs changed                                                                                                                                                                   |
+| B2: identity-resolved churn via Phase-4 keys                                     | per pair: VMs added/removed/moved-cluster using `(vmBiosUuid)` keys                                                                                      | richer                                                                                                                                                                              | needs raw vinfo of BOTH snapshots in the pair → conflicts with DD-C memory release (released snapshots have no rows); heavier; this is the v2 `DIF-01` snapshot-diff feature, out of P8's TRD set |
 
-**Recommendation: B1.** Every required number is already computed by the shipped aggregation (`GlobalSummary.vmCount`, `OperationalInsights.poweredOnVms`, `vcpuAllocated`, `vramAllocatedMib`, `physicalRamMib`, `totalStorageMib`, etc. — [VERIFIED: types/estate.ts, globals.ts]). Deltas are pure subtraction between consecutive `TrendPoint.headline`s; **consecutive pairs only** (ROADMAP says "between *consecutive* snapshots"; no baseline lens). B2 is rejected primarily because it structurally conflicts with DD-C (a released snapshot has no rows to diff) and because it IS the explicitly-deferred v2 `DIF-01` side-by-side diff. Delta presentation: signed branded numbers via `utils/format.ts` (`+`/`−` sign is factual, not editorial); i18n keys hold only the label, never the formatted number; em-dash when a field is `null` on either side (e.g. readiness absent). No color, no traffic-light, no verb.
+**Recommendation: B1.** Every required number is already computed by the shipped aggregation (`GlobalSummary.vmCount`, `OperationalInsights.poweredOnVms`, `vcpuAllocated`, `vramAllocatedMib`, `physicalRamMib`, `totalStorageMib`, etc. — [VERIFIED: types/estate.ts, globals.ts]). Deltas are pure subtraction between consecutive `TrendPoint.headline`s; **consecutive pairs only** (ROADMAP says "between _consecutive_ snapshots"; no baseline lens). B2 is rejected primarily because it structurally conflicts with DD-C (a released snapshot has no rows to diff) and because it IS the explicitly-deferred v2 `DIF-01` side-by-side diff. Delta presentation: signed branded numbers via `utils/format.ts` (`+`/`−` sign is factual, not editorial); i18n keys hold only the label, never the formatted number; em-dash when a field is `null` on either side (e.g. readiness absent). No color, no traffic-light, no verb.
 
 **Headline metric set for the chart + deltas (recommend):** vmCount, poweredOnVms, hostCount, clusterCount, vcpuAllocated, vramAllocatedMib (GiB), consumedGhz, totalStorageMib (GiB/TiB). All present on shipped aggregates; the UI-SPEC/planner picks which render as lines vs delta rows.
 
@@ -322,8 +330,8 @@ const sparkOption: EChartsOption = {
 
 - **Threshold:** fixed at 4 (ROADMAP Critical-5 / CONTEXT both say "N > 4"). Surfacing it as a user control is a deferred polish, not a TRD — keep it fixed and constant; document the number in a factual caption if/when release changes available UI.
 - **What stays hydrated:** the active/latest snapshot (D-01) MUST always keep its raw rows; the 3 most-recent-by-`capturedAt` (so the dashboard active estate + recent re-merge stay possible). When loaded count > 4, release **oldest-by-`capturedAt` first**, never the active, never the newest 4.
-- **Release mechanism (inputs-only, REPLACES the Map — no cached aggregate):** a new store action `releaseRawRows(id)` that does `next.set(id, { ...snap, vinfo: [], vhost: [], vdatastore: [], vpartition: [], rawReleased: true })`. The snapshot's metadata (`capturedAt`, `vCenterLabel`, `rvtoolsVersion`, `id`) survives — that's all the trends series needs once that point's aggregate is computed. This is consistent with the inputs-only invariant (it mutates *inputs* — emptying row arrays — not a cached aggregate). [VERIFIED: snapshotStore.ts mutation idiom — `next.set(id, {...snap, capturedAt})` in `setCapturedAt` is the exact template to copy]
-- **Critical ordering constraint the planner must honor:** the trend point's aggregate for a soon-to-be-released snapshot MUST be computed and held in the derived `TrendSeries` (via the memo) BEFORE its rows are emptied — otherwise the point's numbers vanish on release. Because `trends` is recomputed every memo pass from whatever rows currently exist, the safe design is: **release only fires for snapshots whose raw rows are no longer needed for any point's first computation**. Since A2 (DD-A) computes every point's aggregate every pass from the still-present rows, releasing an old snapshot's rows means that point can no longer be recomputed. Resolution: when `rawReleased` snapshots exist, `buildTrendSeries` must accept a **carried-forward map of already-computed points** so released points are not recomputed from absent rows. The cleanest inputs-only place to keep the already-computed aggregate of a released point is **on the released `Snapshot` itself** as a small frozen `releasedAggregate` field (it is now *input* metadata, not a cached derivation of live rows — the rows are gone). The planner should treat this as the one subtle correctness point and cover it with a dedicated Vitest case ("release oldest; its trend point survives with identical numbers; dashboard count unchanged").
+- **Release mechanism (inputs-only, REPLACES the Map — no cached aggregate):** a new store action `releaseRawRows(id)` that does `next.set(id, { ...snap, vinfo: [], vhost: [], vdatastore: [], vpartition: [], rawReleased: true })`. The snapshot's metadata (`capturedAt`, `vCenterLabel`, `rvtoolsVersion`, `id`) survives — that's all the trends series needs once that point's aggregate is computed. This is consistent with the inputs-only invariant (it mutates _inputs_ — emptying row arrays — not a cached aggregate). [VERIFIED: snapshotStore.ts mutation idiom — `next.set(id, {...snap, capturedAt})` in `setCapturedAt` is the exact template to copy]
+- **Critical ordering constraint the planner must honor:** the trend point's aggregate for a soon-to-be-released snapshot MUST be computed and held in the derived `TrendSeries` (via the memo) BEFORE its rows are emptied — otherwise the point's numbers vanish on release. Because `trends` is recomputed every memo pass from whatever rows currently exist, the safe design is: **release only fires for snapshots whose raw rows are no longer needed for any point's first computation**. Since A2 (DD-A) computes every point's aggregate every pass from the still-present rows, releasing an old snapshot's rows means that point can no longer be recomputed. Resolution: when `rawReleased` snapshots exist, `buildTrendSeries` must accept a **carried-forward map of already-computed points** so released points are not recomputed from absent rows. The cleanest inputs-only place to keep the already-computed aggregate of a released point is **on the released `Snapshot` itself** as a small frozen `releasedAggregate` field (it is now _input_ metadata, not a cached derivation of live rows — the rows are gone). The planner should treat this as the one subtle correctness point and cover it with a dedicated Vitest case ("release oldest; its trend point survives with identical numbers; dashboard count unchanged").
 - **Released-snapshot UI consequence (surface factually):** a released snapshot can no longer be the active estate / drilled / re-merged into the dashboard. If the user clicks a released snapshot, show a neutral factual line (e.g. "raw data released to save memory — trend point retained"), no editorial verb. Selection of a released snapshot for the active merge should be prevented or factually explained. EN+FR keys.
 - **Still in-memory only:** no spill to storage (privacy invariant); release just drops arrays for GC.
 
@@ -388,16 +396,20 @@ import { aggregateGlobals } from './globals'
 
 export interface TrendPoint {
   date: Date
-  ordinal: number | null            // D-05: set when the date was inferred-by-order
+  ordinal: number | null // D-05: set when the date was inferred-by-order
   metadata: { vCenterLabel: string; rvtoolsVersion: string }[] // criterion 6 (array — A2)
-  headline: TrendHeadline           // Pick of GlobalSummary fields
+  headline: TrendHeadline // Pick of GlobalSummary fields
   byCluster: Map<string, TrendHeadline>
 }
-export interface TrendDelta { from: Date; to: Date; vmCount: number; /* ...branded */ }
+export interface TrendDelta {
+  from: Date
+  to: Date
+  vmCount: number /* ...branded */
+}
 export interface TrendSeries {
   points: TrendPoint[]
-  deltas: TrendDelta[]              // consecutive pairs only (DD-B / ROADMAP)
-  orderInferred: boolean            // drives the D-05 factual caption
+  deltas: TrendDelta[] // consecutive pairs only (DD-B / ROADMAP)
+  orderInferred: boolean // drives the D-05 factual caption
 }
 ```
 
@@ -413,21 +425,21 @@ const stableOrder = [...selected].sort(
 
 ## State of the Art
 
-| Old Approach | Current Approach | When Changed | Impact |
-|--------------|------------------|--------------|--------|
+| Old Approach                                  | Current Approach                                               | When Changed                          | Impact                                                                                 |
+| --------------------------------------------- | -------------------------------------------------------------- | ------------------------------------- | -------------------------------------------------------------------------------------- |
 | ECharts category axis with date-string labels | `xAxis.type:'time'` selecting meaningful ticks, non-even split | ECharts 5 (carried into v6 unchanged) | TRD-02 is a config flag, not custom code. [CITED: echarts-doc whats-new-in-echarts-v5] |
-| Blocking sequential upload (shipped) | Latest-first non-blocking background drain | This phase (D-01/D-02) | New behavior, singleton Worker preserved. |
+| Blocking sequential upload (shipped)          | Latest-first non-blocking background drain                     | This phase (D-01/D-02)                | New behavior, singleton Worker preserved.                                              |
 
 **Deprecated/outdated:** `TimelinePoint` placeholder type in `types/estate.ts` (`{capturedAt, vmCount}`) is a Phase-4 forward-compat stub — P8 replaces it with the richer `TrendSeries`/`TrendPoint`/`TrendDelta`. [VERIFIED: types/estate.ts lines 330-338, EstateView.trends typed `TimelinePoint[] | null`]
 
 ## Assumptions Log
 
-| # | Claim | Section | Risk if Wrong |
-|---|-------|---------|---------------|
-| A1 | LineChart addition keeps the ECharts chunk ≤300 KB gz | Pitfall 2 / Stack | LOW — LineChart is a small module; if the gate trips, planner adds a remediation task. Must be verified by `npm run check:bundle-size` during execution, not assumed. |
-| A2 | `vMetaData` timestamp is sufficient for capture-date inference; no `vSource` probe needed | D-04 | LOW — CONTEXT D-04 explicitly says confirm during planning and only add `vSource` if a real fixture proves `vMetaData` insufficient. No fixture in this repo proves otherwise. Flag for fixture validation. |
-| A3 | Carrying a released point's aggregate as frozen metadata on the `Snapshot` does not violate the inputs-only invariant | DD-C | MEDIUM — this is a design judgment (the rows are gone, so the surviving aggregate is now input metadata, not a cached derivation of live state). The planner/discuss-phase should confirm this reading of "inputs-only" before locking; an alternative is to cap N at 4 and reject the 5th+ raw retention differently. Surface as an open decision. |
-| A4 | The 5 s interactive criterion is met by rendering off the first (latest) `addSnapshot` | Pattern 4 / criterion 1 | LOW — parse time of one ~30 MB workbook is the shipped Phase-1 budget; P8 adds no parse cost to the first file. Verified-by-design, not benchmarked here. |
+| #   | Claim                                                                                                                 | Section                 | Risk if Wrong                                                                                                                                                                                                                                                                                                                                       |
+| --- | --------------------------------------------------------------------------------------------------------------------- | ----------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| A1  | LineChart addition keeps the ECharts chunk ≤300 KB gz                                                                 | Pitfall 2 / Stack       | LOW — LineChart is a small module; if the gate trips, planner adds a remediation task. Must be verified by `npm run check:bundle-size` during execution, not assumed.                                                                                                                                                                               |
+| A2  | `vMetaData` timestamp is sufficient for capture-date inference; no `vSource` probe needed                             | D-04                    | LOW — CONTEXT D-04 explicitly says confirm during planning and only add `vSource` if a real fixture proves `vMetaData` insufficient. No fixture in this repo proves otherwise. Flag for fixture validation.                                                                                                                                         |
+| A3  | Carrying a released point's aggregate as frozen metadata on the `Snapshot` does not violate the inputs-only invariant | DD-C                    | MEDIUM — this is a design judgment (the rows are gone, so the surviving aggregate is now input metadata, not a cached derivation of live state). The planner/discuss-phase should confirm this reading of "inputs-only" before locking; an alternative is to cap N at 4 and reject the 5th+ raw retention differently. Surface as an open decision. |
+| A4  | The 5 s interactive criterion is met by rendering off the first (latest) `addSnapshot`                                | Pattern 4 / criterion 1 | LOW — parse time of one ~30 MB workbook is the shipped Phase-1 budget; P8 adds no parse cost to the first file. Verified-by-design, not benchmarked here.                                                                                                                                                                                           |
 
 **Note:** A3 is the one item that genuinely needs user/planner confirmation (it interprets a project invariant). A1/A2/A4 are execution-time verifications, not design unknowns.
 
@@ -445,14 +457,14 @@ const stableOrder = [...selected].sort(
 
 ## Environment Availability
 
-| Dependency | Required By | Available | Version | Fallback |
-|------------|------------|-----------|---------|----------|
-| echarts | trend chart + sparklines | ✓ | ^6.0.0 (package.json) | — |
-| echarts-for-react | `<Chart>` binding | ✓ | ^3.0.6 | — |
-| react / zustand / react-i18next | view + store + i18n | ✓ | ^19.2.6 / ^5.0.13 / ^16.6.6 | — |
-| Vitest + @testing-library/react | engine + component tests (≥75% on `engines/trends/`) | ✓ | ^4.1.2 / ^16.3.2 | — |
-| `npm run check:bundle-size` | LineChart-registration size gate | ✓ | shipped script | — (must pass after LineChart add) |
-| Network / external service | nothing | ✗ (forbidden by P1 guard, throws) | — | N/A — privacy invariant; trends use only parsed columns |
+| Dependency                      | Required By                                          | Available                         | Version                     | Fallback                                                |
+| ------------------------------- | ---------------------------------------------------- | --------------------------------- | --------------------------- | ------------------------------------------------------- |
+| echarts                         | trend chart + sparklines                             | ✓                                 | ^6.0.0 (package.json)       | —                                                       |
+| echarts-for-react               | `<Chart>` binding                                    | ✓                                 | ^3.0.6                      | —                                                       |
+| react / zustand / react-i18next | view + store + i18n                                  | ✓                                 | ^19.2.6 / ^5.0.13 / ^16.6.6 | —                                                       |
+| Vitest + @testing-library/react | engine + component tests (≥75% on `engines/trends/`) | ✓                                 | ^4.1.2 / ^16.3.2            | —                                                       |
+| `npm run check:bundle-size`     | LineChart-registration size gate                     | ✓                                 | shipped script              | — (must pass after LineChart add)                       |
+| Network / external service      | nothing                                              | ✗ (forbidden by P1 guard, throws) | —                           | N/A — privacy invariant; trends use only parsed columns |
 
 **Missing dependencies with no fallback:** none.
 **Missing dependencies with fallback:** none. P8 introduces zero new dependencies and zero external data sources.

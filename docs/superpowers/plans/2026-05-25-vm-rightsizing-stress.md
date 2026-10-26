@@ -254,8 +254,24 @@ describe('adaptRvtoolsVMemory', () => {
     const sheet = {
       headers: ['VM', 'Cluster', 'VM Instance UUID', 'Active', 'Consumed', 'Ballooned', 'Swapped'],
       rows: [
-        { VM: 'web01', Cluster: 'C1', 'VM Instance UUID': 'i1', Active: 512, Consumed: 1024, Ballooned: 0, Swapped: '' },
-        { VM: 'Total', Cluster: '', 'VM Instance UUID': '', Active: 1, Consumed: 1, Ballooned: 1, Swapped: 1 },
+        {
+          VM: 'web01',
+          Cluster: 'C1',
+          'VM Instance UUID': 'i1',
+          Active: 512,
+          Consumed: 1024,
+          Ballooned: 0,
+          Swapped: '',
+        },
+        {
+          VM: 'Total',
+          Cluster: '',
+          'VM Instance UUID': '',
+          Active: 1,
+          Consumed: 1,
+          Ballooned: 1,
+          Swapped: 1,
+        },
       ],
     }
     const out = adaptRvtoolsVMemory(sheet as never)
@@ -382,8 +398,12 @@ Add a merge helper that unions the two sheets by identity into one `VmUsageRow[]
 
 ```ts
 /** Identity key for joining vMemory/vCPU rows to a VM. */
-const usageIdentity = (r: { vmInstanceUuid: string; vmBiosUuid: string; vmName: string; cluster: string }): string =>
-  r.vmInstanceUuid || r.vmBiosUuid || `${r.vmName}::${r.cluster}`
+const usageIdentity = (r: {
+  vmInstanceUuid: string
+  vmBiosUuid: string
+  vmName: string
+  cluster: string
+}): string => r.vmInstanceUuid || r.vmBiosUuid || `${r.vmName}::${r.cluster}`
 
 const mergeUsage = (mem: VmUsageRow[], cpu: VmUsageRow[]): VmUsageRow[] => {
   const byId = new Map<string, VmUsageRow>()
@@ -401,22 +421,22 @@ const mergeUsage = (mem: VmUsageRow[], cpu: VmUsageRow[]): VmUsageRow[] => {
 Wire into `adaptRvtools`: extend its return type with `vmUsage: VmUsageRow[]`, find the optional sheets, and add to the returned object. After the `dvportSheet` block add:
 
 ```ts
-  const vmemSheet = findSheet(workbook, ['vmemory', 'rvtools_tabvmemory'])
-  if (!vmemSheet) {
-    warnings.push({
-      sheet: 'vMemory',
-      kind: 'missing-sheet',
-      message: 'optional sheet vMemory absent — memory utilization/ballooning unavailable',
-    })
-  }
-  const vcpuSheet = findSheet(workbook, ['vcpu', 'rvtools_tabvcpu'])
-  if (!vcpuSheet) {
-    warnings.push({
-      sheet: 'vCPU',
-      kind: 'missing-sheet',
-      message: 'optional sheet vCPU absent — CPU utilization unavailable',
-    })
-  }
+const vmemSheet = findSheet(workbook, ['vmemory', 'rvtools_tabvmemory'])
+if (!vmemSheet) {
+  warnings.push({
+    sheet: 'vMemory',
+    kind: 'missing-sheet',
+    message: 'optional sheet vMemory absent — memory utilization/ballooning unavailable',
+  })
+}
+const vcpuSheet = findSheet(workbook, ['vcpu', 'rvtools_tabvcpu'])
+if (!vcpuSheet) {
+  warnings.push({
+    sheet: 'vCPU',
+    kind: 'missing-sheet',
+    message: 'optional sheet vCPU absent — CPU utilization unavailable',
+  })
+}
 ```
 
 And in the returned object add:
@@ -456,18 +476,81 @@ import { parseSnapshot } from './normalizeColumns'
 
 const wb = {
   sheets: new Map<string, { headers: string[]; rows: Record<string, unknown>[] }>([
-    ['vInfo', { headers: ['VM', 'Cluster', 'Host', 'CPUs', 'Memory', 'Powerstate'], rows: [
-      { VM: 'web01', Cluster: 'C1', Host: 'h1', CPUs: 4, Memory: 8192, Powerstate: 'poweredOn' },
-    ] }],
-    ['vHost', { headers: ['Host', 'Cluster', '# CPU', '# Cores', 'Speed', 'Memory', 'CPU usage %', 'Memory usage %'], rows: [
-      { Host: 'h1', Cluster: 'C1', '# CPU': 2, '# Cores': 16, Speed: 2200, Memory: 262144, 'CPU usage %': 10, 'Memory usage %': 10 },
-    ] }],
-    ['vMemory', { headers: ['VM', 'Cluster', 'VM Instance UUID', 'Active', 'Consumed', 'Ballooned', 'Swapped'], rows: [
-      { VM: 'web01', Cluster: 'C1', 'VM Instance UUID': 'i1', Active: 1024, Consumed: 2048, Ballooned: 0, Swapped: 0 },
-    ] }],
-    ['vCPU', { headers: ['VM', 'Cluster', 'VM Instance UUID', 'Overall Cpu Usage'], rows: [
-      { VM: 'web01', Cluster: 'C1', 'VM Instance UUID': 'i1', 'Overall Cpu Usage': 300 },
-    ] }],
+    [
+      'vInfo',
+      {
+        headers: ['VM', 'Cluster', 'Host', 'CPUs', 'Memory', 'Powerstate'],
+        rows: [
+          {
+            VM: 'web01',
+            Cluster: 'C1',
+            Host: 'h1',
+            CPUs: 4,
+            Memory: 8192,
+            Powerstate: 'poweredOn',
+          },
+        ],
+      },
+    ],
+    [
+      'vHost',
+      {
+        headers: [
+          'Host',
+          'Cluster',
+          '# CPU',
+          '# Cores',
+          'Speed',
+          'Memory',
+          'CPU usage %',
+          'Memory usage %',
+        ],
+        rows: [
+          {
+            Host: 'h1',
+            Cluster: 'C1',
+            '# CPU': 2,
+            '# Cores': 16,
+            Speed: 2200,
+            Memory: 262144,
+            'CPU usage %': 10,
+            'Memory usage %': 10,
+          },
+        ],
+      },
+    ],
+    [
+      'vMemory',
+      {
+        headers: [
+          'VM',
+          'Cluster',
+          'VM Instance UUID',
+          'Active',
+          'Consumed',
+          'Ballooned',
+          'Swapped',
+        ],
+        rows: [
+          {
+            VM: 'web01',
+            Cluster: 'C1',
+            'VM Instance UUID': 'i1',
+            Active: 1024,
+            Consumed: 2048,
+            Ballooned: 0,
+            Swapped: 0,
+          },
+        ],
+      },
+    ],
+    [
+      'vCPU',
+      {
+        headers: ['VM', 'Cluster', 'VM Instance UUID', 'Overall Cpu Usage'],
+        rows: [{ VM: 'web01', Cluster: 'C1', 'VM Instance UUID': 'i1', 'Overall Cpu Usage': 300 }],
+      },
+    ],
   ]),
 }
 
@@ -482,7 +565,6 @@ describe('parseSnapshot vmUsage', () => {
 ```
 
 > Note: `parseSnapshot` lives in `normalizeColumns.ts` (verify the import path against that file — it is re-exported there). If `parseXlsx`'s `ParsedWorkbook` shape differs, build the workbook via the test helpers already used in `normalizeColumns.test.ts`.
-
 - [ ] **Step 2: Run it (expected: FAIL — `vmUsage` undefined / type error)**
 
 Run: `npm run test:run -- src/engines/parser/vmUsageParse.test.ts`
@@ -493,10 +575,10 @@ Expected: FAIL.
   - In `parseSnapshot`, `adaptRvtools` now returns `vmUsage`; pass it straight through (it is adapter output, already typed — no Zod re-validation needed at the row level, but validate for safety using the generic `validate` helper):
 
 ```ts
-  const vmUsage = validate<VmUsageRow>(raw.vmUsage, VmUsageRowSchema, 'vMemory/vCPU')
+const vmUsage = validate<VmUsageRow>(raw.vmUsage, VmUsageRowSchema, 'vMemory/vCPU')
 ```
 
-  Add `VmUsageRowSchema` to the `./schemas` import and `VmUsageRow` to the `@/types` import. Add `...vmUsage.errors` to `parseErrors`, and `vmUsage: vmUsage.rows` to the returned `snapshot` object.
+Add `VmUsageRowSchema` to the `./schemas` import and `VmUsageRow` to the `@/types` import. Add `...vmUsage.errors` to `parseErrors`, and `vmUsage: vmUsage.rows` to the returned `snapshot` object.
 
 - [ ] **Step 4: Run it (expected: PASS)**
 
@@ -564,34 +646,64 @@ import { cores, mhz, mib } from '@/engines/units'
 import type { Snapshot } from '@/types/snapshot'
 import type { VHostRow } from '@/types/vhost'
 import type { VInfoRow } from '@/types/vinfo'
-import {
-  DEFAULT_SIZING_THRESHOLDS,
-  computeSizing,
-  maxVmUsageAcrossSnapshots,
-} from './sizing'
+import { DEFAULT_SIZING_THRESHOLDS, computeSizing, maxVmUsageAcrossSnapshots } from './sizing'
 
 const vinfo = (over: Partial<VInfoRow> = {}): VInfoRow => ({
-  vmName: 'web01', cluster: 'C1', host: 'h1', vcpu: cores(4), vramMib: mib(8192),
-  cpuReadinessPercent: null, powerState: 'poweredOn', template: false, poweredOn: true,
-  osConfig: '', osTools: '', vmBiosUuid: 'b1', vmInstanceUuid: 'i1', viSdkUuid: '',
-  viSdkServer: '', provisionedMib: mib(0), inUseMib: mib(0), path: '', ...over,
+  vmName: 'web01',
+  cluster: 'C1',
+  host: 'h1',
+  vcpu: cores(4),
+  vramMib: mib(8192),
+  cpuReadinessPercent: null,
+  powerState: 'poweredOn',
+  template: false,
+  poweredOn: true,
+  osConfig: '',
+  osTools: '',
+  vmBiosUuid: 'b1',
+  vmInstanceUuid: 'i1',
+  viSdkUuid: '',
+  viSdkServer: '',
+  provisionedMib: mib(0),
+  inUseMib: mib(0),
+  path: '',
+  ...over,
 })
 const host = (): VHostRow => ({
-  hostName: 'h1', cluster: 'C1', sockets: 2 as never, cores: cores(16), speedMhz: mhz(2200),
-  memoryMib: mib(262144), cpuRatio: 0.1, ramRatio: 0.1, faultDomain: '', model: '', vendor: '',
+  hostName: 'h1',
+  cluster: 'C1',
+  sockets: 2 as never,
+  cores: cores(16),
+  speedMhz: mhz(2200),
+  memoryMib: mib(262144),
+  cpuRatio: 0.1,
+  ramRatio: 0.1,
+  faultDomain: '',
+  model: '',
+  vendor: '',
   esxVersion: '',
 })
 const snap = (vmUsage: Snapshot['vmUsage'], vi: VInfoRow[] = [vinfo()]): Snapshot =>
-  ({ vinfo: vi, vmUsage } as unknown as Snapshot)
+  ({ vinfo: vi, vmUsage }) as unknown as Snapshot
 
 describe('computeSizing oversize', () => {
   it('flags CPU + memory oversized when usage is far below capacity', () => {
     // capacity = 4 * 2200 = 8800 MHz; usage 300 → 3.4% ≤ 10 → cpuOversized
     // active 1024 / 8192 = 12.5% ≤ 20 → memOversized
     const max = maxVmUsageAcrossSnapshots([
-      snap([{ vmName: 'web01', cluster: 'C1', vmBiosUuid: 'b1', vmInstanceUuid: 'i1',
-        activeMib: mib(1024), consumedMib: mib(2048), balloonedMib: mib(0), swappedMib: mib(0),
-        cpuUsageMhz: mhz(300) }]),
+      snap([
+        {
+          vmName: 'web01',
+          cluster: 'C1',
+          vmBiosUuid: 'b1',
+          vmInstanceUuid: 'i1',
+          activeMib: mib(1024),
+          consumedMib: mib(2048),
+          balloonedMib: mib(0),
+          swappedMib: mib(0),
+          cpuUsageMhz: mhz(300),
+        },
+      ]),
     ])
     const res = computeSizing([vinfo()], [host()], max, DEFAULT_SIZING_THRESHOLDS, 1)
     const row = res.rows[0]
@@ -606,11 +718,30 @@ describe('computeSizing oversize', () => {
 describe('computeSizing stress', () => {
   it('flags memStressed on ballooning and cpuStressed on CPU ready > 5%', () => {
     const max = maxVmUsageAcrossSnapshots([
-      snap([{ vmName: 'web01', cluster: 'C1', vmBiosUuid: 'b1', vmInstanceUuid: 'i1',
-        activeMib: null, consumedMib: null, balloonedMib: mib(64), swappedMib: mib(0),
-        cpuUsageMhz: null }], [vinfo({ cpuReadinessPercent: 7 })]),
+      snap(
+        [
+          {
+            vmName: 'web01',
+            cluster: 'C1',
+            vmBiosUuid: 'b1',
+            vmInstanceUuid: 'i1',
+            activeMib: null,
+            consumedMib: null,
+            balloonedMib: mib(64),
+            swappedMib: mib(0),
+            cpuUsageMhz: null,
+          },
+        ],
+        [vinfo({ cpuReadinessPercent: 7 })],
+      ),
     ])
-    const res = computeSizing([vinfo({ cpuReadinessPercent: 7 })], [host()], max, DEFAULT_SIZING_THRESHOLDS, 1)
+    const res = computeSizing(
+      [vinfo({ cpuReadinessPercent: 7 })],
+      [host()],
+      max,
+      DEFAULT_SIZING_THRESHOLDS,
+      1,
+    )
     expect(res.rows[0]?.flags.memStressed).toBe(true)
     expect(res.rows[0]?.flags.cpuStressed).toBe(true)
     expect(res.counts.stressed).toBe(1)
@@ -628,21 +759,59 @@ describe('computeSizing null-discipline + guards', () => {
 
   it('vramMib 0 → memActivePct null (no divide-by-zero)', () => {
     const max = maxVmUsageAcrossSnapshots([
-      snap([{ vmName: 'web01', cluster: 'C1', vmBiosUuid: 'b1', vmInstanceUuid: 'i1',
-        activeMib: mib(10), consumedMib: null, balloonedMib: null, swappedMib: null,
-        cpuUsageMhz: null }], [vinfo({ vramMib: mib(0) })]),
+      snap(
+        [
+          {
+            vmName: 'web01',
+            cluster: 'C1',
+            vmBiosUuid: 'b1',
+            vmInstanceUuid: 'i1',
+            activeMib: mib(10),
+            consumedMib: null,
+            balloonedMib: null,
+            swappedMib: null,
+            cpuUsageMhz: null,
+          },
+        ],
+        [vinfo({ vramMib: mib(0) })],
+      ),
     ])
-    const res = computeSizing([vinfo({ vramMib: mib(0) })], [host()], max, DEFAULT_SIZING_THRESHOLDS, 1)
+    const res = computeSizing(
+      [vinfo({ vramMib: mib(0) })],
+      [host()],
+      max,
+      DEFAULT_SIZING_THRESHOLDS,
+      1,
+    )
     expect(res.rows[0]?.memActivePct).toBeNull()
   })
 
   it('excludes powered-off VMs', () => {
     const max = maxVmUsageAcrossSnapshots([
-      snap([{ vmName: 'web01', cluster: 'C1', vmBiosUuid: 'b1', vmInstanceUuid: 'i1',
-        activeMib: mib(1), consumedMib: null, balloonedMib: null, swappedMib: null,
-        cpuUsageMhz: mhz(1) }], [vinfo({ poweredOn: false, powerState: 'poweredOff' })]),
+      snap(
+        [
+          {
+            vmName: 'web01',
+            cluster: 'C1',
+            vmBiosUuid: 'b1',
+            vmInstanceUuid: 'i1',
+            activeMib: mib(1),
+            consumedMib: null,
+            balloonedMib: null,
+            swappedMib: null,
+            cpuUsageMhz: mhz(1),
+          },
+        ],
+        [vinfo({ poweredOn: false, powerState: 'poweredOff' })],
+      ),
     ])
-    const res = computeSizing([vinfo({ poweredOn: false, powerState: 'poweredOff' })], [host()], max, DEFAULT_SIZING_THRESHOLDS, 1)
+    const res = computeSizing(
+      [vinfo({ poweredOn: false, powerState: 'poweredOff' })],
+      [host()],
+      max,
+      DEFAULT_SIZING_THRESHOLDS,
+      1,
+    )
     expect(res.rows).toHaveLength(0)
   })
 })
@@ -650,10 +819,32 @@ describe('computeSizing null-discipline + guards', () => {
 describe('maxVmUsageAcrossSnapshots', () => {
   it('takes the per-identity max across snapshots and sets sampleBasis', () => {
     const max = maxVmUsageAcrossSnapshots([
-      snap([{ vmName: 'web01', cluster: 'C1', vmBiosUuid: 'b1', vmInstanceUuid: 'i1',
-        activeMib: mib(1000), consumedMib: null, balloonedMib: null, swappedMib: null, cpuUsageMhz: mhz(100) }]),
-      snap([{ vmName: 'web01', cluster: 'C1', vmBiosUuid: 'b1', vmInstanceUuid: 'i1',
-        activeMib: mib(3000), consumedMib: null, balloonedMib: null, swappedMib: null, cpuUsageMhz: mhz(50) }]),
+      snap([
+        {
+          vmName: 'web01',
+          cluster: 'C1',
+          vmBiosUuid: 'b1',
+          vmInstanceUuid: 'i1',
+          activeMib: mib(1000),
+          consumedMib: null,
+          balloonedMib: null,
+          swappedMib: null,
+          cpuUsageMhz: mhz(100),
+        },
+      ]),
+      snap([
+        {
+          vmName: 'web01',
+          cluster: 'C1',
+          vmBiosUuid: 'b1',
+          vmInstanceUuid: 'i1',
+          activeMib: mib(3000),
+          consumedMib: null,
+          balloonedMib: null,
+          swappedMib: null,
+          cpuUsageMhz: mhz(50),
+        },
+      ]),
     ])
     expect(max.get('i1')?.activeMib).toBe(3000)
     expect(max.get('i1')?.cpuUsageMhz).toBe(100)
@@ -821,9 +1012,15 @@ export const computeSizing = (
   const rows: VmSizing[] = []
   let hasUsageData = false
   const counts: SizingCounts = {
-    oversized: 0, undersized: 0, stressed: 0,
-    cpuOversized: 0, memOversized: 0, cpuUndersized: 0, memUndersized: 0,
-    memStressed: 0, cpuStressed: 0,
+    oversized: 0,
+    undersized: 0,
+    stressed: 0,
+    cpuOversized: 0,
+    memOversized: 0,
+    cpuUndersized: 0,
+    memUndersized: 0,
+    memStressed: 0,
+    cpuStressed: 0,
   }
 
   for (const v of vinfo) {
@@ -861,9 +1058,19 @@ export const computeSizing = (
     if (flags.memStressed || flags.cpuStressed) counts.stressed += 1
 
     rows.push({
-      vmName: v.vmName, cluster: v.cluster, host: v.host, vcpu: vcpuN, vramMib: vramN,
-      cpuUtilPct, memActivePct, memConsumedPct, balloonedMib: ballooned, swappedMib: swapped,
-      cpuReadinessPercent: ready, sampleBasis: basis, flags,
+      vmName: v.vmName,
+      cluster: v.cluster,
+      host: v.host,
+      vcpu: vcpuN,
+      vramMib: vramN,
+      cpuUtilPct,
+      memActivePct,
+      memConsumedPct,
+      balloonedMib: ballooned,
+      swappedMib: swapped,
+      cpuReadinessPercent: ready,
+      sampleBasis: basis,
+      flags,
     })
   }
 
@@ -901,8 +1108,8 @@ import type { EstateSizing } from '@/engines/aggregation/sizing'
 Add to the `EstateView` interface:
 
 ```ts
-  /** P-RS right-sizing/stress extract (oversized/undersized/stressed). */
-  sizing: EstateSizing
+/** P-RS right-sizing/stress extract (oversized/undersized/stressed). */
+sizing: EstateSizing
 ```
 
 - [ ] **Step 2:** Re-export the sizing surface from `src/engines/aggregation/index.ts`:
@@ -957,32 +1164,39 @@ Expected: FAIL.
   - In the single pass (after `trends`), add:
 
 ```ts
-  const sizingThresholds = opts?.sizingThresholds ?? DEFAULT_SIZING_THRESHOLDS
-  const sizing = computeSizing(
-    merged.vinfo,
-    merged.vhost,
-    maxVmUsageAcrossSnapshots(selected),
-    sizingThresholds,
-    selected.length,
-  )
+const sizingThresholds = opts?.sizingThresholds ?? DEFAULT_SIZING_THRESHOLDS
+const sizing = computeSizing(
+  merged.vinfo,
+  merged.vhost,
+  maxVmUsageAcrossSnapshots(selected),
+  sizingThresholds,
+  selected.length,
+)
 ```
 
-  - Add `sizing,` to the returned object.
-  - Add `EMPTY_SIZING` and put it in `EMPTY_VIEW`:
+- Add `sizing,` to the returned object.
+- Add `EMPTY_SIZING` and put it in `EMPTY_VIEW`:
 
 ```ts
 const EMPTY_SIZING = Object.freeze({
   rows: Object.freeze([]) as never[],
   counts: Object.freeze({
-    oversized: 0, undersized: 0, stressed: 0, cpuOversized: 0, memOversized: 0,
-    cpuUndersized: 0, memUndersized: 0, memStressed: 0, cpuStressed: 0,
+    oversized: 0,
+    undersized: 0,
+    stressed: 0,
+    cpuOversized: 0,
+    memOversized: 0,
+    cpuUndersized: 0,
+    memUndersized: 0,
+    memStressed: 0,
+    cpuStressed: 0,
   }),
   thresholds: DEFAULT_SIZING_THRESHOLDS,
   snapshotCount: 0,
   hasUsageData: false,
 })
 ```
-  Add `sizing: EMPTY_SIZING,` to `EMPTY_VIEW`.
+Add `sizing: EMPTY_SIZING,` to `EMPTY_VIEW`.
 
 - [ ] **Step 4: Run typecheck + tests (expected: PASS)**
 
@@ -1016,11 +1230,17 @@ it('sizingThresholds: defaults to DEFAULT_SIZING_THRESHOLDS', () => {
   expect(selectSizingThresholds(useSnapshotStore.getState())).toEqual(DEFAULT_SIZING_THRESHOLDS)
 })
 it('sizingThresholds: setter replaces with a fresh object', () => {
-  selectSetSizingThresholds(useSnapshotStore.getState())({ ...DEFAULT_SIZING_THRESHOLDS, cpuOversizePct: 5 })
+  selectSetSizingThresholds(useSnapshotStore.getState())({
+    ...DEFAULT_SIZING_THRESHOLDS,
+    cpuOversizePct: 5,
+  })
   expect(selectSizingThresholds(useSnapshotStore.getState()).cpuOversizePct).toBe(5)
 })
 it('sizingThresholds: clearAll restores defaults', () => {
-  selectSetSizingThresholds(useSnapshotStore.getState())({ ...DEFAULT_SIZING_THRESHOLDS, cpuOversizePct: 5 })
+  selectSetSizingThresholds(useSnapshotStore.getState())({
+    ...DEFAULT_SIZING_THRESHOLDS,
+    cpuOversizePct: 5,
+  })
   useSnapshotStore.getState().clearAll()
   expect(selectSizingThresholds(useSnapshotStore.getState())).toEqual(DEFAULT_SIZING_THRESHOLDS)
 })
@@ -1121,7 +1341,6 @@ export function buildExportView(active, all, mode, today, opts?): ExportView {
 }
 ```
 > `EstateSizing` is exported from `@/types/estate` (it re-exports the engine type per Task B2). If you kept the type in the engine, import it from `@/engines/aggregation`.
-
 - [ ] **Step 4: Run it (expected: PASS)**
 
 Run: `npm run test:run -- src/engines/export/buildExportView.test.ts`
@@ -1150,25 +1369,24 @@ git commit -m "feat(rs-10): expose all-snapshots sizing on ExportView"
 - [ ] **Step 2: Add ExportStrings keys** in `src/engines/export/types.ts` — add a `rightSizing` group (match the existing per-slide string-group shape), e.g.:
 
 ```ts
-  rightSizing: {
-    title: string
-    oversized: string
-    undersized: string
-    stressed: string
-    basisSingle: string
-    basisMaxOfN: string // contains a {count} token if the codebase interpolates; else plain
-    poweredOnOnly: string
-    thresholdsCaption: string
-    colVm: string
-    colCluster: string
-    colVcpu: string
-    colCpuPct: string
-    colVram: string
-    colActivePct: string
-  }
+rightSizing: {
+  title: string
+  oversized: string
+  undersized: string
+  stressed: string
+  basisSingle: string
+  basisMaxOfN: string // contains a {count} token if the codebase interpolates; else plain
+  poweredOnOnly: string
+  thresholdsCaption: string
+  colVm: string
+  colCluster: string
+  colVcpu: string
+  colCpuPct: string
+  colVram: string
+  colActivePct: string
+}
 ```
 > Match how other groups are typed/populated; `ExportStrings` is built from the `pptx` i18n namespace in the export worker — see Task F1 for the JSON keys.
-
 - [ ] **Step 3: Write the failing test** — add to `builder.test.ts`: build a `view` whose `sizing.hasUsageData === true` and assert the produced deck has one more slide than the same view with `hasUsageData === false` (the golden structural test counts slides). Pattern after the existing contention-annex conditional test in that file.
 
 - [ ] **Step 4: Run it (expected: FAIL)**
@@ -1194,45 +1412,67 @@ export const addRightSizingSlide = (
   const s = strings.rightSizing
   const slide = pptx.addSlide()
   // title (neutral) — use the deck's title helper/pattern from eosSlide
-  slide.addText(s.title, { /* match eosSlide title opts */ })
+  slide.addText(s.title, {
+    /* match eosSlide title opts */
+  })
   // three KPI cards: oversized / undersized / stressed counts
-  addKpiCard(slide, { label: s.oversized, value: String(sizing.counts.oversized) /* + card opts */ })
+  addKpiCard(slide, {
+    label: s.oversized,
+    value: String(sizing.counts.oversized) /* + card opts */,
+  })
   addKpiCard(slide, { label: s.undersized, value: String(sizing.counts.undersized) })
   addKpiCard(slide, { label: s.stressed, value: String(sizing.counts.stressed) })
   // top-N table of flagged rows (native pptx table)
   const flagged = sizing.rows
-    .filter((r) => r.flags.cpuOversized || r.flags.memOversized || r.flags.cpuUndersized ||
-      r.flags.memUndersized || r.flags.memStressed || r.flags.cpuStressed)
+    .filter(
+      (r) =>
+        r.flags.cpuOversized ||
+        r.flags.memOversized ||
+        r.flags.cpuUndersized ||
+        r.flags.memUndersized ||
+        r.flags.memStressed ||
+        r.flags.cpuStressed,
+    )
     .slice(0, 18)
   const header = [s.colVm, s.colCluster, s.colVcpu, s.colCpuPct, s.colVram, s.colActivePct]
   const body = flagged.map((r) => [
-    r.vmName, r.cluster, String(r.vcpu),
+    r.vmName,
+    r.cluster,
+    String(r.vcpu),
     r.cpuUtilPct === null ? '—' : `${r.cpuUtilPct.toFixed(1)}%`,
     String(r.vramMib),
     r.memActivePct === null ? '—' : `${r.memActivePct.toFixed(1)}%`,
   ])
-  slide.addTable([header, ...body], { /* match contentionAnnex table opts */ })
+  slide.addTable([header, ...body], {
+    /* match contentionAnnex table opts */
+  })
   // caption: basis + powered-on + thresholds used
   const basis = sizing.snapshotCount >= 2 ? s.basisMaxOfN : s.basisSingle
-  slide.addText(`${basis} · ${s.poweredOnOnly} · ${s.thresholdsCaption}`, { /* small caption opts */ })
+  slide.addText(`${basis} · ${s.poweredOnOnly} · ${s.thresholdsCaption}`, {
+    /* small caption opts */
+  })
 }
 ```
 > Fill the `{ ... }` option blocks by copying the exact coordinates/fonts/colors from `eosSlide.ts`/`contentionAnnex.ts`. Use `strings`/`locale` exactly as those slides do. Numbers should be locale-formatted via the deck's existing formatter (see `format.ts`) rather than `.toFixed` if that's the established pattern — match the codebase.
-
 - [ ] **Step 6: Wire into `builder.ts`** — import `addRightSizingSlide` and, after the contention annex block (the "utilization/stress" neighborhood), add:
 
 ```ts
-  if (view.sizing.hasUsageData) addRightSizingSlide(pptx, view.sizing, strings, locale)
+if (view.sizing.hasUsageData) addRightSizingSlide(pptx, view.sizing, strings, locale)
 ```
 
 - [ ] **Step 7: Wire the export worker** — in `src/engines/export/export.worker.ts`, the deck is built from the `ExportView`. Pass the all-snapshots sizing into the slide by calling `buildPptx` with a view whose `sizing` is the export sizing:
 
 ```ts
-  const exportView = buildExportView(active, all, mode, today, opts)
-  await buildPptx({ ...exportView.view, sizing: exportView.sizing }, exportView.trends, strings, locale, pptxOpts)
+const exportView = buildExportView(active, all, mode, today, opts)
+await buildPptx(
+  { ...exportView.view, sizing: exportView.sizing },
+  exportView.trends,
+  strings,
+  locale,
+  pptxOpts,
+)
 ```
 > Read `export.worker.ts` first to match its exact call site and variable names; only change the `view` passed to `buildPptx` so the slide sees max-of-N sizing.
-
 - [ ] **Step 8: Run it (expected: PASS)**
 
 Run: `npm run test:run -- src/engines/export/pptx/builder.test.ts`
@@ -1278,14 +1518,35 @@ import { RightSizingView } from './RightSizingView'
 import type { EstateSizing } from '@/types/estate'
 
 const sizing = (over: Partial<EstateSizing> = {}): EstateSizing => ({
-  rows: [], counts: { oversized: 3, undersized: 1, stressed: 2, cpuOversized: 2, memOversized: 1,
-    cpuUndersized: 1, memUndersized: 0, memStressed: 1, cpuStressed: 1 },
-  thresholds: { cpuOversizePct: 10, memOversizePct: 20, cpuUndersizePct: 90, memUndersizePct: 90, balloonMib: 0, swapMib: 0 },
-  snapshotCount: 1, hasUsageData: true, ...over,
+  rows: [],
+  counts: {
+    oversized: 3,
+    undersized: 1,
+    stressed: 2,
+    cpuOversized: 2,
+    memOversized: 1,
+    cpuUndersized: 1,
+    memUndersized: 0,
+    memStressed: 1,
+    cpuStressed: 1,
+  },
+  thresholds: {
+    cpuOversizePct: 10,
+    memOversizePct: 20,
+    cpuUndersizePct: 90,
+    memUndersizePct: 90,
+    balloonMib: 0,
+    swapMib: 0,
+  },
+  snapshotCount: 1,
+  hasUsageData: true,
+  ...over,
 })
 
 describe('RightSizingView', () => {
-  beforeEach(async () => { await i18n.changeLanguage('en') })
+  beforeEach(async () => {
+    await i18n.changeLanguage('en')
+  })
   it('renders the three category counts', () => {
     render(<RightSizingView sizing={sizing()} />)
     expect(screen.getByText('3')).toBeInTheDocument()
@@ -1297,7 +1558,6 @@ describe('RightSizingView', () => {
 })
 ```
 > Match the prop shape to how sibling views are invoked (prop vs `useEstateView`). If sibling views read the hook internally, mock the store instead (follow `CpuReadyPanel.test.tsx`).
-
 - [ ] **Step 4: Run it (expected: FAIL)**
 
 Run: `npm run test:run -- src/components/rightsizing/RightSizingView.test.tsx`
@@ -1395,7 +1655,12 @@ git commit -m "feat(rs-13): right-sizing thresholds, filter, VM table, counts ch
     "swap": "Swap > MiB",
     "cpuReady": "CPU-ready > %"
   },
-  "filter": { "all": "All", "oversized": "Allocation ≫ usage", "undersized": "Usage near allocation", "stressed": "Pressure" }
+  "filter": {
+    "all": "All",
+    "oversized": "Allocation ≫ usage",
+    "undersized": "Usage near allocation",
+    "stressed": "Pressure"
+  }
 }
 ```
 
@@ -1424,7 +1689,12 @@ git commit -m "feat(rs-13): right-sizing thresholds, filter, VM table, counts ch
     "swap": "Swap > Mio",
     "cpuReady": "CPU-ready > %"
   },
-  "filter": { "all": "Tous", "oversized": "Allocation ≫ utilisation", "undersized": "Utilisation proche de l'allocation", "stressed": "Pression" }
+  "filter": {
+    "all": "Tous",
+    "oversized": "Allocation ≫ utilisation",
+    "undersized": "Utilisation proche de l'allocation",
+    "stressed": "Pression"
+  }
 }
 ```
 

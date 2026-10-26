@@ -45,7 +45,7 @@ Replace the shallow per-cluster card with RVTools-Analyser-grade depth, add a de
 ### Claude's Discretion
 
 - Exact tile/column ordering, label strings (factual, EN/FR parity, no editorial verbs), the screen-fit layout grid for the cluster-detail view, and the minimal-blast-radius approach for the `poweredOn`→`Powerstate` parser change.
-</decisions>
+  </decisions>
 
 <canonical_refs>
 
@@ -72,7 +72,7 @@ Replace the shallow per-cluster card with RVTools-Analyser-grade depth, add a de
 - `.planning/REQUIREMENTS.md` — P5 requirement IDs to be DERIVED by the planner (no GVD/INV-depth IDs exist yet; planner adds them per this CONTEXT + RVTools-Analyser #1/2/4/7/11).
 
 > The original `04-RESEARCH.md`/`04-PATTERNS.md`/`04-UI-SPEC.md` are pre-replan and NOT P5 references.
-</canonical_refs>
+> </canonical_refs>
 
 <code_context>
 
@@ -96,14 +96,14 @@ Replace the shallow per-cluster card with RVTools-Analyser-grade depth, add a de
 - ViewToggle now has 3 segments; the Hosts view + cluster-detail screen are new view-state branches in the App/Dashboard shell.
 - `EstateView` gains the D-05 fields + a per-cluster detail projection; `aggregateClusters`/`perEsx` produce them.
 - D-07 parser change ripples to every `poweredOn` consumer — enumerate and update or shim.
-</code_context>
+  </code_context>
 
 <specifics>
 ## Specific Ideas
 
 - Reference: `azure.github.io/RVToolsAnalyzer` Summary/Operational-Insights depth + the screenshot's "67 total · 7 off · 0 suspended · 4 templates" / "vInfo In Use — incl .vswp + snapshots" framing (illustrative target, not pixel-match).
 - The per-cluster detail screen is the unit of PPTX export later: "one screen fit = one slide" is a hard layout constraint for P5's cluster-detail view.
-</specifics>
+  </specifics>
 
 <deferred>
 ## Deferred Ideas
@@ -123,5 +123,5 @@ Replace the shallow per-cluster card with RVTools-Analyser-grade depth, add a de
 
 ---
 
-*Phase: 05-rich-cluster-host-esx-intelligence*
-*Context gathered: 2026-05-17*
+_Phase: 05-rich-cluster-host-esx-intelligence_
+_Context gathered: 2026-05-17_

@@ -1,26 +1,28 @@
 ---
+
 phase: 11
 plan: "03"
 subsystem: planning
 tags: [traceability, bookkeeping, audit]
 requires: []
 provides:
-  - "Accurate REQUIREMENTS.md traceability so /gsd-audit-milestone 1.0 Source-A trace passes"
-affects:
-  - .planning/REQUIREMENTS.md
-tech-stack:
+- "Accurate REQUIREMENTS.md traceability so /gsd-audit-milestone 1.0 Source-A trace passes"
+  affects:
+- .planning/REQUIREMENTS.md
+  tech-stack:
   added: []
   patterns: []
-key-files:
+  key-files:
   created: []
   modified:
-    - .planning/REQUIREMENTS.md
-key-decisions:
-  - "Mechanical status/phase-column edit only; struck/retired (~~) rows left byte-identical"
-  - "All P9 rows set Complete now (shipped on-screen); F-2 deliverable side lands in 11-05/11-06 — traceability records shipped reality per the audit"
-requirements-completed: [STG-01, NET-01, DTL-01, ALR-01, VSR-01, PLN-03, PLN-04]
-duration: 5 min
-completed: 2026-05-19
+  - .planning/REQUIREMENTS.md
+    key-decisions:
+- "Mechanical status/phase-column edit only; struck/retired (~~) rows left byte-identical"
+- "All P9 rows set Complete now (shipped on-screen); F-2 deliverable side lands in 11-05/11-06 — traceability records shipped reality per the audit"
+  requirements-completed: [STG-01, NET-01, DTL-01, ALR-01, VSR-01, PLN-03, PLN-04]
+  duration: 5 min
+  completed: 2026-05-19
+
 ---
 
 # Phase 11 Plan 03: Traceability reconcile Summary

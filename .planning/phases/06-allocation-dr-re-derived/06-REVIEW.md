@@ -1,42 +1,44 @@
 ---
+
 phase: 06-allocation-dr-re-derived
 reviewed: 2026-05-17T00:00:00Z
 depth: standard
 files_reviewed: 21
 files_reviewed_list:
-  - src/App.tsx
-  - src/components/dashboard/GlobalDashboard.tsx
-  - src/components/dr/DrSimPanel.tsx
-  - src/components/dr/DrSimPanel.test.tsx
-  - src/components/planning/PlannedRatiosControl.tsx
-  - src/components/planning/PlanningView.tsx
-  - src/components/ViewToggle.tsx
-  - src/engines/aggregation/estateView.ts
-  - src/engines/drSim/allocate.ts
-  - src/engines/drSim/index.ts
-  - src/engines/drSim/runScenario.ts
-  - src/engines/drSim/runScenario.test.ts
-  - src/hooks/useEstateView.ts
-  - src/i18n/locales/en/alloc.json
-  - src/i18n/locales/fr/alloc.json
-  - src/i18n/locales/en/dr.json
-  - src/i18n/locales/fr/dr.json
-  - src/i18n/locales/en/inventory.json
-  - src/i18n/locales/fr/inventory.json
-  - src/store/snapshotStore.ts
-  - src/types/estate.ts
-findings:
+- src/App.tsx
+- src/components/dashboard/GlobalDashboard.tsx
+- src/components/dr/DrSimPanel.tsx
+- src/components/dr/DrSimPanel.test.tsx
+- src/components/planning/PlannedRatiosControl.tsx
+- src/components/planning/PlanningView.tsx
+- src/components/ViewToggle.tsx
+- src/engines/aggregation/estateView.ts
+- src/engines/drSim/allocate.ts
+- src/engines/drSim/index.ts
+- src/engines/drSim/runScenario.ts
+- src/engines/drSim/runScenario.test.ts
+- src/hooks/useEstateView.ts
+- src/i18n/locales/en/alloc.json
+- src/i18n/locales/fr/alloc.json
+- src/i18n/locales/en/dr.json
+- src/i18n/locales/fr/dr.json
+- src/i18n/locales/en/inventory.json
+- src/i18n/locales/fr/inventory.json
+- src/store/snapshotStore.ts
+- src/types/estate.ts
+  findings:
   critical: 1
   warning: 4
   info: 3
   total: 8
-status: resolved
-resolution:
+  status: resolved
+  resolution:
   fixed: [CR-01, WR-01, WR-02, WR-03, WR-04]
   deferred: [IN-01, IN-02, IN-03]
   deferred_reason: Info-severity, out of --fix scope (Critical+Warning only)
   fix_commits: [fdabb81, 29cd9b2, ab531fc, 25a0a70]
   verified: "tsc -b clean; vitest 310/310; biome ./src clean; locked decisions D-00..D-12 intact"
+
 ---
 
 # Phase 6: Code Review Report
@@ -105,13 +107,13 @@ Alternatively guard at the store boundary in `setPlannedRatios` so any caller is
 **File:** `src/hooks/useEstateView.ts:4-5,40-41,52`
 **Issue:** D-06 mandates no URL-hash persistence of ratio/DR inputs. `useEstateView` still
 imports `AllocRatios`/`DEFAULT_RATIOS` from `useAllocationHash` and accepts a `ratios`
-parameter defaulting to `DEFAULT_RATIOS`, threading it into `allocRatios` for the *measured*
+parameter defaulting to `DEFAULT_RATIOS`, threading it into `allocRatios` for the _measured_
 aggregation. `useAllocationHash` itself (still on disk, still read/written by
 `AllocationSliders.tsx`) does `history.replaceState` of `#alloc=cpu:..,ram:..` — i.e. ratio
 inputs are persisted to the URL. Phase 6's intent is that the planned ratios live only in the
 in-memory store, but the measured ratio still reaches `buildEstateView` via this hash-backed
 path whenever a live caller passes hash-derived `ratios`. No reviewed caller passes `ratios`
-(all use the `DEFAULT_RATIOS` default), so the hash is currently inert *for these files*, but
+(all use the `DEFAULT_RATIOS` default), so the hash is currently inert _for these files_, but
 the coupling and the live `AllocationSliders` consumer keep a ratio-input URL-persistence
 path alive against the spirit of D-06. Confirm whether `AllocationSliders`/`useAllocationHash`
 are still mounted; if so this is effectively a ratio input persisted to the URL.
@@ -151,20 +153,20 @@ ranges.
 ### WR-04: `runScenario` Site-loss removes stretched-cluster hosts at the lost site with no failover modeling
 
 **File:** `src/engines/drSim/runScenario.ts:61-71`
-**Issue:** Site loss removes *every* host whose `faultDomain ∈ failedSites`, including hosts
+**Issue:** Site loss removes _every_ host whose `faultDomain ∈ failedSites`, including hosts
 belonging to declared-stretched clusters, and their VMs — then re-aggregates survivors. For a
 stretched cluster spanning two sites, losing one site is exactly the case where the cluster is
-*expected* to survive on the other site; the engine instead drops that site's capacity and
+_expected_ to survive on the other site; the engine instead drops that site's capacity and
 VMs with no restart/failover onto the surviving site. The `assumptions.doesNotModel` string
 (`dr.json:45`) discloses "Does not model: HA admission control … stretched-cluster
 split-brain", so this is arguably by-design, but the panel's separate "lost — no DR target"
-line (`DrSimPanel.tsx:161-167`) only counts *non*-stretched hosts at the site, implying the
-stretched portion *is* protected — while the engine `before − after` delta still books the
+line (`DrSimPanel.tsx:161-167`) only counts _non_-stretched hosts at the site, implying the
+stretched portion _is_ protected — while the engine `before − after` delta still books the
 stretched hosts as removed capacity. The UI narrative and the engine math diverge for the
 stretched-at-lost-site case.
 **Fix:** Either (a) document explicitly (caveat key) that Site loss measures raw physical
 subtraction including stretched hosts and that surviving-site failover is not modeled, so the
-"lost — no DR target" line is the *only* DR-aware statement; or (b) exclude declared-stretched
+"lost — no DR target" line is the _only_ DR-aware statement; or (b) exclude declared-stretched
 clusters' hosts from the Site-loss removal set (model the surviving site keeping them) so the
 engine matches the UI's implied semantics. Pick one and make the contract single.
 
@@ -201,6 +203,6 @@ the URL-hash sliders.
 
 ---
 
-*Reviewed: 2026-05-17*
-*Reviewer: Claude (gsd-code-reviewer)*
-*Depth: standard*
+_Reviewed: 2026-05-17_
+_Reviewer: Claude (gsd-code-reviewer)_
+_Depth: standard_

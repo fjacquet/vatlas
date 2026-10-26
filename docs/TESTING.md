@@ -10,14 +10,14 @@ engines/store/UI tier boundaries that shape what each test exercises, see
 
 ## Test framework and setup
 
-| Tool | Version | Role |
-|------|---------|------|
-| Vitest | `^4.1.6` | Test runner (unit, integration, component) |
-| `@vitest/coverage-v8` | `^4.1.6` | V8 coverage provider |
-| `@testing-library/react` | `^16.3.2` | Component rendering and queries |
-| `@testing-library/jest-dom` | `^6.9.1` | DOM matchers (`toBeInTheDocument`, etc.) |
-| `@testing-library/user-event` | `^14.6.1` | Realistic user interaction simulation |
-| jsdom | `^29.1.1` | Default test environment |
+| Tool                          | Version   | Role                                       |
+| ----------------------------- | --------- | ------------------------------------------ |
+| Vitest                        | `^4.1.6`  | Test runner (unit, integration, component) |
+| `@vitest/coverage-v8`         | `^4.1.6`  | V8 coverage provider                       |
+| `@testing-library/react`      | `^16.3.2` | Component rendering and queries            |
+| `@testing-library/jest-dom`   | `^6.9.1`  | DOM matchers (`toBeInTheDocument`, etc.)   |
+| `@testing-library/user-event` | `^14.6.1` | Realistic user interaction simulation      |
+| jsdom                         | `^29.1.1` | Default test environment                   |
 
 Configuration lives in `vitest.config.ts`. Key settings:
 
@@ -112,12 +112,12 @@ Coverage uses the V8 provider with `text`, `json`, and `html` reporters. The
 gate applies to the pure logic layers only — UI components are intentionally
 excluded from the threshold.
 
-| Type | Threshold |
-|------|-----------|
-| Lines | 75% |
-| Functions | 75% |
-| Branches | 75% |
-| Statements | 75% |
+| Type       | Threshold |
+| ---------- | --------- |
+| Lines      | 75%       |
+| Functions  | 75%       |
+| Branches   | 75%       |
+| Statements | 75%       |
 
 Gated (`coverage.include`) paths:
 
@@ -133,7 +133,7 @@ fails if any threshold drops below 75% on the gated paths.
 
 The default jsdom environment does **not** lay out the DOM and does **not**
 produce real SVG geometry. Charts in vatlas render through Apache ECharts with
-the SVG renderer (`src/components/Chart.tsx`). Assertions about *real* chart
+the SVG renderer (`src/components/Chart.tsx`). Assertions about _real_ chart
 geometry — computed SVG path coordinates, element layout, pixel positions —
 cannot be made under jsdom because the produced SVG has no real geometry.
 

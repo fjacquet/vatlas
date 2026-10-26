@@ -34,8 +34,8 @@ the right-sizing view already owns that lens with user-editable thresholds).
 
 ## Constraints (binding)
 
-- **Mixed basis is intentional.** vCPU and vRAM are *configured* allocation
-  (`vm.vcpu`, `vm.vramMib`); storage is *in-use / committed* (`vm.inUseMib`).
+- **Mixed basis is intentional.** vCPU and vRAM are _configured_ allocation
+  (`vm.vcpu`, `vm.vramMib`); storage is _in-use / committed_ (`vm.inUseMib`).
   The storage column MUST be labelled to make its basis explicit (e.g.
   "Storage (in-use)") so it is never misread as provisioned. This is the user's
   deliberate choice, not an oversight.
@@ -67,16 +67,16 @@ New pure engine `src/engines/aggregation/avgVmSize.ts`:
 
 ```ts
 export interface AxisStats {
-  mean: number   // arithmetic mean over all VMs
+  mean: number // arithmetic mean over all VMs
   median: number // 50th percentile (average of the two middles on even N)
-  max: number    // per-axis maximum
+  max: number // per-axis maximum
 }
 
 export interface VmSizeStats {
   vmCount: number
-  vcpu: AxisStats        // cores (configured)
-  vramMib: AxisStats     // plain numbers; unit is MiB (configured)
-  storageMib: AxisStats  // plain numbers; unit is MiB (in-use / committed)
+  vcpu: AxisStats // cores (configured)
+  vramMib: AxisStats // plain numbers; unit is MiB (configured)
+  storageMib: AxisStats // plain numbers; unit is MiB (in-use / committed)
 }
 ```
 

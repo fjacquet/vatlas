@@ -1,58 +1,62 @@
 ---
+
 phase: 02-aggregation-global-dashboard
 plan: 01
 subsystem: ui
 tags: [echarts, echarts-for-react, svg-renderer, tree-shaking, charting, theme, react-memo, ci-gate]
 
 # Dependency graph
+
 requires:
-  - phase: 01-foundation-invariants
-    provides: "Midnight Executive @theme tokens in src/index.css; FallbackError component-shape conventions; check-supply-chain.mjs gate template; class-strategy dark mode"
-provides:
-  - "src/components/Chart.tsx — the single tree-shaken <Chart> primitive (echarts/core + echarts.use, {renderer:'svg'} injected centrally, React.memo reference comparator) consumed by every later phase"
-  - "src/theme/echartsTheme.ts — MIDNIGHT_EXECUTIVE_LIGHT/DARK ECharts theme objects mapped from index.css tokens (registered as 'midnight-executive' / 'midnight-executive-dark')"
-  - "scripts/check-bundle-size.mjs + check:bundle-size npm script — CI gate failing when the echarts chunk exceeds 307200 bytes gz"
-  - "echarts@6.0.0 + echarts-for-react@3.0.6 in dependencies"
-affects: [02-02-aggregation-engines, 02-03-dashboard-ui, dashboard, charting, pptx-export, html-report]
+- phase: 01-foundation-invariants
+  provides: "Midnight Executive @theme tokens in src/index.css; FallbackError component-shape conventions; check-supply-chain.mjs gate template; class-strategy dark mode"
+  provides:
+- "src/components/Chart.tsx — the single tree-shaken <Chart> primitive (echarts/core + echarts.use, {renderer:'svg'} injected centrally, React.memo reference comparator) consumed by every later phase"
+- "src/theme/echartsTheme.ts — MIDNIGHT_EXECUTIVE_LIGHT/DARK ECharts theme objects mapped from index.css tokens (registered as 'midnight-executive' / 'midnight-executive-dark')"
+- "scripts/check-bundle-size.mjs + check:bundle-size npm script — CI gate failing when the echarts chunk exceeds 307200 bytes gz"
+- "echarts@6.0.0 + echarts-for-react@3.0.6 in dependencies"
+  affects: [02-02-aggregation-engines, 02-03-dashboard-ui, dashboard, charting, pptx-export, html-report]
 
 # Tech tracking
+
 tech-stack:
-  added: ["echarts@^6.0.0", "echarts-for-react@^3.0.6"]
-  patterns:
-    - "Tree-shaken ECharts: echarts/core + per-feature subpath imports + echarts.use([...]); the top-level barrel import is forbidden and CI-gated"
-    - "Single universal `option` prop on <Chart> (no per-chart-family prop API — KISS, future-proof for treemap/heatmap/calendar/line)"
-    - "React.memo with reference-equality comparator (option objects come from memoized useEstateView selectors)"
-    - "Pure data theme module (no React/DOM) mapped from index.css @theme tokens; light+dark both resolved"
-    - "Post-build bare-Node CI size gate modeled on check-supply-chain.mjs"
+added: ["echarts@^6.0.0", "echarts-for-react@^3.0.6"]
+patterns:
+- "Tree-shaken ECharts: echarts/core + per-feature subpath imports + echarts.use([...]); the top-level barrel import is forbidden and CI-gated"
+- "Single universal `option` prop on <Chart> (no per-chart-family prop API — KISS, future-proof for treemap/heatmap/calendar/line)"
+- "React.memo with reference-equality comparator (option objects come from memoized useEstateView selectors)"
+- "Pure data theme module (no React/DOM) mapped from index.css @theme tokens; light+dark both resolved"
+- "Post-build bare-Node CI size gate modeled on check-supply-chain.mjs"
 
 key-files:
-  created:
-    - src/components/Chart.tsx
-    - src/components/Chart.test.tsx
-    - src/theme/echartsTheme.ts
-    - src/theme/echartsTheme.test.ts
-    - scripts/check-bundle-size.mjs
+created:
+- src/components/Chart.tsx
+- src/components/Chart.test.tsx
+- src/theme/echartsTheme.ts
+- src/theme/echartsTheme.test.ts
+- scripts/check-bundle-size.mjs
   modified:
-    - package.json
-    - package-lock.json
-    - tsconfig.app.json
-    - .github/workflows/static.yml
+- package.json
+- package-lock.json
+- tsconfig.app.json
+- .github/workflows/static.yml
 
 key-decisions:
-  - "echarts pinned ^6.0.0 / echarts-for-react ^3.0.6 — re-verified GA latest at execution (6.1.0 only at rc.2, excluded per GA-only stack discipline)"
-  - "SVG-assertion path: mocked echarts-for-react/lib/core stand-in that renders <svg> iff opts.renderer==='svg' (jsdom cannot produce real ECharts SVG geometry — RESEARCH Open Question 2 documented fallback)"
-  - "Removed deprecated tsconfig baseUrl rather than ignoreDeprecations (TS 5.9 rejects the '6.0' token the TS7.0 deprecation demands); paths resolve relative to tsconfig under moduleResolution:bundler"
-  - "echarts-chunk marker substring in check-bundle-size.mjs = literal 'echarts' (case-insensitive latin1 scan of dist/assets/*.js)"
-  - "Wired check:bundle-size into static.yml as a post-build CI step (T-02-02 enforcement) — NOT prebuild (prebuild stays supply-chain-only per 01-03)"
+- "echarts pinned ^6.0.0 / echarts-for-react ^3.0.6 — re-verified GA latest at execution (6.1.0 only at rc.2, excluded per GA-only stack discipline)"
+- "SVG-assertion path: mocked echarts-for-react/lib/core stand-in that renders <svg> iff opts.renderer==='svg' (jsdom cannot produce real ECharts SVG geometry — RESEARCH Open Question 2 documented fallback)"
+- "Removed deprecated tsconfig baseUrl rather than ignoreDeprecations (TS 5.9 rejects the '6.0' token the TS7.0 deprecation demands); paths resolve relative to tsconfig under moduleResolution:bundler"
+- "echarts-chunk marker substring in check-bundle-size.mjs = literal 'echarts' (case-insensitive latin1 scan of dist/assets/*.js)"
+- "Wired check:bundle-size into static.yml as a post-build CI step (T-02-02 enforcement) — NOT prebuild (prebuild stays supply-chain-only per 01-03)"
 
 patterns-established:
-  - "Pattern 1: Tree-shaken ECharts registry at module scope, once, before any chart mounts"
-  - "Pattern 2: <Chart> wrapper — single option prop, central opts/theme injection, reference-equality memo"
-  - "Pattern 3: Theme as pure data mapped from CSS @theme tokens, light+dark, registered at module load"
+- "Pattern 1: Tree-shaken ECharts registry at module scope, once, before any chart mounts"
+- "Pattern 2: <Chart> wrapper — single option prop, central opts/theme injection, reference-equality memo"
+- "Pattern 3: Theme as pure data mapped from CSS @theme tokens, light+dark, registered at module load"
 
 requirements-completed: [VIZ-01, VIZ-02, VIZ-03]
 
 # Metrics
+
 duration: 14min
 completed: 2026-05-16
 ---
@@ -183,5 +187,6 @@ None. The theme is fully resolved (concrete oklch/hex strings from `index.css`, 
 - Commit `7279ba6` (Task 2) — FOUND
 
 ---
+
 _Phase: 02-aggregation-global-dashboard_
 _Completed: 2026-05-16_

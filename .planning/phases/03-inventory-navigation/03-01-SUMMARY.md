@@ -1,56 +1,58 @@
 ---
+
 phase: 03-inventory-navigation
 plan: 01
 subsystem: inventory
 tags: [tanstack-table, tanstack-virtual, csv, datatable, column-picker, view-toggle, inv-05, inv-06]
 requires:
-  - EstateView / buildEstateView single-memo projection pass (Phase 2)
-  - AccountingModeToggle / ThemeToggle aria-pressed fieldset idiom (Phase 1/2)
-  - format.ts pure-util module idiom (Phase 1)
-  - scripts/check-bundle-size.mjs echarts gate (Phase 2)
-provides:
-  - "@tanstack/react-table@8.21.3 + @tanstack/react-virtual@3.13.24 pinned"
-  - toCsv / csvCell — pure RFC-4180 serializer with CSV-injection guard
-  - oneLine — pure display-only whitespace collapse
-  - VmDisplayRow interface + EstateView.vmRows pure projection
-  - "DataTable<T> — generic virtualised sortable/filterable/hideable table + CSV-of-current-view"
-  - ColumnPicker — INV-06 show/hide popover
-  - ViewToggle — Dashboard↔Inventory segmented control
-affects:
-  - 03-02 (3 object tables consume DataTable + ColumnPicker; set enableHiding/ColumnDef)
-  - 03-03 (tree, App wiring, inventory i18n namespace, ViewToggle mount)
-tech-stack:
+- EstateView / buildEstateView single-memo projection pass (Phase 2)
+- AccountingModeToggle / ThemeToggle aria-pressed fieldset idiom (Phase 1/2)
+- format.ts pure-util module idiom (Phase 1)
+- scripts/check-bundle-size.mjs echarts gate (Phase 2)
+  provides:
+- "@tanstack/react-table@8.21.3 + @tanstack/react-virtual@3.13.24 pinned"
+- toCsv / csvCell — pure RFC-4180 serializer with CSV-injection guard
+- oneLine — pure display-only whitespace collapse
+- VmDisplayRow interface + EstateView.vmRows pure projection
+- "DataTable<T> — generic virtualised sortable/filterable/hideable table + CSV-of-current-view"
+- ColumnPicker — INV-06 show/hide popover
+- ViewToggle — Dashboard↔Inventory segmented control
+  affects:
+- 03-02 (3 object tables consume DataTable + ColumnPicker; set enableHiding/ColumnDef)
+- 03-03 (tree, App wiring, inventory i18n namespace, ViewToggle mount)
+  tech-stack:
   added:
-    - "@tanstack/react-table@8.21.3 (exact)"
-    - "@tanstack/react-virtual@3.13.24 (exact)"
-  patterns:
-    - Headless TanStack table with component-useState sort/filter/visibility (no useMemo)
-    - useVirtualizer fixed-36px window, overscan 12 (single density, KISS)
-    - CSV of getFilteredRowModel × getVisibleLeafColumns, raw values, newlines preserved
-    - oneLine at cell display boundary, original in title (Minor-2 two-path)
-key-files:
-  created:
-    - src/utils/csv.ts
-    - src/utils/csv.test.ts
-    - src/utils/oneLine.ts
-    - src/utils/oneLine.test.ts
-    - src/components/inventory/DataTable.tsx
-    - src/components/inventory/ColumnPicker.tsx
-    - src/components/ViewToggle.tsx
-  modified:
-    - package.json
-    - package-lock.json
-    - scripts/check-bundle-size.mjs
-    - src/types/estate.ts
-    - src/engines/aggregation/estateView.ts
-decisions:
-  - "tanstack bundle gate threshold = 60 KiB gz (MAX_TANSTACK_GZIP_BYTES=61440); graceful no-op until 03-03 wires the chunk into the production graph"
-  - "ColumnPicker popover is a <fieldset>+<legend sr-only> (not <div role=group>) — biome useSemanticElements; matches project ThemeToggle/AccountingModeToggle idiom"
-metrics:
+  - "@tanstack/react-table@8.21.3 (exact)"
+  - "@tanstack/react-virtual@3.13.24 (exact)"
+    patterns:
+  - Headless TanStack table with component-useState sort/filter/visibility (no useMemo)
+  - useVirtualizer fixed-36px window, overscan 12 (single density, KISS)
+  - CSV of getFilteredRowModel × getVisibleLeafColumns, raw values, newlines preserved
+  - oneLine at cell display boundary, original in title (Minor-2 two-path)
+    key-files:
+    created:
+  - src/utils/csv.ts
+  - src/utils/csv.test.ts
+  - src/utils/oneLine.ts
+  - src/utils/oneLine.test.ts
+  - src/components/inventory/DataTable.tsx
+  - src/components/inventory/ColumnPicker.tsx
+  - src/components/ViewToggle.tsx
+    modified:
+  - package.json
+  - package-lock.json
+  - scripts/check-bundle-size.mjs
+  - src/types/estate.ts
+  - src/engines/aggregation/estateView.ts
+    decisions:
+- "tanstack bundle gate threshold = 60 KiB gz (MAX_TANSTACK_GZIP_BYTES=61440); graceful no-op until 03-03 wires the chunk into the production graph"
+- "ColumnPicker popover is a <fieldset>+<legend sr-only> (not <div role=group>) — biome useSemanticElements; matches project ThemeToggle/AccountingModeToggle idiom"
+  metrics:
   duration: "~38min (continuation: Task 3 only this session)"
   completed: 2026-05-16
   tasks: 3
   files: 12
+
 ---
 
 # Phase 3 Plan 01: Table Infrastructure (INV-05/06 Primitives) Summary
@@ -80,21 +82,21 @@ Shared, app-agnostic Phase-3 table infrastructure: pinned + bundle-gated TanStac
 
 ## Verification Results
 
-| Gate | Result |
-|------|--------|
-| `npm ls @tanstack/react-table @tanstack/react-virtual` | 8.21.3 / 3.13.24 exact |
-| `npm run typecheck` | PASS (tsc + tsconfig.test.json) |
-| biome (`npx @biomejs/biome check`, per CLAUDE.md gotcha — `npm run lint` is RTK-intercepted) | PASS, 3 files no fixes |
-| `npm run test:run` | 33 files / 214 tests PASS |
-| csv/oneLine coverage | 100% statement+branch (≥75% required) |
-| `node scripts/check-bundle-size.mjs` | exit 0 — echarts 202.7 KiB ≤ 300 KiB intact; tanstack gate graceful no-op (no `@tanstack` chunk pre-03-03) |
-| single-useMemo grep gate | 0 call sites outside `useEstateView` + Phase-1 `SnapshotListSidebar` |
-| `localStorage` in inventory/ + ViewToggle | none (incl. doc-comments — tokens removed to keep bare-grep gate literally green) |
-| `useMemo` in the 3 component files | none |
-| `role="group"` + `noRedundantRoles` in ViewToggle | both literal-present |
-| `npm run check:supply-chain` | OK |
-| `npm run build` | built in 538ms |
-| semgrep (`--config=auto --error`, 378 rules, 3 new component files) | 0 findings / 0 blocking |
+| Gate                                                                                         | Result                                                                                                     |
+| -------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `npm ls @tanstack/react-table @tanstack/react-virtual`                                       | 8.21.3 / 3.13.24 exact                                                                                     |
+| `npm run typecheck`                                                                          | PASS (tsc + tsconfig.test.json)                                                                            |
+| biome (`npx @biomejs/biome check`, per CLAUDE.md gotcha — `npm run lint` is RTK-intercepted) | PASS, 3 files no fixes                                                                                     |
+| `npm run test:run`                                                                           | 33 files / 214 tests PASS                                                                                  |
+| csv/oneLine coverage                                                                         | 100% statement+branch (≥75% required)                                                                      |
+| `node scripts/check-bundle-size.mjs`                                                         | exit 0 — echarts 202.7 KiB ≤ 300 KiB intact; tanstack gate graceful no-op (no `@tanstack` chunk pre-03-03) |
+| single-useMemo grep gate                                                                     | 0 call sites outside `useEstateView` + Phase-1 `SnapshotListSidebar`                                       |
+| `localStorage` in inventory/ + ViewToggle                                                    | none (incl. doc-comments — tokens removed to keep bare-grep gate literally green)                          |
+| `useMemo` in the 3 component files                                                           | none                                                                                                       |
+| `role="group"` + `noRedundantRoles` in ViewToggle                                            | both literal-present                                                                                       |
+| `npm run check:supply-chain`                                                                 | OK                                                                                                         |
+| `npm run build`                                                                              | built in 538ms                                                                                             |
+| semgrep (`--config=auto --error`, 378 rules, 3 new component files)                          | 0 findings / 0 blocking                                                                                    |
 
 ## Chosen tanstack bundle-gate threshold + measured size
 

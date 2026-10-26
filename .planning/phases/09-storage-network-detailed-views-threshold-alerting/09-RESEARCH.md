@@ -11,7 +11,7 @@
 ### Locked Decisions
 
 - **D-01:** Threshold alerting **IS in this milestone** (not deferred).
-- **D-02:** Config held **in-memory only** — a Zustand *inputs* slice (same class as `plannedRatios`). **NO new `localStorage` key**, no `vatlas-thresholds`, no URL-hash. Refresh ⇒ defaults restored.
+- **D-02:** Config held **in-memory only** — a Zustand _inputs_ slice (same class as `plannedRatios`). **NO new `localStorage` key**, no `vatlas-thresholds`, no URL-hash. Refresh ⇒ defaults restored.
 - **D-03:** Default thresholds mirror RVTools-Analyser: guest filesystem alert at **< 10 % free (≥ 90 % used)**, datastore alert at **> 85 % used**. LU/logical-unit default chosen by Claude in PLAN, documented. All user-editable at runtime.
 - **D-04:** Alert presentation **factual only** — counts + flagged rows (row highlight/badge), **no verdict, no editorial verb, no traffic-light color**. Reuse factual-caption + em-dash-sentinel idioms.
 - **D-05:** Add **two new top-level ViewToggle segments: "Storage" and "Network"** (8 total: Dashboard · Inventory · Hosts · Planning · EOS · Trends · Storage · Network). **Extend the shipped `fieldset`+`aria-pressed` ViewToggle** — do NOT build a new nav component.
@@ -35,7 +35,7 @@ LU/logical-unit default threshold value (D-03); exact tile/column ordering + EN/
 - Conservative/earlier-warning default threshold preset — not chosen (D-03 uses RVTools-Analyser defaults); could become a selectable preset later.
 - Storage/network analytics beyond inventory + thresholds (IOPS/latency trends, capacity-forecast) — not in RVTools exports, out of scope, potential v2.
 - HTML/PPTX export generation (→ P10); GitHub Pages deploy (→ P10); any persisted-to-disk threshold config.
-</user_constraints>
+  </user_constraints>
 
 <phase_requirements>
 
@@ -43,14 +43,14 @@ LU/logical-unit default threshold value (D-03); exact tile/column ordering + EN/
 
 P9 requirement IDs do not exist yet and MUST be derived by the planner (mirror the P5/P6 re-derivation pattern, update the Traceability table). The capability surface below is grouped so REQ-IDs map cleanly. Suggested ID stems (planner decides final): **STG-** (storage views #10), **NET-** (network inventory #12), **DTL-** (detail drills #12), **ALR-** (threshold alerting #12/#14), **VSR-** (vSAN relink — closes the open STR-04).
 
-| Group | Capability surface | Reference | Research support |
-|-------|--------------------|-----------|------------------|
-| STG (Storage views #10) | Disk sizes by Cluster/ESX/VM/Datastore; two lenses (provisioned-vs-in-use, capacity-vs-used-vs-free) behind the accounting-toggle idiom; treemap (consumption) + stacked-bar (capacity); tables reuse P3 DataTable | RVTools #10, D-07/D-08 | §Standard Stack, §Architecture Patterns (Pattern 2/3), §Code Examples (treemap) |
-| NET (Network inventory #12) | vNetwork (VM→portgroup), vSwitch (std), dvSwitch (distributed) + dvPort topology; uplinks, portgroup VLANs; OPTIONAL-sheet factual-degrade | RVTools #12, D-11 | §Standard Stack (parser ext), §Runtime State Inventory, §Pitfall 1, real-column tables |
-| DTL (Detail drills #12) | Datastore detail, VM detail, ESX storage+network detail; click-drill view-state (P5 pattern); screen-fit/export-ready | D-06 | §Architecture Patterns (Pattern 1), §Code Examples (drill) |
-| ALR (Threshold alerting #12/#14) | In-memory thresholds slice (filesystem ≥90 % used, datastore >85 % used, LU default TBD); factual flag counts/badges; user-editable config surface | D-01..D-04 | §Architecture Patterns (Pattern 4), §Don't Hand-Roll, §Security Domain |
-| VSR (vSAN relink — closes STR-04) | vInfo VM→datastore→cluster relink for blank-`Cluster name` rows; shared-LUN attribution (D-10); NAA-dedupe interaction | D-09/D-10 | §Architecture Patterns (Pattern 5), §Runtime State Inventory, §Pitfall 2, §Validation Architecture |
-</phase_requirements>
+| Group                             | Capability surface                                                                                                                                                                                                 | Reference              | Research support                                                                                   |
+| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------- | -------------------------------------------------------------------------------------------------- |
+| STG (Storage views #10)           | Disk sizes by Cluster/ESX/VM/Datastore; two lenses (provisioned-vs-in-use, capacity-vs-used-vs-free) behind the accounting-toggle idiom; treemap (consumption) + stacked-bar (capacity); tables reuse P3 DataTable | RVTools #10, D-07/D-08 | §Standard Stack, §Architecture Patterns (Pattern 2/3), §Code Examples (treemap)                    |
+| NET (Network inventory #12)       | vNetwork (VM→portgroup), vSwitch (std), dvSwitch (distributed) + dvPort topology; uplinks, portgroup VLANs; OPTIONAL-sheet factual-degrade                                                                         | RVTools #12, D-11      | §Standard Stack (parser ext), §Runtime State Inventory, §Pitfall 1, real-column tables             |
+| DTL (Detail drills #12)           | Datastore detail, VM detail, ESX storage+network detail; click-drill view-state (P5 pattern); screen-fit/export-ready                                                                                              | D-06                   | §Architecture Patterns (Pattern 1), §Code Examples (drill)                                         |
+| ALR (Threshold alerting #12/#14)  | In-memory thresholds slice (filesystem ≥90 % used, datastore >85 % used, LU default TBD); factual flag counts/badges; user-editable config surface                                                                 | D-01..D-04             | §Architecture Patterns (Pattern 4), §Don't Hand-Roll, §Security Domain                             |
+| VSR (vSAN relink — closes STR-04) | vInfo VM→datastore→cluster relink for blank-`Cluster name` rows; shared-LUN attribution (D-10); NAA-dedupe interaction                                                                                             | D-09/D-10              | §Architecture Patterns (Pattern 5), §Runtime State Inventory, §Pitfall 2, §Validation Architecture |
+| </phase_requirements>             |
 
 ## Summary
 
@@ -64,28 +64,28 @@ The second consequential finding: **RVTools exports come in two radically differ
 
 ## Architectural Responsibility Map
 
-| Capability | Primary Tier | Secondary Tier | Rationale |
-|------------|-------------|----------------|-----------|
-| RVTools network/storage sheet parsing | Parser worker (`parser.worker.ts` / `adapters/rvtools.ts`) | — | `xlsx` import is confined to the worker; all new sheet adapters live beside the existing ones (CLAUDE.md architecture) |
-| vSAN VM→datastore→cluster relink | Pure engine (`engines/aggregation/`) | — | Pure function, Vitest-gated ≥75 %; composes into the single `buildEstateView` pass |
-| Storage-by-X / threshold-flag projections | Pure engine (`engines/aggregation/`) | — | All metrics flow through `EstateView`, consumed via the single `useEstateView` memo |
-| In-memory thresholds config (inputs) | Zustand store (`snapshotStore.ts`) | — | Inputs-only slice, exactly the `plannedRatios` precedent; no persistence |
-| Storage/Network views + detail drills | React presenter components | `useEstateView` (read-only) | Click-drill is lifted in-app view-state in `App.tsx`, the P5 pattern; presenters consume `EstateView` props only |
-| Chart rendering (treemap/stacked-bar) | `src/components/Chart.tsx` (single ECharts site) | — | SVG renderer mandated; option built by a pure selector off memoized `EstateView` |
+| Capability                                | Primary Tier                                               | Secondary Tier              | Rationale                                                                                                              |
+| ----------------------------------------- | ---------------------------------------------------------- | --------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| RVTools network/storage sheet parsing     | Parser worker (`parser.worker.ts` / `adapters/rvtools.ts`) | —                           | `xlsx` import is confined to the worker; all new sheet adapters live beside the existing ones (CLAUDE.md architecture) |
+| vSAN VM→datastore→cluster relink          | Pure engine (`engines/aggregation/`)                       | —                           | Pure function, Vitest-gated ≥75 %; composes into the single `buildEstateView` pass                                     |
+| Storage-by-X / threshold-flag projections | Pure engine (`engines/aggregation/`)                       | —                           | All metrics flow through `EstateView`, consumed via the single `useEstateView` memo                                    |
+| In-memory thresholds config (inputs)      | Zustand store (`snapshotStore.ts`)                         | —                           | Inputs-only slice, exactly the `plannedRatios` precedent; no persistence                                               |
+| Storage/Network views + detail drills     | React presenter components                                 | `useEstateView` (read-only) | Click-drill is lifted in-app view-state in `App.tsx`, the P5 pattern; presenters consume `EstateView` props only       |
+| Chart rendering (treemap/stacked-bar)     | `src/components/Chart.tsx` (single ECharts site)           | —                           | SVG renderer mandated; option built by a pure selector off memoized `EstateView`                                       |
 
 ## Standard Stack
 
 ### Core (all already shipped — reuse verbatim, install nothing)
 
-| Library | Version (pinned) | Purpose | Why Standard |
-|---------|------------------|---------|--------------|
-| React | `^19.2.6` | UI runtime | Shipped; no new deps for P9 [VERIFIED: package.json / CLAUDE.md] |
-| Zustand | `^5.0.13` | In-memory thresholds inputs slice | `plannedRatios` is the exact precedent (D-02) [VERIFIED: src/store/snapshotStore.ts] |
-| Zod | `^4.4.3` | Runtime validation at parser boundary ONLY | New `VSwitchRow`/`VNetworkRow`/`DvSwitchRow` schemas join `schemas.ts` [VERIFIED: src/engines/parser/schemas.ts] |
-| Apache ECharts | `^6.0.0` | Treemap (consumption) + stacked-bar (capacity) | `TreemapChart` is NOT yet registered in `Chart.tsx` — must add to the `echarts.use([...])` list [VERIFIED: src/components/Chart.tsx lines 1-42; CITED: /apache/echarts-doc treemap.md] |
-| `echarts-for-react` | `^3.0.6` | React binding (via `<Chart>`) | Single chart site; no change to `<Chart>` API [VERIFIED: src/components/Chart.tsx] |
-| `@tanstack/react-table` | (shipped) | Storage/network tables via `DataTable` | P3 `DataTable`/`ColumnPicker`/CSV reused [VERIFIED: src/components/inventory/DataTable.tsx] |
-| react-i18next | `^16.6.6` | EN/FR parity for new namespaces | New `storage`/`network`/`alerts` namespaces, keys in BOTH `en/`+`fr/` [VERIFIED: src/i18n/locales/{en,fr}/] |
+| Library                 | Version (pinned) | Purpose                                        | Why Standard                                                                                                                                                                           |
+| ----------------------- | ---------------- | ---------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| React                   | `^19.2.6`        | UI runtime                                     | Shipped; no new deps for P9 [VERIFIED: package.json / CLAUDE.md]                                                                                                                       |
+| Zustand                 | `^5.0.13`        | In-memory thresholds inputs slice              | `plannedRatios` is the exact precedent (D-02) [VERIFIED: src/store/snapshotStore.ts]                                                                                                   |
+| Zod                     | `^4.4.3`         | Runtime validation at parser boundary ONLY     | New `VSwitchRow`/`VNetworkRow`/`DvSwitchRow` schemas join `schemas.ts` [VERIFIED: src/engines/parser/schemas.ts]                                                                       |
+| Apache ECharts          | `^6.0.0`         | Treemap (consumption) + stacked-bar (capacity) | `TreemapChart` is NOT yet registered in `Chart.tsx` — must add to the `echarts.use([...])` list [VERIFIED: src/components/Chart.tsx lines 1-42; CITED: /apache/echarts-doc treemap.md] |
+| `echarts-for-react`     | `^3.0.6`         | React binding (via `<Chart>`)                  | Single chart site; no change to `<Chart>` API [VERIFIED: src/components/Chart.tsx]                                                                                                     |
+| `@tanstack/react-table` | (shipped)        | Storage/network tables via `DataTable`         | P3 `DataTable`/`ColumnPicker`/CSV reused [VERIFIED: src/components/inventory/DataTable.tsx]                                                                                            |
+| react-i18next           | `^16.6.6`        | EN/FR parity for new namespaces                | New `storage`/`network`/`alerts` namespaces, keys in BOTH `en/`+`fr/` [VERIFIED: src/i18n/locales/{en,fr}/]                                                                            |
 
 ### The one ECharts registration change
 
@@ -97,11 +97,11 @@ No new packages. ECharts treemap is part of the already-installed `echarts@^6.0.
 
 ### Alternatives Considered
 
-| Instead of | Could Use | Tradeoff |
-|------------|-----------|----------|
-| ECharts treemap | Custom SVG rects | D-08 mandates ECharts treemap (VIZ-02 already locked it project-wide); custom would break the HTML-report SVG-inline plan and the `<Chart>` single-site invariant |
-| Zustand thresholds slice | React context / localStorage | D-02 explicitly forbids localStorage; `plannedRatios` slice is the locked precedent |
-| `vInfo.Path` relink | `vDisk."Disk Path"` relink | Empirically `vDisk."Disk Path"` = guest mount points in real data (0 % parseable as `[datastore]`); `vInfo.Path` = 98 % parseable. Not a real alternative — it is a correctness requirement |
+| Instead of               | Could Use                    | Tradeoff                                                                                                                                                                                    |
+| ------------------------ | ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ECharts treemap          | Custom SVG rects             | D-08 mandates ECharts treemap (VIZ-02 already locked it project-wide); custom would break the HTML-report SVG-inline plan and the `<Chart>` single-site invariant                           |
+| Zustand thresholds slice | React context / localStorage | D-02 explicitly forbids localStorage; `plannedRatios` slice is the locked precedent                                                                                                         |
+| `vInfo.Path` relink      | `vDisk."Disk Path"` relink   | Empirically `vDisk."Disk Path"` = guest mount points in real data (0 % parseable as `[datastore]`); `vInfo.Path` = 98 % parseable. Not a real alternative — it is a correctness requirement |
 
 ## Architecture Patterns
 
@@ -177,7 +177,10 @@ src/App.tsx                              # + storage/network view branches + det
 
 ```tsx
 // Source: src/components/cluster/ClusterDetail.tsx (shipped P5 pattern — copy this shape)
-export interface DatastoreDetailProps { detail: DatastoreDetail; onBack: () => void }
+export interface DatastoreDetailProps {
+  detail: DatastoreDetail
+  onBack: () => void
+}
 export function DatastoreDetail({ detail, onBack }: DatastoreDetailProps) {
   const { t, i18n } = useTranslation('storage')
   // one-screen-fit fixed grid, NO internal scroll, 16:9 — Phase-10 snapshots it as one slide
@@ -229,9 +232,10 @@ setThresholds: (t) => set({ thresholds: { ...t } }),   // fresh object — no pe
 const BRACKET = /^\[([^\]]+)\]/
 const dsToClusters = new Map<string, Set<string>>()
 for (const vm of merged.vinfo) {
-  const m = BRACKET.exec(vm.path ?? '')           // vInfo.Path, e.g. "[SITEL12_SILVER_08] vm/vm.vmx"
-  if (!m) continue                                 // ~2 % unparseable (no config path) — skip, factual
-  const ds = m[1].trim(), cl = vm.cluster.trim()
+  const m = BRACKET.exec(vm.path ?? '') // vInfo.Path, e.g. "[SITEL12_SILVER_08] vm/vm.vmx"
+  if (!m) continue // ~2 % unparseable (no config path) — skip, factual
+  const ds = m[1].trim(),
+    cl = vm.cluster.trim()
   if (!cl) continue
   ;(dsToClusters.get(ds) ?? dsToClusters.set(ds, new Set()).get(ds)!).add(cl)
 }
@@ -245,7 +249,7 @@ This requires the parser to **add `path` to `VInfoRow`** (a new optional string 
 ### Anti-Patterns to Avoid
 
 - **Relinking off `vDisk."Disk Path"`:** empirically guest mount points, not `[datastore]` tokens — 0 % parseable. The 09-CONTEXT/memory phrasing "vInfo VM→datastore→cluster" is correct; the join column is `vInfo.Path`.
-- **Summing shared-LUN capacity across clusters:** `perDatastore` already takes capacity from the FIRST row in an NAA group and never sums (Moderate-11). The relink must preserve this — attribute *identity to a cluster*, never re-sum capacity.
+- **Summing shared-LUN capacity across clusters:** `perDatastore` already takes capacity from the FIRST row in an NAA group and never sums (Moderate-11). The relink must preserve this — attribute _identity to a cluster_, never re-sum capacity.
 - **A 2nd `useMemo`:** grep-gated CI failure. All projections compose in `buildEstateView`.
 - **Throwing when a network sheet is absent:** the Downloads workbook has zero network sheets — that is a supported input. Push a collected warning + factual degrade, exactly like `vDatastore`/`vPartition`.
 - **Editorial verb / traffic-light on threshold flags:** D-04. Counts + neutral badge only. Note CLAUDE.md gotcha: a doc-comment containing the literal forbidden token can trip the security hook / grep gates — phrase absence comments without the literal token.
@@ -253,15 +257,15 @@ This requires the parser to **add `path` to `VInfoRow`** (a new optional string 
 
 ## Don't Hand-Roll
 
-| Problem | Don't Build | Use Instead | Why |
-|---------|-------------|-------------|-----|
-| Datastore NAA dedupe | A new dedupe pass | Existing `perDatastore`/`datastoreCountByCluster` (`naa ?? name` key) | Moderate-11 invariant already correct; relink only adds cluster attribution |
-| Tabular storage/network views | A custom table | P3 `DataTable` + `ColumnPicker` + CSV | Virtualized, sortable, CSV-of-filtered already shipped; mind `inventory:col.<id>` keys |
-| Lens / config toggles | A new toggle widget | `AccountingModeToggle` fieldset idiom | Keyboard + a11y + theming already solved |
-| Treemap rendering | Custom SVG | ECharts `TreemapChart` via `<Chart>` | SVG renderer + HTML-report inline plan + theme already wired |
-| In-memory config persistence | localStorage / context | Zustand `plannedRatios`-class slice | D-02 forbids localStorage; precedent exists |
-| Detail navigation | React Router | Lifted `useState` view-state | No router in app shell; P5 precedent; 2nd-memo-free |
-| RVTools sheet/column drift | New alias logic | `findSheet`/`findColumn`/`mapColumns` | Already handles `RVTools_tab*` prefix + case/whitespace; FR/DE aliases |
+| Problem                       | Don't Build            | Use Instead                                                           | Why                                                                                    |
+| ----------------------------- | ---------------------- | --------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| Datastore NAA dedupe          | A new dedupe pass      | Existing `perDatastore`/`datastoreCountByCluster` (`naa ?? name` key) | Moderate-11 invariant already correct; relink only adds cluster attribution            |
+| Tabular storage/network views | A custom table         | P3 `DataTable` + `ColumnPicker` + CSV                                 | Virtualized, sortable, CSV-of-filtered already shipped; mind `inventory:col.<id>` keys |
+| Lens / config toggles         | A new toggle widget    | `AccountingModeToggle` fieldset idiom                                 | Keyboard + a11y + theming already solved                                               |
+| Treemap rendering             | Custom SVG             | ECharts `TreemapChart` via `<Chart>`                                  | SVG renderer + HTML-report inline plan + theme already wired                           |
+| In-memory config persistence  | localStorage / context | Zustand`plannedRatios`-class slice                                    | D-02 forbids localStorage; precedent exists                                            |
+| Detail navigation             | React Router           | Lifted `useState` view-state                                          | No router in app shell; P5 precedent; 2nd-memo-free                                    |
+| RVTools sheet/column drift    | New alias logic        | `findSheet`/`findColumn`/`mapColumns`                                 | Already handles `RVTools_tab*` prefix + case/whitespace; FR/DE aliases                 |
 
 **Key insight:** P9 introduces **zero new libraries and zero new architectural mechanisms**. Every piece has a shipped precedent. The risk is entirely in (a) RVTools data-model correctness (mitigated by the empirical findings here) and (b) regressing the validated parser (mitigated by the canary + fixture gate).
 
@@ -269,13 +273,13 @@ This requires the parser to **add `path` to `VInfoRow`** (a new optional string 
 
 > P9 extends the validated parser (D-11) — this section is mandatory.
 
-| Category | Items Found | Action Required |
-|----------|-------------|------------------|
-| Stored data | None — no datastore/dataset persistence (PAR-05 privacy invariant; store is in-memory `Map`). Verified: `src/store/snapshotStore.ts` does no browser-storage writes. | None |
-| Live service config | None — 100 % client-side, no external services. | None |
-| OS-registered state | None — browser app, no OS registration. | None |
-| Secrets/env vars | None — no secrets in this phase. | None |
-| Build artifacts | CI bundle-size gate (`npm run check:bundle-size`, ≤300 KB gz echarts chunk) will re-evaluate after `TreemapChart` is registered in `Chart.tsx`. Treemap is a small incremental series; verify the gate stays green. CI supply-chain gate (`npm run check:supply-chain`) unaffected (no new deps). | Run `npm run check:bundle-size` after the ECharts registry change |
+| Category            | Items Found                                                                                                                                                                                                                                                                                       | Action Required                                                   |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------- |
+| Stored data         | None — no datastore/dataset persistence (PAR-05 privacy invariant; store is in-memory `Map`). Verified: `src/store/snapshotStore.ts` does no browser-storage writes.                                                                                                                              | None                                                              |
+| Live service config | None — 100 % client-side, no external services.                                                                                                                                                                                                                                                   | None                                                              |
+| OS-registered state | None — browser app, no OS registration.                                                                                                                                                                                                                                                           | None                                                              |
+| Secrets/env vars    | None — no secrets in this phase.                                                                                                                                                                                                                                                                  | None                                                              |
+| Build artifacts     | CI bundle-size gate (`npm run check:bundle-size`, ≤300 KB gz echarts chunk) will re-evaluate after `TreemapChart` is registered in `Chart.tsx`. Treemap is a small incremental series; verify the gate stays green. CI supply-chain gate (`npm run check:supply-chain`) unaffected (no new deps). | Run `npm run check:bundle-size` after the ECharts registry change |
 
 **Parser-extension blast radius (the real "state" for a refactor-class change):**
 
@@ -360,16 +364,19 @@ File: 20260430_1400_allvCenters.xlsx
 // Source: ctx7 /apache/echarts-doc treemap.md (verified this session) — built by a
 // pure selector off memoized EstateView.storage, passed to the shipped <Chart>.
 const option: EChartsOption = {
-  series: [{
-    type: 'treemap',                 // requires TreemapChart added to Chart.tsx echarts.use([])
-    data: [{ name: 'CL_12', value: 184320, children: [
-              { name: 'SITEL12_SILVER_08', value: 92160 } ] }],
-    label: { show: true },           // node description text
-    upperLabel: { show: true },      // parent-level label band (cluster → datastore drill)
-    breadcrumb: { show: true },
-    // colorMappingBy/visualMin/visualMax left default — Midnight Executive theme
-    // supplies the palette; NO verdict color (factual, D-04 spirit).
-  }],
+  series: [
+    {
+      type: 'treemap', // requires TreemapChart added to Chart.tsx echarts.use([])
+      data: [
+        { name: 'CL_12', value: 184320, children: [{ name: 'SITEL12_SILVER_08', value: 92160 }] },
+      ],
+      label: { show: true }, // node description text
+      upperLabel: { show: true }, // parent-level label band (cluster → datastore drill)
+      breadcrumb: { show: true },
+      // colorMappingBy/visualMin/visualMax left default — Midnight Executive theme
+      // supplies the palette; NO verdict color (factual, D-04 spirit).
+    },
+  ],
 }
 // stacked-bar (capacity lens) reuses the already-registered BarChart:
 //   series: [{type:'bar', stack:'cap', name:'used'}, {type:'bar', stack:'cap', name:'free'}]
@@ -380,8 +387,24 @@ const option: EChartsOption = {
 ```tsx
 // Source: src/components/ViewToggle.tsx + git history (one commit per segment)
 export type AppView =
-  'dashboard'|'inventory'|'hosts'|'planning'|'eos'|'trends'|'storage'|'network'
-const VIEWS = ['dashboard','inventory','hosts','planning','eos','trends','storage','network'] as const
+  | 'dashboard'
+  | 'inventory'
+  | 'hosts'
+  | 'planning'
+  | 'eos'
+  | 'trends'
+  | 'storage'
+  | 'network'
+const VIEWS = [
+  'dashboard',
+  'inventory',
+  'hosts',
+  'planning',
+  'eos',
+  'trends',
+  'storage',
+  'network',
+] as const
 // + add nav.storage / nav.network keys to i18n/locales/{en,fr}/inventory.json (ViewToggle uses
 //   the 'inventory' namespace for nav.* — verified line 28 of ViewToggle.tsx)
 // + add the two branches in App.tsx's activeView chain (verified App.tsx lines 40-52)
@@ -389,11 +412,11 @@ const VIEWS = ['dashboard','inventory','hosts','planning','eos','trends','storag
 
 ## State of the Art
 
-| Old Approach | Current Approach | When Changed | Impact |
-|--------------|------------------|--------------|--------|
-| `vDatastore.Hosts` host-name join for blank-cluster attribution (Pitfall-6/A3) | `vInfo.Path` `[datastore]` token → cluster | This phase (D-09) | The original join was inert (Hosts = count); STR-04 finally closeable |
-| Datastore table = `perDatastore` only | + per-cluster/esx/vm storage-by-X projections | This phase (D-07) | Storage view needs new pure projections, same single-pass pattern |
-| ECharts registry: bar/pie/gauge/heatmap/line | + treemap | This phase (D-08) | One-line `echarts.use([...])` addition in `Chart.tsx`; re-check bundle gate |
+| Old Approach                                                                   | Current Approach                              | When Changed      | Impact                                                                      |
+| ------------------------------------------------------------------------------ | --------------------------------------------- | ----------------- | --------------------------------------------------------------------------- |
+| `vDatastore.Hosts` host-name join for blank-cluster attribution (Pitfall-6/A3) | `vInfo.Path` `[datastore]` token → cluster    | This phase (D-09) | The original join was inert (Hosts = count); STR-04 finally closeable       |
+| Datastore table = `perDatastore` only                                          | + per-cluster/esx/vm storage-by-X projections | This phase (D-07) | Storage view needs new pure projections, same single-pass pattern           |
+| ECharts registry: bar/pie/gauge/heatmap/line                                   | + treemap                                     | This phase (D-08) | One-line `echarts.use([...])` addition in `Chart.tsx`; re-check bundle gate |
 
 **Deprecated/outdated:**
 
@@ -401,12 +424,12 @@ const VIEWS = ['dashboard','inventory','hosts','planning','eos','trends','storag
 
 ## Assumptions Log
 
-| # | Claim | Section | Risk if Wrong |
-|---|-------|---------|---------------|
-| A1 | RVTools 3.10/3.11/4.0 emit the same `vSwitch`/`vNetwork`/`dvSwitch` column names as the 4.x file inspected (only 4.4-class files were on this machine) | Code Examples | MEDIUM — alias arrays mitigate; add 3.x aliases defensively. Validate if a 3.x export becomes available |
-| A2 | `vInfo.Path` is present in 3.x exports too (verified present in both 4.x files on this machine) | Pattern 5 | MEDIUM — if absent in 3.x, relink degrades to em-dash for those files (acceptable factual fallback, not a crash) |
-| A3 | LU/logical-unit threshold maps to per-datastore used% (RVTools has no separate "logical unit" sheet; `vDatastore` is the LU surface) | User Constraints D-03 | LOW — planner documents the chosen LU semantic + default in PLAN per D-03 |
-| A4 | The shared-LUN "shared across N clusters" line (D-10) excluded from single-cluster rollups is the preferred minimal-inference choice | Pattern 5 | LOW — empirically only 1/67 datastores is shared; planner confirms approach + validates on a real multi-cluster file |
+| #   | Claim                                                                                                                                                  | Section               | Risk if Wrong                                                                                                        |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| A1  | RVTools 3.10/3.11/4.0 emit the same `vSwitch`/`vNetwork`/`dvSwitch` column names as the 4.x file inspected (only 4.4-class files were on this machine) | Code Examples         | MEDIUM — alias arrays mitigate; add 3.x aliases defensively. Validate if a 3.x export becomes available              |
+| A2  | `vInfo.Path` is present in 3.x exports too (verified present in both 4.x files on this machine)                                                        | Pattern 5             | MEDIUM — if absent in 3.x, relink degrades to em-dash for those files (acceptable factual fallback, not a crash)     |
+| A3  | LU/logical-unit threshold maps to per-datastore used% (RVTools has no separate "logical unit" sheet; `vDatastore` is the LU surface)                   | User Constraints D-03 | LOW — planner documents the chosen LU semantic + default in PLAN per D-03                                            |
+| A4  | The shared-LUN "shared across N clusters" line (D-10) excluded from single-cluster rollups is the preferred minimal-inference choice                   | Pattern 5             | LOW — empirically only 1/67 datastores is shared; planner confirms approach + validates on a real multi-cluster file |
 
 ## Open Questions
 
@@ -426,13 +449,13 @@ const VIEWS = ['dashboard','inventory','hosts','planning','eos','trends','storag
 
 ## Environment Availability
 
-| Dependency | Required By | Available | Version | Fallback |
-|------------|------------|-----------|---------|----------|
-| Real RVTools workbook (full sheet set) | vSAN-relink + network real-file validation | ✓ | `~/Library/CloudStorage/OneDrive-Home/20260430_1400_allvCenters.xlsx` (27 sheets, 75 blank-cluster ds) | — |
-| Real RVTools workbook (trimmed, no network) | D-11 factual-degrade validation | ✓ | `~/Downloads/RVTools_export_all_2026-01-07_10.23.35.xlsx` (8 sheets, no network) | — |
-| `xlsx` (SheetJS, CDN tarball) | parser | ✓ | 0.20.3 (node_modules) | — |
-| Vitest + jsdom | unit/component tests | ✓ | 4.1.2 | Browser Mode for real ECharts SVG geometry if needed |
-| ECharts treemap | D-08 | ✓ | echarts ^6.0.0 (treemap in `echarts/charts`) | — |
+| Dependency                                  | Required By                                | Available | Version                                                                                                | Fallback                                             |
+| ------------------------------------------- | ------------------------------------------ | --------- | ------------------------------------------------------------------------------------------------------ | ---------------------------------------------------- |
+| Real RVTools workbook (full sheet set)      | vSAN-relink + network real-file validation | ✓         | `~/Library/CloudStorage/OneDrive-Home/20260430_1400_allvCenters.xlsx` (27 sheets, 75 blank-cluster ds) | —                                                    |
+| Real RVTools workbook (trimmed, no network) | D-11 factual-degrade validation            | ✓         | `~/Downloads/RVTools_export_all_2026-01-07_10.23.35.xlsx` (8 sheets, no network)                       | —                                                    |
+| `xlsx` (SheetJS, CDN tarball)               | parser                                     | ✓         | 0.20.3 (node_modules)                                                                                  | —                                                    |
+| Vitest + jsdom                              | unit/component tests                       | ✓         | 4.1.2                                                                                                  | Browser Mode for real ECharts SVG geometry if needed |
+| ECharts treemap                             | D-08                                       | ✓         | echarts ^6.0.0 (treemap in `echarts/charts`)                                                           | —                                                    |
 
 **Missing dependencies with no fallback:** None.
 **Missing dependencies with fallback:** None — both the full and the trimmed real workbooks are present for the two mandated validation cases.
@@ -441,28 +464,28 @@ const VIEWS = ['dashboard','inventory','hosts','planning','eos','trends','storag
 
 ### Test Framework
 
-| Property | Value |
-|----------|-------|
-| Framework | Vitest `^4.1.2` + `@testing-library/react` `^16.3.2` (jsdom default) |
-| Config file | (vitest config in `vite.config.ts` / `tsconfig.test.json`) |
-| Quick run command | `npm run test:run` (CI mode; RTK: `rtk vitest`) |
-| Full suite command | `npm run test:run && npm run test:coverage` (engines/ gated ≥75 %) |
+| Property           | Value                                                                |
+| ------------------ | -------------------------------------------------------------------- |
+| Framework          | Vitest `^4.1.2` + `@testing-library/react` `^16.3.2` (jsdom default) |
+| Config file        | (vitest config in `vite.config.ts` / `tsconfig.test.json`)           |
+| Quick run command  | `npm run test:run` (CI mode; RTK: `rtk vitest`)                      |
+| Full suite command | `npm run test:run && npm run test:coverage` (engines/ gated ≥75 %)   |
 
 ### Phase Requirements → Test Map (planner derives final REQ-IDs)
 
-| Group | Behavior | Test Type | Automated Command | File Exists? |
-|-------|----------|-----------|-------------------|-------------|
-| Parser ext | MiB canary still 102400 (no regression) | unit | `npm run test:run -- canary` | ✅ shipped (`canary.test.ts`) |
-| Parser ext | vNetwork/vSwitch/dvSwitch absent → warning + `[]`, no throw | unit | `npm run test:run -- rvtools` | ❌ Wave 0 (extend `adapters/rvtools.test.ts`) |
-| Parser ext | vNetwork/vSwitch/dvSwitch present → adapted rows | unit | `npm run test:run -- rvtools` | ❌ Wave 0 |
-| VSR relink | blank-cluster ds resolves via `vInfo.Path` (synthetic) | unit | `npm run test:run -- vsanRelink` | ❌ Wave 0 (`vsanRelink.test.ts`) |
-| VSR relink | **real-file: ≥1 blank ds resolves on `20260430_1400_allvCenters.xlsx`** | integration | a new real-file test reading the named workbook, asserting relink count > 0 (≈25 distinct, 116 rows) | ❌ Wave 0 (the STR-04 regression guard the memory demands) |
-| VSR shared-LUN | `Y-TEMPLATES`-class ds surfaced as "shared across N", excluded from single-cluster rollup | unit + real-file | `npm run test:run -- vsanRelink` | ❌ Wave 0 |
-| Storage-by-X | two-lens projection sums match estate total (no double-count) | unit | `npm run test:run -- storageByX` | ❌ Wave 0 |
-| Threshold flags | fs partition ≥90 % used flagged; datastore >85 % flagged; defaults restored on clearAll | unit | `npm run test:run -- thresholdFlags` | ❌ Wave 0 |
-| Thresholds slice | REPLACE-never-mutate; no localStorage write | unit | `npm run test:run -- snapshotStore` | ✅ extend (`snapshotStore.test.ts`) |
-| UI | ViewToggle has 8 segments incl storage/network; arrow-key wrap | component | `npm run test:run -- ViewToggle` | ✅ extend |
-| UI | Datastore/VM/ESX detail drill renders + back; factual, no editorial verb | component | `npm run test:run -- StorageView` | ❌ Wave 0 |
+| Group            | Behavior                                                                                  | Test Type        | Automated Command                                                                                    | File Exists?                                               |
+| ---------------- | ----------------------------------------------------------------------------------------- | ---------------- | ---------------------------------------------------------------------------------------------------- | ---------------------------------------------------------- |
+| Parser ext       | MiB canary still 102400 (no regression)                                                   | unit             | `npm run test:run -- canary`                                                                         | ✅ shipped (`canary.test.ts`)                              |
+| Parser ext       | vNetwork/vSwitch/dvSwitch absent → warning + `[]`, no throw                               | unit             | `npm run test:run -- rvtools`                                                                        | ❌ Wave 0 (extend `adapters/rvtools.test.ts`)              |
+| Parser ext       | vNetwork/vSwitch/dvSwitch present → adapted rows                                          | unit             | `npm run test:run -- rvtools`                                                                        | ❌ Wave 0                                                  |
+| VSR relink       | blank-cluster ds resolves via `vInfo.Path` (synthetic)                                    | unit             | `npm run test:run -- vsanRelink`                                                                     | ❌ Wave 0 (`vsanRelink.test.ts`)                           |
+| VSR relink       | **real-file: ≥1 blank ds resolves on `20260430_1400_allvCenters.xlsx`**                   | integration      | a new real-file test reading the named workbook, asserting relink count > 0 (≈25 distinct, 116 rows) | ❌ Wave 0 (the STR-04 regression guard the memory demands) |
+| VSR shared-LUN   | `Y-TEMPLATES`-class ds surfaced as "shared across N", excluded from single-cluster rollup | unit + real-file | `npm run test:run -- vsanRelink`                                                                     | ❌ Wave 0                                                  |
+| Storage-by-X     | two-lens projection sums match estate total (no double-count)                             | unit             | `npm run test:run -- storageByX`                                                                     | ❌ Wave 0                                                  |
+| Threshold flags  | fs partition ≥90 % used flagged; datastore >85 % flagged; defaults restored on clearAll   | unit             | `npm run test:run -- thresholdFlags`                                                                 | ❌ Wave 0                                                  |
+| Thresholds slice | REPLACE-never-mutate; no localStorage write                                               | unit             | `npm run test:run -- snapshotStore`                                                                  | ✅ extend (`snapshotStore.test.ts`)                        |
+| UI               | ViewToggle has 8 segments incl storage/network; arrow-key wrap                            | component        | `npm run test:run -- ViewToggle`                                                                     | ✅ extend                                                  |
+| UI               | Datastore/VM/ESX detail drill renders + back; factual, no editorial verb                  | component        | `npm run test:run -- StorageView`                                                                    | ❌ Wave 0                                                  |
 
 ### Sampling Rate
 
@@ -504,22 +527,22 @@ const VIEWS = ['dashboard','inventory','hosts','planning','eos','trends','storag
 
 ### Applicable ASVS Categories
 
-| ASVS Category | Applies | Standard Control |
-|---------------|---------|-----------------|
-| V2 Authentication | no | No auth surface (client-only) |
-| V3 Session Management | no | No sessions |
-| V4 Access Control | no | No server/access control |
-| V5 Input Validation | **yes** | Zod schemas at the parser boundary for every new row type (`V{Network,Switch,DvSwitch,DvPort}RowSchema`); `readString`/`readNumber` coercion already defensive; invalid rows dropped + reported, never thrown unchecked |
-| V6 Cryptography | no | No crypto in this phase |
+| ASVS Category         | Applies | Standard Control                                                                                                                                                                                                        |
+| --------------------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| V2 Authentication     | no      | No auth surface (client-only)                                                                                                                                                                                           |
+| V3 Session Management | no      | No sessions                                                                                                                                                                                                             |
+| V4 Access Control     | no      | No server/access control                                                                                                                                                                                                |
+| V5 Input Validation   | **yes** | Zod schemas at the parser boundary for every new row type (`V{Network,Switch,DvSwitch,DvPort}RowSchema`); `readString`/`readNumber` coercion already defensive; invalid rows dropped + reported, never thrown unchecked |
+| V6 Cryptography       | no      | No crypto in this phase                                                                                                                                                                                                 |
 
 ### Known Threat Patterns for {client-side RVTools parser + ECharts SVG}
 
-| Pattern | STRIDE | Standard Mitigation |
-|---------|--------|---------------------|
-| Malicious/oversized `.xlsx` (zip-bomb, ReDoS) | DoS | `xlsx@0.20.3` (CVE-fixed tarball, never npm 0.18.5); parser already in a Web Worker (UI not blocked); `readNumber` regex is bounded |
-| Untrusted cell content injected into ECharts labels (treemap node names from datastore names) | Tampering/XSS | ECharts SVG renderer escapes text content; do NOT use `formatter` with raw HTML; pass datastore/portgroup names as plain `name`/`value` data (the shipped `<Chart>` pattern) |
-| Untrusted cell content in CSV export (spreadsheet formula injection — a leading `=` `+` `-` `@` in a datastore/portgroup name) | Tampering | The P3 CSV path uses raw accessor values; the planner must confirm the shipped CSV idiom already neutralizes formula-trigger lead characters for the new columns — reuse the existing escaping, do not re-implement |
-| `vInfo.Path` parsed via regex `/^\[([^\]]+)\]/` | DoS (ReDoS) | The regex is linear (anchored, negated char class, no backtracking) — safe; documented here so the planner does not "improve" it into a backtracking pattern |
+| Pattern                                                                                                                        | STRIDE        | Standard Mitigation                                                                                                                                                                                                 |
+| ------------------------------------------------------------------------------------------------------------------------------ | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Malicious/oversized `.xlsx` (zip-bomb, ReDoS)                                                                                  | DoS           | `xlsx@0.20.3` (CVE-fixed tarball, never npm 0.18.5); parser already in a Web Worker (UI not blocked); `readNumber` regex is bounded                                                                                 |
+| Untrusted cell content injected into ECharts labels (treemap node names from datastore names)                                  | Tampering/XSS | ECharts SVG renderer escapes text content; do NOT use `formatter` with raw HTML; pass datastore/portgroup names as plain `name`/`value` data (the shipped `<Chart>` pattern)                                        |
+| Untrusted cell content in CSV export (spreadsheet formula injection — a leading `=` `+` `-` `@` in a datastore/portgroup name) | Tampering     | The P3 CSV path uses raw accessor values; the planner must confirm the shipped CSV idiom already neutralizes formula-trigger lead characters for the new columns — reuse the existing escaping, do not re-implement |
+| `vInfo.Path` parsed via regex `/^\[([^\]]+)\]/`                                                                                | DoS (ReDoS)   | The regex is linear (anchored, negated char class, no backtracking) — safe; documented here so the planner does not "improve" it into a backtracking pattern                                                        |
 
 ## Sources
 

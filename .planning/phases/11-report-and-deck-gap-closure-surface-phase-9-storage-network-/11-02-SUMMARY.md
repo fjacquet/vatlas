@@ -1,33 +1,35 @@
 ---
+
 phase: 11
 plan: "02"
 subsystem: i18n
 tags: [i18n, locale, export, parity]
 requires: []
 provides:
-  - "storage/network/planned dotted i18n keys (the chrome contract 11-05/11-06 resolve via strings['storage.title'] ?? fallback)"
-affects:
+- "storage/network/planned dotted i18n keys (the chrome contract 11-05/11-06 resolve via strings['storage.title'] ?? fallback)"
+  affects:
+- src/i18n/locales/en/report.json
+- src/i18n/locales/fr/report.json
+- src/i18n/locales/en/pptx.json
+- src/i18n/locales/fr/pptx.json
+  tech-stack:
+  added: []
+  patterns:
+  - "Collision-free-by-intent: identical dotted paths across report.json + pptx.json so the prefix-less flatten spread (useExport.ts:77-84) resolves the same string regardless of which file wins"
+    key-files:
+    created: []
+    modified:
   - src/i18n/locales/en/report.json
   - src/i18n/locales/fr/report.json
   - src/i18n/locales/en/pptx.json
   - src/i18n/locales/fr/pptx.json
-tech-stack:
-  added: []
-  patterns:
-    - "Collision-free-by-intent: identical dotted paths across report.json + pptx.json so the prefix-less flatten spread (useExport.ts:77-84) resolves the same string regardless of which file wins"
-key-files:
-  created: []
-  modified:
-    - src/i18n/locales/en/report.json
-    - src/i18n/locales/fr/report.json
-    - src/i18n/locales/en/pptx.json
-    - src/i18n/locales/fr/pptx.json
-key-decisions:
-  - "Same dotted paths AND same values in report.json + pptx.json (simplest collision-safe choice; plan allowed differing values but identical paths)"
-  - "FR uses Gio for GiB; factual-only (no editorial verbs); {{n}} placeholder for vsanShared, formatted at render"
-requirements-completed: [STG-04, STG-05, NET-01, NET-02, NET-03, NET-04, NET-05]
-duration: 7 min
-completed: 2026-05-19
+    key-decisions:
+- "Same dotted paths AND same values in report.json + pptx.json (simplest collision-safe choice; plan allowed differing values but identical paths)"
+- "FR uses Gio for GiB; factual-only (no editorial verbs); {{n}} placeholder for vsanShared, formatted at render"
+  requirements-completed: [STG-04, STG-05, NET-01, NET-02, NET-03, NET-04, NET-05]
+  duration: 7 min
+  completed: 2026-05-19
+
 ---
 
 # Phase 11 Plan 02: Storage/Network/planned i18n keys Summary

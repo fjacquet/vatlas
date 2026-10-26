@@ -1,4 +1,5 @@
 ---
+
 status: complete
 phase: 03-inventory-navigation
 source: [03-01-SUMMARY.md, 03-02-SUMMARY.md, 03-03-SUMMARY.md]
@@ -7,15 +8,16 @@ updated: 2026-05-16T00:00:00Z
 ---
 
 ## Current Test
+
 <!-- OVERWRITE each test - shows where we are -->
 
 number: 1
 name: Dashboard ↔ Inventory toggle
 expected: |
-  With a snapshot loaded, a segmented Dashboard / Inventory toggle is visible
-  in the toolbar (default = Dashboard). Clicking "Inventory" switches the main
-  area to the inventory view; clicking "Dashboard" switches back. Keyboard-
-  operable (Tab to it, arrows/Enter to switch). Phase-1 sidebar still works.
+With a snapshot loaded, a segmented Dashboard / Inventory toggle is visible
+in the toolbar (default = Dashboard). Clicking "Inventory" switches the main
+area to the inventory view; clicking "Dashboard" switches back. Keyboard-
+operable (Tab to it, arrows/Enter to switch). Phase-1 sidebar still works.
 awaiting: user response
 
 ## Tests

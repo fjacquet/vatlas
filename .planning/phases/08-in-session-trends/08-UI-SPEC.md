@@ -1,4 +1,5 @@
 ---
+
 phase: 8
 slug: in-session-trends
 status: approved
@@ -16,13 +17,13 @@ reviewed_at: 2026-05-17
 
 ## Design System
 
-| Property | Value |
-|----------|-------|
-| Tool | none (manual Tailwind v4 design system — no `components.json`, no shadcn; React 19 + Vite stack) |
-| Preset | not applicable |
-| Component library | none (hand-built components; ECharts via the single shipped `<Chart>` primitive) |
-| Icon library | none — text glyph `✕` is the only glyph (precedent: `SnapshotCard`); no icon dependency in scope |
-| Font | UI: `system-ui, -apple-system, "Segoe UI", Roboto, sans-serif` (body, base) · numerics: `--font-mono` (`"JetBrains Mono", "Fira Code", ui-monospace, monospace`) with `tabular-nums` for all counts/deltas/axis values |
+| Property          | Value                                                                                                                                                                                                                  |
+| ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Tool              | none (manual Tailwind v4 design system — no `components.json`, no shadcn; React 19 + Vite stack)                                                                                                                       |
+| Preset            | not applicable                                                                                                                                                                                                         |
+| Component library | none (hand-built components; ECharts via the single shipped `<Chart>` primitive)                                                                                                                                       |
+| Icon library      | none — text glyph `✕` is the only glyph (precedent: `SnapshotCard`); no icon dependency in scope                                                                                                                       |
+| Font              | UI: `system-ui, -apple-system, "Segoe UI", Roboto, sans-serif` (body, base) · numerics: `--font-mono` (`"JetBrains Mono", "Fira Code", ui-monospace, monospace`) with `tabular-nums` for all counts/deltas/axis values |
 
 **Registry safety gate:** not applicable (no shadcn, no third-party registry). Section retained below for checker completeness.
 
@@ -32,15 +33,15 @@ reviewed_at: 2026-05-17
 
 vatlas uses Tailwind's native 4px scale. Declared values (multiples of 4):
 
-| Token | Value | Usage in Phase 8 |
-|-------|-------|------------------|
-| xs | 4px | `gap-1` segment gaps inside the extended `ViewToggle`; inline number/sign spacing in delta rows |
-| sm | 8px | `gap-2` snapshot list rows; sparkline internal grid inset (`grid:{top:2,bottom:2,left:2,right:2}` ECharts px — chart-internal, not a layout token) |
-| md | 16px | `p-4` panel padding (the shipped `.panel` component idiom) |
-| lg | 24px | `gap-6` between stacked `<section className="panel">` blocks in `TrendsView` (matches `EosView` `flex flex-col gap-6`) |
-| xl | 32px | `p-8` `TrendsView` `<main>` outer padding (matches `EosView`/`HostsView` precedent) |
-| 2xl | 48px | not used in this phase |
-| 3xl | 64px | not used in this phase |
+| Token | Value | Usage in Phase 8                                                                                                                                   |
+| ----- | ----- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| xs    | 4px   | `gap-1` segment gaps inside the extended `ViewToggle`; inline number/sign spacing in delta rows                                                    |
+| sm    | 8px   | `gap-2` snapshot list rows; sparkline internal grid inset (`grid:{top:2,bottom:2,left:2,right:2}` ECharts px — chart-internal, not a layout token) |
+| md    | 16px  | `p-4` panel padding (the shipped `.panel` component idiom)                                                                                         |
+| lg    | 24px  | `gap-6` between stacked `<section className="panel">` blocks in `TrendsView` (matches `EosView` `flex flex-col gap-6`)                             |
+| xl    | 32px  | `p-8` `TrendsView` `<main>` outer padding (matches `EosView`/`HostsView` precedent)                                                                |
+| 2xl   | 48px  | not used in this phase                                                                                                                             |
+| 3xl   | 64px  | not used in this phase                                                                                                                             |
 
 Exceptions:
 
@@ -53,13 +54,13 @@ Exceptions:
 
 vatlas has no custom type scale; it composes Tailwind defaults already established across P2–P7. Phase 8 reuses the exact roles shipped in `EosView`/`SnapshotCard` — no new sizes, no new weights.
 
-| Role | Size | Weight | Line Height | Phase 8 usage |
-|------|------|--------|-------------|---------------|
-| Display (metric value) | 24px (`text-2xl`) | 600 (`font-semibold`) via mono `tabular-nums` | Tailwind default (1.0–1.2 for 2xl) | Delta-panel primary numbers, headline KPI values (mirrors `EosView` tile `text-2xl tabular-nums`) |
-| Heading | 20px (`text-xl`) | 600 (`font-semibold`) | 1.2 (Tailwind `text-xl` default) | `TrendsView` `<h2>` section heading (verbatim `EosView` `text-xl font-semibold`) |
-| Subheading | 16px (`text-base`) | 600 (`font-semibold`) | 1.2 | Delta-panel / chart sub-section `<h3>` (verbatim `EosView` `text-base font-semibold`) |
-| Body | 14px (`text-sm`) | 400 (regular) | 1.5 (Tailwind `text-sm` default ≈1.43, treated as body) | Factual captions: warm-up "trends preparing — N/M", inferred-order note, released-snapshot note, error state |
-| Caption / meta | 12px (`text-xs`) / `text-[12px]` | 400 (regular) | default | Snapshot-card metadata, per-point tooltip body, empty-state text (verbatim `SnapshotCard` / `SnapshotListSidebar` precedent) |
+| Role                   | Size                             | Weight                                        | Line Height                                             | Phase 8 usage                                                                                                                |
+| ---------------------- | -------------------------------- | --------------------------------------------- | ------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| Display (metric value) | 24px (`text-2xl`)                | 600 (`font-semibold`) via mono `tabular-nums` | Tailwind default (1.0–1.2 for 2xl)                      | Delta-panel primary numbers, headline KPI values (mirrors `EosView` tile `text-2xl tabular-nums`)                            |
+| Heading                | 20px (`text-xl`)                 | 600 (`font-semibold`)                         | 1.2 (Tailwind `text-xl` default)                        | `TrendsView` `<h2>` section heading (verbatim `EosView` `text-xl font-semibold`)                                             |
+| Subheading             | 16px (`text-base`)               | 600 (`font-semibold`)                         | 1.2                                                     | Delta-panel / chart sub-section `<h3>` (verbatim `EosView` `text-base font-semibold`)                                        |
+| Body                   | 14px (`text-sm`)                 | 400 (regular)                                 | 1.5 (Tailwind `text-sm` default ≈1.43, treated as body) | Factual captions: warm-up "trends preparing — N/M", inferred-order note, released-snapshot note, error state                 |
+| Caption / meta         | 12px (`text-xs`) / `text-[12px]` | 400 (regular)                                 | default                                                 | Snapshot-card metadata, per-point tooltip body, empty-state text (verbatim `SnapshotCard` / `SnapshotListSidebar` precedent) |
 
 Declared scale: **4 sizes** (24 / 20 / 16 / 14, with 12 as the existing meta/caption tier shipped project-wide) · **2 weights** (regular 400 + semibold 600). No italic, no third weight. Numerics always `font-mono tabular-nums` (project convention, CLAUDE.md / `EosView` precedent) so trend values and deltas do not jitter as they update progressively.
 
@@ -69,12 +70,12 @@ Declared scale: **4 sizes** (24 / 20 / 16 / 14, with 12 as the existing meta/cap
 
 Phase 8 introduces **no new color**. It consumes the shipped Midnight Executive `@theme` tokens (`src/index.css`) exactly as P2–P7 do. Hex approximations below are the documented oklch anchors from `index.css`.
 
-| Role | Value | Usage |
-|------|-------|-------|
-| Dominant (~60%) | light `#FAFAFA` `bg-slate-50` / dark `surface-900` (`oklch(15% .02 260)`) | App background, `<main>` canvas behind the trends view |
-| Secondary (~30%) | light `#FFFFFF` `.panel` (`bg-white`) / dark `surface-800` (`oklch(20% .02 260)`); sidebar border `slate-200`/`surface-700` | Trend chart panel, delta-panel card, snapshot-list rail, dashboard cluster cards hosting sparklines |
-| Accent (~10%) | gold `--color-accent-500` `oklch(78% .16 75)` ≈ `#F9B935` | **Reserved — see explicit list below** |
-| Destructive | `--color-util-high` `oklch(58% .22 25)` (red) | **Hover-only** on the snapshot-card remove `✕` (`hover:text-util-high`, shipped `SnapshotCard` idiom). No destructive *confirmation* surface in this phase (see Copywriting). |
+| Role             | Value                                                                                                                       | Usage                                                                                                                                                                         |
+| ---------------- | --------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Dominant (~60%)  | light `#FAFAFA` `bg-slate-50` / dark `surface-900` (`oklch(15% .02 260)`)                                                   | App background, `<main>` canvas behind the trends view                                                                                                                        |
+| Secondary (~30%) | light `#FFFFFF` `.panel` (`bg-white`) / dark `surface-800` (`oklch(20% .02 260)`); sidebar border `slate-200`/`surface-700` | Trend chart panel, delta-panel card, snapshot-list rail, dashboard cluster cards hosting sparklines                                                                           |
+| Accent (~10%)    | gold `--color-accent-500` `oklch(78% .16 75)` ≈ `#F9B935`                                                                   | **Reserved — see explicit list below**                                                                                                                                        |
+| Destructive      | `--color-util-high` `oklch(58% .22 25)` (red)                                                                               | **Hover-only** on the snapshot-card remove `✕` (`hover:text-util-high`, shipped `SnapshotCard` idiom). No destructive _confirmation_ surface in this phase (see Copywriting). |
 
 **Accent gold reserved for (exhaustive — never "all interactive"):**
 
@@ -98,18 +99,18 @@ Every color utility MUST carry its `dark:` twin (CLAUDE.md class-strategy dark m
 
 All Phase-8 strings are **factual, no editorial verb** (PROJECT.md denylist: no "grew / shrank / improved / degraded / should / recommend / poor / good"), carry **no pre-formatted numbers** (numbers injected via `utils/format.ts` `fmtDate`/`fmtInt`/`fmtMemMb` interpolation, never baked into the string), and ship as **EN + FR parity keys** in a new `i18n/locales/{en,fr}/trends.json` namespace (mirrors the shipped `eos.json` precedent). The exact key strings are the planner's call within this contract; the table below fixes intent + tone.
 
-| Element | Copy intent (factual, no verb, EN/FR parity) |
-|---------|----------------------------------------------|
-| Primary CTA / entry | **No new CTA.** Trends is reached via the existing `ViewToggle` segment labelled `trends` (`nav.trends` key, added to the shipped `inventory:nav.*` set). The view *exists* when ≥2 snapshots are loaded; the act that "enters" trends is the existing UploadZone drop + the existing view segment. |
-| Empty state heading | A neutral heading equal to the section title (precedent: `EosView` renders just the `<h2>` heading when no snapshot). E.g. the `trends:heading` string ("Trends" / "Tendances"). |
-| Empty state body | Factual single line stating the prerequisite: trends require ≥2 loaded snapshots (e.g. "Load 2 or more snapshots to see trends." / "Chargez 2 instantanés ou plus pour voir les tendances."). One snapshot ⇒ `view.trends` is `null` (RESEARCH Pattern 1); render this line, no chart, no spinner. State the condition, not advice. |
-| Warm-up indicator (D-02) | Factual progress line scoped to the snapshot-list/trends area only (never a global blocking overlay): "trends preparing — N/M" with N=`done`, M=`total` injected via `fmtInt` (e.g. `trends:warmup` = `Trends preparing — {{done}}/{{total}}` / `Tendances en préparation — {{done}}/{{total}}`). No spinner-as-blocker, no "please wait", no verb. Disappears when `done === total`. Lives in `SnapshotListSidebar`'s own region. |
-| Inferred-order caption (D-05) | Neutral fact that ordering is not from real capture dates, shown only when `view.trends.orderInferred === true`: e.g. `trends:orderInferred` = "Timeline order inferred — not from real capture dates." / "Ordre de la chronologie déduit — non issu des dates de capture réelles." No "warning", no color, no icon — a plain `text-sm text-slate-500 dark:text-slate-400` caption (the shipped `EosView` caption tone). |
-| Released-snapshot note (DD-C) | Shown when a released snapshot (`rawReleased === true`) is clicked / cannot become the active estate: factual, e.g. `trends:released` = "Raw data released to free memory — trend point retained." / "Données brutes libérées pour économiser la mémoire — point de tendance conservé." No verb, no alarm; selection of a released snapshot for the active merge is prevented or factually explained, not error-styled. |
-| Delta-panel rows (TRD-04) | One factual row per consecutive pair, per metric: a label key + a signed branded number, e.g. label `trends:delta.vmCount` ("VMs") rendered as `+12` / `−3`; memory/storage in branded GiB/TiB via `fmtMemMb` (never `* 1.048576`). Sign `+`/`−` is factual; em-dash `—` when the field is `null` on either side of the pair. No "increase/decrease", no color, no arrow-up/down glyph beyond the mathematical sign. |
-| Per-point tooltip (criterion 6) | ECharts `tooltip:{trigger:'axis'}` body lists, factually: the point date (locale via `fmtDate`) and the contributing snapshot metadata array — each `{ vCenterLabel, rvtoolsVersion }` (A2: a merged point legitimately spans multiple vCenters). Plain key/value, no narrative. |
-| Error state | Region-scoped `ErrorBoundary` fallback identical to `EosView`'s `EosError`: `role="alert"`, reads **only** `error.message` (never `error.cause`/`stack`/the object — would leak VM/host names), rendered in a `border-util-high/40` panel. Copy = the shipped `dashboard:states.error` pattern (`{{message}}` interpolated). No retry button (no async user action to retry — refresh is the recovery, consistent with the privacy/in-memory model). |
-| Destructive confirmation | **None in this phase.** The only destructive-adjacent action is the existing per-snapshot remove `✕` (shipped `SnapshotCard`, hover-`util-high`, **no confirmation dialog** by established product pattern — DRX-01 reversible/neutral precedent). Memory release (DD-C) is automatic and non-destructive to the trend series (the point is retained); it requires no user confirmation and no destructive styling. |
+| Element                         | Copy intent (factual, no verb, EN/FR parity)                                                                                                                                                                                                                                                                                                                                                                                                         |
+| ------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Primary CTA / entry             | **No new CTA.** Trends is reached via the existing `ViewToggle` segment labelled `trends` (`nav.trends` key, added to the shipped `inventory:nav.*` set). The view _exists_ when ≥2 snapshots are loaded; the act that "enters" trends is the existing UploadZone drop + the existing view segment.                                                                                                                                                  |
+| Empty state heading             | A neutral heading equal to the section title (precedent: `EosView` renders just the `<h2>` heading when no snapshot). E.g. the `trends:heading` string ("Trends" / "Tendances").                                                                                                                                                                                                                                                                     |
+| Empty state body                | Factual single line stating the prerequisite: trends require ≥2 loaded snapshots (e.g. "Load 2 or more snapshots to see trends." / "Chargez 2 instantanés ou plus pour voir les tendances."). One snapshot ⇒ `view.trends` is `null` (RESEARCH Pattern 1); render this line, no chart, no spinner. State the condition, not advice.                                                                                                                  |
+| Warm-up indicator (D-02)        | Factual progress line scoped to the snapshot-list/trends area only (never a global blocking overlay): "trends preparing — N/M" with N=`done`, M=`total` injected via `fmtInt` (e.g. `trends:warmup` = `Trends preparing — {{done}}/{{total}}` / `Tendances en préparation — {{done}}/{{total}}`). No spinner-as-blocker, no "please wait", no verb. Disappears when `done === total`. Lives in `SnapshotListSidebar`'s own region.                   |
+| Inferred-order caption (D-05)   | Neutral fact that ordering is not from real capture dates, shown only when `view.trends.orderInferred === true`: e.g. `trends:orderInferred` = "Timeline order inferred — not from real capture dates." / "Ordre de la chronologie déduit — non issu des dates de capture réelles." No "warning", no color, no icon — a plain `text-sm text-slate-500 dark:text-slate-400` caption (the shipped `EosView` caption tone).                             |
+| Released-snapshot note (DD-C)   | Shown when a released snapshot (`rawReleased === true`) is clicked / cannot become the active estate: factual, e.g. `trends:released` = "Raw data released to free memory — trend point retained." / "Données brutes libérées pour économiser la mémoire — point de tendance conservé." No verb, no alarm; selection of a released snapshot for the active merge is prevented or factually explained, not error-styled.                              |
+| Delta-panel rows (TRD-04)       | One factual row per consecutive pair, per metric: a label key + a signed branded number, e.g. label `trends:delta.vmCount` ("VMs") rendered as `+12` / `−3`; memory/storage in branded GiB/TiB via `fmtMemMb` (never `* 1.048576`). Sign `+`/`−` is factual; em-dash `—` when the field is `null` on either side of the pair. No "increase/decrease", no color, no arrow-up/down glyph beyond the mathematical sign.                                 |
+| Per-point tooltip (criterion 6) | ECharts `tooltip:{trigger:'axis'}` body lists, factually: the point date (locale via `fmtDate`) and the contributing snapshot metadata array — each `{ vCenterLabel, rvtoolsVersion }` (A2: a merged point legitimately spans multiple vCenters). Plain key/value, no narrative.                                                                                                                                                                     |
+| Error state                     | Region-scoped `ErrorBoundary` fallback identical to `EosView`'s `EosError`: `role="alert"`, reads **only** `error.message` (never `error.cause`/`stack`/the object — would leak VM/host names), rendered in a `border-util-high/40` panel. Copy = the shipped `dashboard:states.error` pattern (`{{message}}` interpolated). No retry button (no async user action to retry — refresh is the recovery, consistent with the privacy/in-memory model). |
+| Destructive confirmation        | **None in this phase.** The only destructive-adjacent action is the existing per-snapshot remove `✕` (shipped `SnapshotCard`, hover-`util-high`, **no confirmation dialog** by established product pattern — DRX-01 reversible/neutral precedent). Memory release (DD-C) is automatic and non-destructive to the trend series (the point is retained); it requires no user confirmation and no destructive styling.                                  |
 
 ---
 
@@ -161,10 +162,10 @@ All Phase-8 strings are **factual, no editorial verb** (PROJECT.md denylist: no 
 
 ## Registry Safety
 
-| Registry | Blocks Used | Safety Gate |
-|----------|-------------|-------------|
-| shadcn official | none | not applicable — project does not use shadcn |
-| third-party | none | not applicable |
+| Registry        | Blocks Used | Safety Gate                                  |
+| --------------- | ----------- | -------------------------------------------- |
+| shadcn official | none        | not applicable — project does not use shadcn |
+| third-party     | none        | not applicable                               |
 
 No design-system registry is in use (manual Tailwind v4). No third-party blocks declared. No vetting gate required. Phase 8 adds **zero new dependencies** (RESEARCH: every capability reuses shipped libraries — echarts ^6, echarts-for-react ^3.0.6, zustand ^5, react-i18next).
 

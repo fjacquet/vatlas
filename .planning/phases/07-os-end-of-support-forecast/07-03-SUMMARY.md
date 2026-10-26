@@ -1,62 +1,63 @@
 ---
+
 phase: 07-os-end-of-support-forecast
 plan: 03
 subsystem: ui
 tags: [eos, estateview, viewtoggle, i18n, datatable, echarts]
 
 requires:
-  - phase: 07-01
-    provides: loadEosCatalogue() parse-once boundary + EosCatalogue type
-  - phase: 07-02
-    provides: buildEosProjection / classifyEsxi pure engines
-provides:
-  - EstateView.eos projection composed in the single buildEstateView pass (no new memo)
-  - fmtDate(iso, locale) locale-aware date formatter with em-dash sentinel
-  - ECharts heatmap/calendar/visualmap registered (SVG-only)
-  - 5th 'eos' ViewToggle segment + App branch
-  - EosView read-only presenter (freshness/as-of lines, cumulative bucket strip, forecast chart, P3 DataTable drill, verbatim unknown-OS list, separate ESXi section)
-  - eos i18n namespace (EN/FR) + nav.eos + col.eolFrom in inventory.json
-  - DataTable header/body column-alignment fix (benefits all consumers)
-affects: [10-html-pptx-export consumes the EstateView.eos shape]
+- phase: 07-01
+  provides: loadEosCatalogue() parse-once boundary + EosCatalogue type
+- phase: 07-02
+  provides: buildEosProjection / classifyEsxi pure engines
+  provides:
+- EstateView.eos projection composed in the single buildEstateView pass (no new memo)
+- fmtDate(iso, locale) locale-aware date formatter with em-dash sentinel
+- ECharts heatmap/calendar/visualmap registered (SVG-only)
+- 5th 'eos' ViewToggle segment + App branch
+- EosView read-only presenter (freshness/as-of lines, cumulative bucket strip, forecast chart, P3 DataTable drill, verbatim unknown-OS list, separate ESXi section)
+- eos i18n namespace (EN/FR) + nav.eos + col.eolFrom in inventory.json
+- DataTable header/body column-alignment fix (benefits all consumers)
+  affects: [10-html-pptx-export consumes the EstateView.eos shape]
 
 tech-stack:
-  added: []
-  patterns:
-    - "EOS projection types live in @/types/estate (types→engines direction, no cycle)"
-    - "DataTable header row mirrors the virtualized body flex layout for column alignment"
+added: []
+patterns:
+- "EOS projection types live in @/types/estate (types→engines direction, no cycle)"
+- "DataTable header row mirrors the virtualized body flex layout for column alignment"
 
 key-files:
-  created:
-    - src/components/eos/EosView.tsx
-    - src/i18n/locales/en/eos.json
-    - src/i18n/locales/fr/eos.json
+created:
+- src/components/eos/EosView.tsx
+- src/i18n/locales/en/eos.json
+- src/i18n/locales/fr/eos.json
   modified:
-    - src/types/estate.ts
-    - src/engines/aggregation/estateView.ts
-    - src/engines/eos/bucketEos.ts
-    - src/utils/format.ts
-    - src/utils/format.test.ts
-    - src/components/Chart.tsx
-    - src/components/ViewToggle.tsx
-    - src/App.tsx
-    - src/i18n/index.ts
-    - src/i18n/locales/en/inventory.json
-    - src/i18n/locales/fr/inventory.json
-    - src/components/inventory/DataTable.tsx
-    - .planning/REQUIREMENTS.md
+- src/types/estate.ts
+- src/engines/aggregation/estateView.ts
+- src/engines/eos/bucketEos.ts
+- src/utils/format.ts
+- src/utils/format.test.ts
+- src/components/Chart.tsx
+- src/components/ViewToggle.tsx
+- src/App.tsx
+- src/i18n/index.ts
+- src/i18n/locales/en/inventory.json
+- src/i18n/locales/fr/inventory.json
+- src/components/inventory/DataTable.tsx
+- .planning/REQUIREMENTS.md
 
 key-decisions:
-  - "D-00: EOS projection composed in the single buildEstateView pass; EosView is presenter-only (no second memo)"
-  - "D-03/D-07: always-visible as-of + catalogue-verified lines; neutral >90d staleness caption; EN/FR parity"
-  - "D-05: 5th 'eos' ViewToggle segment reusing the shipped fieldset+aria-pressed idiom (no new nav)"
-  - "D-08: EOS drill reuses the shipped generic DataTable with an inline ColumnDef<EosRow> config (column config, not a new component — same pattern as vm/esx/datastore configs)"
-  - "D-09b/c: ESXi hosts surfaced as a separate kind; patch level = em-dash; never summed with VMs"
-  - "D-11/D-12: unknown-OS drill = verbatim raw strings + occurrence counts, rendered as an auto-escaped React text child (no raw-HTML sink)"
-  - "REQUIREMENTS.md EOS rows reconciled from stale Phase 5 → Phase 7"
+- "D-00: EOS projection composed in the single buildEstateView pass; EosView is presenter-only (no second memo)"
+- "D-03/D-07: always-visible as-of + catalogue-verified lines; neutral >90d staleness caption; EN/FR parity"
+- "D-05: 5th 'eos' ViewToggle segment reusing the shipped fieldset+aria-pressed idiom (no new nav)"
+- "D-08: EOS drill reuses the shipped generic DataTable with an inline ColumnDef<EosRow> config (column config, not a new component — same pattern as vm/esx/datastore configs)"
+- "D-09b/c: ESXi hosts surfaced as a separate kind; patch level = em-dash; never summed with VMs"
+- "D-11/D-12: unknown-OS drill = verbatim raw strings + occurrence counts, rendered as an auto-escaped React text child (no raw-HTML sink)"
+- "REQUIREMENTS.md EOS rows reconciled from stale Phase 5 → Phase 7"
 
 patterns-established:
-  - "Pattern: EOS projection types in @/types/estate, engine import type-only (no cycle)"
-  - "Pattern: virtualized DataTable header must share the body's flex column sizing"
+- "Pattern: EOS projection types in @/types/estate, engine import type-only (no cycle)"
+- "Pattern: virtualized DataTable header must share the body's flex column sizing"
 
 requirements-completed: [EOS-01, EOS-02, EOS-03, EOS-04, EOS-05, EOS-06]
 

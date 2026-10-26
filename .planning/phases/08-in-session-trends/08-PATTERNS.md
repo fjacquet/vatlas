@@ -6,25 +6,25 @@
 
 ## File Classification
 
-| New/Modified File | New/Mod | Role | Data Flow | Closest Analog | Match Quality |
-|-------------------|---------|------|-----------|----------------|---------------|
-| `src/engines/trends/buildTrendSeries.ts` | NEW | engine (pure) | transform / batch | `src/engines/eos/bucketEos.ts` + `src/engines/aggregation/estateView.ts` | exact (pure projection, P5/P6/P7 precedent) |
-| `src/engines/trends/captureDateOrdinal.ts` | NEW | engine (pure) | transform | `src/engines/parser/captureDate.ts` (`inferCaptureDate`, deterministic, no clock) | exact |
-| `src/engines/trends/buildTrendSeries.test.ts` | NEW | test | — | `src/engines/aggregation/estateView.test.ts` | exact |
-| `src/engines/trends/captureDateOrdinal.test.ts` | NEW | test | — | `src/engines/aggregation/estateView.test.ts` / `src/engines/eos/*.test.ts` | exact |
-| `src/engines/trends/index.ts` | NEW | barrel | — | `src/engines/aggregation/index.ts` | exact |
-| `src/types/estate.ts` | MOD | model (types) | — | self — `TimelinePoint` placeholder (lines 330-338) + `EosProjection` (372-385) | exact (replace stub) |
-| `src/engines/aggregation/estateView.ts` | MOD | engine (pure) | transform | self — P7 EOS composition (lines 258-268, 279) | exact (in-file precedent) |
-| `src/hooks/useEstateView.ts` | MOD | hook | request-response | self — line 55 `buildEstateView(...)` call site | exact |
-| `src/store/snapshotStore.ts` | MOD | store | event-driven (mutation) | self — `setCapturedAt` (139-146) / `removeSnapshot` (96-110) | exact (REPLACE-never-mutate idiom) |
-| `src/hooks/useSnapshotUpload.ts` | MOD | hook | streaming (worker drain) | self — current blocking parse loop (27-47) | role-match (behavior change) |
-| `src/components/Chart.tsx` | MOD | component | — | self — `echarts.use([...])` registry (29-41) | exact (one-line addition) |
-| `src/components/ViewToggle.tsx` | MOD | component | — | self — `AppView`/`VIEWS` (3-5) | exact (append segment) |
-| `src/App.tsx` | MOD | shell | — | self — view branch (39-49) | exact (append branch) |
-| `src/components/SnapshotCard.tsx` | MOD | component | event-driven (edit) | self — read-only capturedAt (61) + remove button (88-95) | exact (inline edit) |
-| `src/components/SnapshotListSidebar.tsx` | MOD | component | — | self — sorted list `useMemo` (25-28) + `useSnapshotUpload` use (23) | exact |
-| `src/components/trends/*` (TrendsView, TrendChart, TrendSparkline, DeltaPanel, trendsChartOptions) | NEW | component | request-response | `src/components/eos/EosView.tsx` (whole-file shell + `<Chart>` + ErrorBoundary) | exact (verbatim shell) |
-| `src/i18n/locales/{en,fr}/trends.json` | NEW | config (i18n) | — | `src/i18n/locales/{en,fr}/eos.json` (the `eos:` namespace consumed by EosView) | exact |
+| New/Modified File                                                                                  | New/Mod | Role          | Data Flow                | Closest Analog                                                                    | Match Quality                               |
+| -------------------------------------------------------------------------------------------------- | ------- | ------------- | ------------------------ | --------------------------------------------------------------------------------- | ------------------------------------------- |
+| `src/engines/trends/buildTrendSeries.ts`                                                           | NEW     | engine (pure) | transform / batch        | `src/engines/eos/bucketEos.ts` + `src/engines/aggregation/estateView.ts`          | exact (pure projection, P5/P6/P7 precedent) |
+| `src/engines/trends/captureDateOrdinal.ts`                                                         | NEW     | engine (pure) | transform                | `src/engines/parser/captureDate.ts` (`inferCaptureDate`, deterministic, no clock) | exact                                       |
+| `src/engines/trends/buildTrendSeries.test.ts`                                                      | NEW     | test          | —                        | `src/engines/aggregation/estateView.test.ts`                                      | exact                                       |
+| `src/engines/trends/captureDateOrdinal.test.ts`                                                    | NEW     | test          | —                        | `src/engines/aggregation/estateView.test.ts` / `src/engines/eos/*.test.ts`        | exact                                       |
+| `src/engines/trends/index.ts`                                                                      | NEW     | barrel        | —                        | `src/engines/aggregation/index.ts`                                                | exact                                       |
+| `src/types/estate.ts`                                                                              | MOD     | model (types) | —                        | self — `TimelinePoint` placeholder (lines 330-338) + `EosProjection` (372-385)    | exact (replace stub)                        |
+| `src/engines/aggregation/estateView.ts`                                                            | MOD     | engine (pure) | transform                | self — P7 EOS composition (lines 258-268, 279)                                    | exact (in-file precedent)                   |
+| `src/hooks/useEstateView.ts`                                                                       | MOD     | hook          | request-response         | self — line 55 `buildEstateView(...)` call site                                   | exact                                       |
+| `src/store/snapshotStore.ts`                                                                       | MOD     | store         | event-driven (mutation)  | self — `setCapturedAt` (139-146) / `removeSnapshot` (96-110)                      | exact (REPLACE-never-mutate idiom)          |
+| `src/hooks/useSnapshotUpload.ts`                                                                   | MOD     | hook          | streaming (worker drain) | self — current blocking parse loop (27-47)                                        | role-match (behavior change)                |
+| `src/components/Chart.tsx`                                                                         | MOD     | component     | —                        | self — `echarts.use([...])` registry (29-41)                                      | exact (one-line addition)                   |
+| `src/components/ViewToggle.tsx`                                                                    | MOD     | component     | —                        | self — `AppView`/`VIEWS` (3-5)                                                    | exact (append segment)                      |
+| `src/App.tsx`                                                                                      | MOD     | shell         | —                        | self — view branch (39-49)                                                        | exact (append branch)                       |
+| `src/components/SnapshotCard.tsx`                                                                  | MOD     | component     | event-driven (edit)      | self — read-only capturedAt (61) + remove button (88-95)                          | exact (inline edit)                         |
+| `src/components/SnapshotListSidebar.tsx`                                                           | MOD     | component     | —                        | self — sorted list `useMemo` (25-28) + `useSnapshotUpload` use (23)               | exact                                       |
+| `src/components/trends/*` (TrendsView, TrendChart, TrendSparkline, DeltaPanel, trendsChartOptions) | NEW     | component     | request-response         | `src/components/eos/EosView.tsx` (whole-file shell + `<Chart>` + ErrorBoundary)   | exact (verbatim shell)                      |
+| `src/i18n/locales/{en,fr}/trends.json`                                                             | NEW     | config (i18n) | —                        | `src/i18n/locales/{en,fr}/eos.json` (the `eos:` namespace consumed by EosView)    | exact                                       |
 
 ## Pattern Assignments
 
@@ -144,9 +144,7 @@ Mirrors the one-line-per-export, doc-header style of the aggregation barrel (lin
 ```typescript
 // after line 268, before the return at 270:
 const trends =
-  selected.length >= 2
-    ? buildTrendSeries(selected, mode, { stretchedClusters, allocRatios })
-    : null
+  selected.length >= 2 ? buildTrendSeries(selected, mode, { stretchedClusters, allocRatios }) : null
 ```
 
 Then change `trends: null,` (line 279) → `trends,` and add `trends: null` to the frozen `EMPTY_VIEW` only if signature change requires it (line 347 already has `trends: null` — keep).
@@ -190,7 +188,7 @@ setCapturedAt: (id, date) =>
 
 ### `src/hooks/useSnapshotUpload.ts` (hook) — MOD: latest-first non-blocking drain (D-01/D-02)
 
-**Analog:** self — the current blocking sequential loop (lines 27-47); the `parseInWorker` + `addSnapshot` call (lines 33-38) and per-file `try/catch` toast (39-42) are reused; only the *blocking* nature changes.
+**Analog:** self — the current blocking sequential loop (lines 27-47); the `parseInWorker` + `addSnapshot` call (lines 33-38) and per-file `try/catch` toast (39-42) are reused; only the _blocking_ nature changes.
 
 **Reused verbatim** — the per-file body (lines 33-42): `const { snapshot } = await parseInWorker(file)`; `useSnapshotStore.getState().addSnapshot({ id: crypto.randomUUID(), parsedAt: new Date(), ...snapshot })`; the privacy-safe `err.message`-only toast (lines 40-41, doc lines 21-22 — never pass the error object).
 
@@ -223,7 +221,7 @@ setCapturedAt: (id, date) =>
 
 - Line 3: `export type AppView = 'dashboard' | 'inventory' | 'hosts' | 'planning' | 'eos' | 'trends'`
 - Line 5: `const VIEWS = ['dashboard', 'inventory', 'hosts', 'planning', 'eos', 'trends'] as const`
-The `<fieldset role="group">` + `<legend className="sr-only">` + `map(button aria-pressed)` idiom (lines 47-75), the gold-active-segment class (line 65 `bg-accent-500 text-surface-900` + `dark:` twin), the Arrow-Left/Right wraparound (lines 31-45), and `focus-visible:ring-2 ring-primary-500` (line 63) are all inherited verbatim — no new code. New label key `inventory:nav.trends` in EN+FR (t(`nav.${view}`) line 70). UI-SPEC: append `trends` last.
+  The `<fieldset role="group">` + `<legend className="sr-only">` + `map(button aria-pressed)` idiom (lines 47-75), the gold-active-segment class (line 65 `bg-accent-500 text-surface-900` + `dark:` twin), the Arrow-Left/Right wraparound (lines 31-45), and `focus-visible:ring-2 ring-primary-500` (line 63) are all inherited verbatim — no new code. New label key `inventory:nav.trends` in EN+FR (t(`nav.${view}`) line 70). UI-SPEC: append `trends` last.
 
 **App.tsx** — add a branch in the ternary chain (lines 45-49), mirroring the EOS branch exactly:
 
@@ -256,7 +254,7 @@ Empty state when `view.trends === null`: just the `<h2>` heading (EosView lines 
 
 **Region-scoped ErrorBoundary** — copy `EosError` verbatim (EosView lines 25-36): `role="alert"`, reads ONLY `error.message` (never `.cause`/`.stack` — leaks VM/host names), `border-util-high/40` panel, `t('states.error', { message })` from the `dashboard` namespace.
 
-**Chart use** — `<Chart option={chartOption} ariaLabel={t('heading')} />` (EosView line 214). The pure option builder lives in `trendsChartOptions.ts` built off `view.trends` (mirrors EosView `chartOption` lines 127-155). **TRD-02 mandate:** `xAxis: { type: 'time' }` + `series.data` as `[Date, value]` pairs (NOT `type: 'category'` — that is the forbidden default; EosView's `type: 'category'` at line 131 is correct for *buckets* but is the anti-pattern for the temporal axis). D-05 fallback: `type: 'category'` over stable-ordered labels ONLY when `view.trends.orderInferred === true`.
+**Chart use** — `<Chart option={chartOption} ariaLabel={t('heading')} />` (EosView line 214). The pure option builder lives in `trendsChartOptions.ts` built off `view.trends` (mirrors EosView `chartOption` lines 127-155). **TRD-02 mandate:** `xAxis: { type: 'time' }` + `series.data` as `[Date, value]` pairs (NOT `type: 'category'` — that is the forbidden default; EosView's `type: 'category'` at line 131 is correct for _buckets_ but is the anti-pattern for the temporal axis). D-05 fallback: `type: 'category'` over stable-ordered labels ONLY when `view.trends.orderInferred === true`.
 
 **Sparkline** (TRD-03, RESEARCH Pattern 3) — same `<Chart>`, minimal option: `grid:{top:2,bottom:2,left:2,right:2}`, `xAxis/yAxis show:false`, `series:[{type:'line',showSymbol:false,lineStyle:{width:1.5}}]`, `<Chart option={sparkOption} style={{ height: 36 }} />`. Slot lives in `src/components/dashboard/ClusterColumn.tsx` (rendered only when `view.trends` has ≥2 points for that cluster).
 
@@ -307,9 +305,9 @@ Copy the factory + fixed-clock + per-field-assertion idiom. Include the mandator
 
 ## No Analog Found
 
-| File | Role | Reason |
-|------|------|--------|
-| — | — | None. Every Phase-8 file maps to a shipped vatlas analog (P8 is composition of shipped engines + extension of shipped components — confirmed by ROADMAP "nothing direct; reuses `<Chart>` from Phase 2 and the aggregation pipeline from Phase 2"). |
+| File | Role | Reason                                                                                                                                                                                                                                              |
+| ---- | ---- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| —    | —    | None. Every Phase-8 file maps to a shipped vatlas analog (P8 is composition of shipped engines + extension of shipped components — confirmed by ROADMAP "nothing direct; reuses `<Chart>` from Phase 2 and the aggregation pipeline from Phase 2"). |
 
 ## Metadata
 

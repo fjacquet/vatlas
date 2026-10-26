@@ -7,11 +7,11 @@
 
 ## Executive Summary
 
-vatlas is an *analytics atlas* over RVTools workbooks: ingest one or many `.xlsx` exports in the browser, present a global dashboard + virtualised inventory tree + EOS forecast + DR what-if + in-session trends, then export the synthesis as one self-contained HTML report and one PPTX deck. Experts build this class of tool exactly the way `vsizer` already does — pure-function `engines/` over Zustand-held immutable snapshots, with `useMemo`-derived view-models feeding both UI and exports — and vatlas should adopt that pattern wholesale rather than reinvent it. The product invariants (100 % client-side, no telemetry, no cross-session persistence, RVTools-only, factual reports with **no editorial recommendations**) are inherited from `vsizer` and non-negotiable; they cascade into stack choices (no analytics SDK, no Sentry by default, runtime fetch-wrapper guard), data model (Snapshot is immutable, Estate is a Set of snapshot ids, aggregates are derived not stored), and export design (one-file HTML, factual PPTX in the Midnight Executive palette).
+vatlas is an _analytics atlas_ over RVTools workbooks: ingest one or many `.xlsx` exports in the browser, present a global dashboard + virtualised inventory tree + EOS forecast + DR what-if + in-session trends, then export the synthesis as one self-contained HTML report and one PPTX deck. Experts build this class of tool exactly the way `vsizer` already does — pure-function `engines/` over Zustand-held immutable snapshots, with `useMemo`-derived view-models feeding both UI and exports — and vatlas should adopt that pattern wholesale rather than reinvent it. The product invariants (100 % client-side, no telemetry, no cross-session persistence, RVTools-only, factual reports with **no editorial recommendations**) are inherited from `vsizer` and non-negotiable; they cascade into stack choices (no analytics SDK, no Sentry by default, runtime fetch-wrapper guard), data model (Snapshot is immutable, Estate is a Set of snapshot ids, aggregates are derived not stored), and export design (one-file HTML, factual PPTX in the Midnight Executive palette).
 
 The recommended stack is **vsizer's stack at current 2026-05 versions** (React 19.2, Vite 8 + Rolldown, Tailwind v4.3, Zustand 5, Zod 4, SheetJS 0.20.3 via the official CDN tarball — **never** the CVE-affected npm `xlsx`, pptxgenjs 4, Vitest 4, Biome 2) plus two new pieces for vatlas: **Apache ECharts via `echarts-for-react` with tree-shaken imports + the SVG renderer** for charting, and **live-DOM serialization via `renderToStaticMarkup` + inlined CSS/fonts/SVG** for the HTML report export. The chart-library choice is the biggest new decision: vatlas needs treemap, sunburst, heatmap, calendar-heatmap, and gauge series, and ECharts ships all of them as first-class series with a documented `renderToSVGString()` path that makes the HTML-report export trivially compatible.
 
-The dominant risks are not technical — they are *correctness* and *privacy* risks. Wrong numbers in an operator-facing capacity tool are worse than no numbers (one operator will base a budget on them), so the math pitfalls flagged in `PITFALLS.md` (RVTools "MB" is MiB; powered-off VMs distort consolidation ratios; multi-vCenter merges must key on `(VI SDK UUID, VM/cluster UUID)` not name; stretched-cluster 50 % is only correct for symmetric clusters; hyperthreads are not pCPU; DR sim must show its assumptions) all require dedicated engineering. The privacy invariant must be defended with a runtime `fetch`/`XHR`/`WS`/`sendBeacon` guard, a CSP `connect-src 'self'` meta tag, and a CI denylist of telemetry packages — landed in the very first phase, before any feature that might be tempted to add them.
+The dominant risks are not technical — they are _correctness_ and _privacy_ risks. Wrong numbers in an operator-facing capacity tool are worse than no numbers (one operator will base a budget on them), so the math pitfalls flagged in `PITFALLS.md` (RVTools "MB" is MiB; powered-off VMs distort consolidation ratios; multi-vCenter merges must key on `(VI SDK UUID, VM/cluster UUID)` not name; stretched-cluster 50 % is only correct for symmetric clusters; hyperthreads are not pCPU; DR sim must show its assumptions) all require dedicated engineering. The privacy invariant must be defended with a runtime `fetch`/`XHR`/`WS`/`sendBeacon` guard, a CSP `connect-src 'self'` meta tag, and a CI denylist of telemetry packages — landed in the very first phase, before any feature that might be tempted to add them.
 
 ## Key Findings
 
@@ -22,7 +22,7 @@ vatlas adopts `vsizer`'s stack at 2026-05 versions and adds exactly two new depe
 **Core technologies:**
 
 - **React 19.2 + TypeScript 5.9 (strict) + Vite 8 (Rolldown)** — UI runtime and build. Client-only, so the 2025-12/2026-01 RSC CVE chain does not apply. Match `vsizer` `tsconfig.app.json` verbatim (`strict`, `noUncheckedIndexedAccess`, `verbatimModuleSyntax`, `erasableSyntaxOnly`).
-- **Apache ECharts 5.6 via `echarts-for-react` 3, SVG renderer, tree-shaken** — charting engine. Single decisive reason: vatlas needs treemap, sunburst, heatmap, calendar-heatmap, and gauge; ECharts ships all five natively where Recharts ships none of them, Nivo ships them with weaker SVG-export ergonomics, and visx ships them only as *primitives to build from*. SVG renderer (not Canvas) is the keystone that makes the HTML-report export embed crisp inline `<svg>` with one line of code. See "Tension reconciled" below.
+- **Apache ECharts 5.6 via `echarts-for-react` 3, SVG renderer, tree-shaken** — charting engine. Single decisive reason: vatlas needs treemap, sunburst, heatmap, calendar-heatmap, and gauge; ECharts ships all five natively where Recharts ships none of them, Nivo ships them with weaker SVG-export ergonomics, and visx ships them only as _primitives to build from_. SVG renderer (not Canvas) is the keystone that makes the HTML-report export embed crisp inline `<svg>` with one line of code. See "Tension reconciled" below.
 - **SheetJS 0.20.3 via CDN tarball** — RVTools `.xlsx` parsing. The npm `xlsx` package is frozen at 0.18.5 and CVE-affected; SheetJS deliberately publishes only via `cdn.sheetjs.com`. Pin in `package.json` as the full tarball URL; revert any tool that rewrites it.
 - **Zustand 5 + Zod 4** — memory-only state and parser-boundary validation. No `localStorage`/`IndexedDB`/`OPFS` of dataset rows, ever. UI-only prefs (theme, locale) may use `localStorage`.
 - **pptxgenjs 4.0.1** — PPTX export. Inherit `vsizer/engines/export/pptx/` style tokens (Midnight Executive palette, factual-only copy).
@@ -150,7 +150,7 @@ The research surfaces a clear dependency graph but **two competing groupings**: 
 - ADR-0010 (MB-is-MiB) inherited; ADR for multi-vCenter keys (`vcenter_uuid`, `vm_bios_uuid`).
 - Parser in Web Worker on day one: `parseXlsx` + RVTools adapter + Zod schemas (ported from `vsizer`, extended for OS column / vDatastore / vPartition), `dense: true`, drop raw cells eagerly. Header-based alias dictionary for column drift across RVTools 3.10/3.11/4.0/4.4. Trim + null-preprocess on every Zod schema. RVTools-MiB canary fixture.
 - Snapshot ingestion store (Zustand, immutable, append-only).
-- *Pitfalls addressed:* Critical-1, Critical-2, Critical-5, Moderate-1, Minor-1/3/5.
+- _Pitfalls addressed:_ Critical-1, Critical-2, Critical-5, Moderate-1, Minor-1/3/5.
 
 **Cluster B — Single-snapshot aggregation + dashboard.**
 
@@ -160,7 +160,7 @@ The research surfaces a clear dependency graph but **two competing groupings**: 
 - Global dashboard UI, one column per cluster, OS family breakdown.
 - `useEstateView` hook (single bridge from store to engines).
 - ECharts integration with tree-shaking, SVG renderer, `<Chart>` wrapper, theme tokens.
-- *Pitfalls addressed:* Critical-6, Moderate-4, Moderate-5, Moderate-11, Moderate-9.
+- _Pitfalls addressed:_ Critical-6, Moderate-4, Moderate-5, Moderate-11, Moderate-9.
 
 **Cluster C — Inventory navigation.**
 
@@ -169,7 +169,7 @@ The research surfaces a clear dependency graph but **two competing groupings**: 
 - Datastore view with thin-provisioning flags.
 - CSV export of the current filter (ported from `vsizer`).
 - Column show/hide menu, sticky header + first column, filter chips.
-- *Pitfalls addressed:* part of Critical-5 (memory budget on large estates), Minor-2 (multi-line cells).
+- _Pitfalls addressed:_ part of Critical-5 (memory budget on large estates), Minor-2 (multi-line cells).
 
 **Cluster D — Multi-vCenter + scenarios (the analytics core).**
 
@@ -177,7 +177,7 @@ The research surfaces a clear dependency graph but **two competing groupings**: 
 - Stretched-cluster pill (port `vsizer` ADR-0007) with per-site reservation math and the `confidence` field.
 - Allocation-ratio sliders (CPU 4:1 / RAM 1:1 defaults, URL-hash-encoded only).
 - DR sim in three modes (host loss, cluster loss, vCenter loss) with assumptions panel + `caveats` array. Stretched-cluster split-brain bonus mode.
-- *Pitfalls addressed:* Critical-3, Critical-4, Moderate-10.
+- _Pitfalls addressed:_ Critical-3, Critical-4, Moderate-10.
 
 **Cluster E — EOS forecasting.**
 
@@ -186,7 +186,7 @@ The research surfaces a clear dependency graph but **two competing groupings**: 
 - Lifecycle phase bucketing including the **"overdue"** bucket (RHEL 7, Win 2012 R2 are past EOS).
 - EOS forecast UI at 3/6/9/12-month horizons + one-click drill from a bucket to the affected VM list.
 - ESX build → support state classifier.
-- *Pitfalls addressed:* Moderate-6, Minor-4.
+- _Pitfalls addressed:_ Moderate-6, Minor-4.
 
 **Cluster F — Multi-snapshot trends.**
 
@@ -195,7 +195,7 @@ The research surfaces a clear dependency graph but **two competing groupings**: 
 - Temporal (not categorical) X-axis; show actual capture dates on hover; show RVTools version per snapshot.
 - Line charts of headline metrics; per-cluster sparklines on the dashboard; (P2) cluster × time heatmap; (P2) side-by-side snapshot diff.
 - Snapshot retention policy: when N > 4 snapshots are loaded, release older raw rows; keep only aggregated time-series.
-- *Pitfalls addressed:* Minor-6, part of Critical-5 (memory budget).
+- _Pitfalls addressed:_ Minor-6, part of Critical-5 (memory budget).
 
 **Cluster G — Export pipeline (HTML + PPTX).**
 
@@ -203,7 +203,7 @@ The research surfaces a clear dependency graph but **two competing groupings**: 
 - `engines/export/pptx/` — ported from `vsizer`, extended with EOS / DR / Trends / Inventory slides. `pptxText` wrapper for text-overflow + control-char stripping. `pptxSafeFormat` for U+202F → U+00A0. Golden-PPTX snapshot test.
 - Both run in `engines/export/index.worker.ts`.
 - Data-freshness display in header + every export footer; methodology footer with the locked-in CPU/RAM ratios and stretched reservation.
-- *Pitfalls addressed:* Moderate-2, Moderate-7, Moderate-8.
+- _Pitfalls addressed:_ Moderate-2, Moderate-7, Moderate-8.
 
 **Cluster H — Polish & deploy.**
 
@@ -211,7 +211,7 @@ The research surfaces a clear dependency graph but **two competing groupings**: 
 - Light/dark theme, drag-and-drop multi-file UX, drop-zone validation (D11), explicit data-freshness display (D10).
 - `vatlas-lang` allowed in `localStorage` (locale code only; not dataset content).
 - GitHub Pages CI (typecheck → lint → test → build → deploy), `base: '/vatlas/'`.
-- *Pitfalls addressed:* Moderate-2, Minor-7.
+- _Pitfalls addressed:_ Moderate-2, Minor-7.
 
 ### Phase ordering rationale (the hard constraints)
 
@@ -244,12 +244,12 @@ These dependency edges are non-negotiable; the roadmapper must respect them when
 
 ## Confidence Assessment
 
-| Area | Confidence | Notes |
-|------|------------|-------|
-| Stack | HIGH | Every dependency verified against current upstream releases as of 2026-05-15. The two new choices (ECharts + live-DOM HTML export) are documented with explicit alternatives-considered tables and have working precedents (ECharts is a top-3 charting library; `renderToStaticMarkup` is React's documented API). Charting bundle size landing zone is MEDIUM until first build. |
-| Features | MEDIUM-HIGH | RVTools schema, EOS catalogue source/format, multi-vCenter merge keys, DR methodology, and viz patterns are all backed by HIGH-confidence public sources (Broadcom techdocs, RVTools release notes, endoflife.date repo, vCAT, multiple community blogs). The precise paid feature matrix of the closed-source reference tool (RVTools Analyser) is partially LOW confidence — vendor docs are behind login/paywall — but vatlas doesn't need to clone it 1:1 so this is not blocking. |
-| Architecture | HIGH | Direct extrapolation from `vsizer`'s shipped, tested architecture + explicit vatlas scope deltas in `PROJECT.md`. Performance numbers (parse time, estate-size envelope) are order-of-magnitude estimates from typical RVTools exports + `vsizer` benchmark data — MEDIUM confidence, will verify with real fixtures in the parser phase. |
-| Pitfalls | HIGH | Drawn from `vsizer`'s shipped lessons + `store-predict` ADR-017 (inheritable) + explicit RVTools / VMware / pptxgenjs / Intl.NumberFormat public sources. Every Critical pitfall has a concrete prevention artifact (schema rule, test fixture, CI gate, ADR). |
+| Area         | Confidence  | Notes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| ------------ | ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Stack        | HIGH        | Every dependency verified against current upstream releases as of 2026-05-15. The two new choices (ECharts + live-DOM HTML export) are documented with explicit alternatives-considered tables and have working precedents (ECharts is a top-3 charting library; `renderToStaticMarkup` is React's documented API). Charting bundle size landing zone is MEDIUM until first build.                                                                                                     |
+| Features     | MEDIUM-HIGH | RVTools schema, EOS catalogue source/format, multi-vCenter merge keys, DR methodology, and viz patterns are all backed by HIGH-confidence public sources (Broadcom techdocs, RVTools release notes, endoflife.date repo, vCAT, multiple community blogs). The precise paid feature matrix of the closed-source reference tool (RVTools Analyser) is partially LOW confidence — vendor docs are behind login/paywall — but vatlas doesn't need to clone it 1:1 so this is not blocking. |
+| Architecture | HIGH        | Direct extrapolation from `vsizer`'s shipped, tested architecture + explicit vatlas scope deltas in `PROJECT.md`. Performance numbers (parse time, estate-size envelope) are order-of-magnitude estimates from typical RVTools exports + `vsizer` benchmark data — MEDIUM confidence, will verify with real fixtures in the parser phase.                                                                                                                                              |
+| Pitfalls     | HIGH        | Drawn from `vsizer`'s shipped lessons + `store-predict` ADR-017 (inheritable) + explicit RVTools / VMware / pptxgenjs / Intl.NumberFormat public sources. Every Critical pitfall has a concrete prevention artifact (schema rule, test fixture, CI gate, ADR).                                                                                                                                                                                                                         |
 
 **Overall confidence:** HIGH for the stack and architecture (sibling-derived), MEDIUM-HIGH for the feature surface (some reference-tool-feature inference), HIGH for the pitfall inventory.
 
@@ -264,5 +264,6 @@ These dependency edges are non-negotiable; the roadmapper must respect them when
 - **EOS catalogue v1 API stability.** `endoflife.date` v1 is in Beta; breaking changes possible. **Resolve:** `scripts/sync-eos-catalogue.ts` must Zod-validate the fetched shape and fail the build on a schema mismatch (signals a needed update to the normalizer).
 
 ---
-*Research completed: 2026-05-15*
-*Ready for roadmap: yes*
+
+_Research completed: 2026-05-15_
+_Ready for roadmap: yes_

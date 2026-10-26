@@ -20,7 +20,7 @@ npm install
 
 That is the complete install. A few notes:
 
-- **Do not run `npm install xlsx`.** The SheetJS dependency is deliberately pinned to the official CDN tarball (`https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz`) in `package.json`'s `dependencies`. The npm `xlsx` package is frozen at a CVE-affected version and is *not* the same code. `npm install` with no arguments resolves the pinned tarball correctly.
+- **Do not run `npm install xlsx`.** The SheetJS dependency is deliberately pinned to the official CDN tarball (`https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz`) in `package.json`'s `dependencies`. The npm `xlsx` package is frozen at a CVE-affected version and is _not_ the same code. `npm install` with no arguments resolves the pinned tarball correctly.
 - `npm install` also installs the supply-chain guard. The `prebuild` script (`scripts/check-supply-chain.mjs`) fails the build if the `xlsx` pin drifts or telemetry packages appear — no action needed during setup, just be aware it exists.
 
 ## First run

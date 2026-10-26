@@ -1,63 +1,64 @@
 ---
+
 phase: 01-foundation-invariants
 plan: 03
 subsystem: infra
 tags: [typescript, branded-types, units, sheetjs, xlsx, adr, mib, vitest, tdd]
 
 requires:
-  - phase: 01-foundation-invariants
-    plan: 01
-    provides: "tsconfig.app.json strict + noUncheckedIndexedAccess; vitest.config.ts coverage includes src/engines/units/**; @engines path alias"
-  - phase: 01-foundation-invariants
-    plan: 02
-    provides: "scripts/check-supply-chain.mjs SheetJS-pin gate (REQUIRED_XLSX_PIN); prebuild hook"
-provides:
-  - "src/engines/units/{types,constants,converters,index}.ts — branded MiB/GiB/TiB/Bytes/MHz/GHz/Cores/Sockets + pure converters, Zod-free"
-  - "BYTES_PER_MIB=1_048_576, MIB_PER_GIB=GIB_PER_TIB=1_024, MHZ_PER_GHZ=1_000 (as const)"
-  - "Compile-time brand discrimination (passing GiB where MiB expected is a tsc error)"
-  - "scripts/generate-mib-canary.mjs — deterministic RVTools-shaped .xlsx generator"
-  - "src/__fixtures__/rvtools-mib-canary.xlsx — committed canary fixture (Plan 04 consumes)"
-  - "docs/adr/0010-rvtools-mb-as-mib.md — verbatim store-predict ADR-017 inheritance"
-  - "package.json: xlsx pinned to SheetJS CDN tarball 0.20.3; npm run generate-mib-canary script"
-affects: [01-04-parser, 01-05-snapshot-store]
+- phase: 01-foundation-invariants
+  plan: 01
+  provides: "tsconfig.app.json strict + noUncheckedIndexedAccess; vitest.config.ts coverage includes src/engines/units/**; @engines path alias"
+- phase: 01-foundation-invariants
+  plan: 02
+  provides: "scripts/check-supply-chain.mjs SheetJS-pin gate (REQUIRED_XLSX_PIN); prebuild hook"
+  provides:
+- "src/engines/units/{types,constants,converters,index}.ts — branded MiB/GiB/TiB/Bytes/MHz/GHz/Cores/Sockets + pure converters, Zod-free"
+- "BYTES_PER_MIB=1_048_576, MIB_PER_GIB=GIB_PER_TIB=1_024, MHZ_PER_GHZ=1_000 (as const)"
+- "Compile-time brand discrimination (passing GiB where MiB expected is a tsc error)"
+- "scripts/generate-mib-canary.mjs — deterministic RVTools-shaped .xlsx generator"
+- "src/**fixtures**/rvtools-mib-canary.xlsx — committed canary fixture (Plan 04 consumes)"
+- "docs/adr/0010-rvtools-mb-as-mib.md — verbatim store-predict ADR-017 inheritance"
+- "package.json: xlsx pinned to SheetJS CDN tarball 0.20.3; npm run generate-mib-canary script"
+  affects: [01-04-parser, 01-05-snapshot-store]
 
 tech-stack:
-  added:
-    - "xlsx (SheetJS) https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz — pinned CDN tarball (NOT the CVE-affected npm package)"
+added:
+- "xlsx (SheetJS) https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz — pinned CDN tarball (NOT the CVE-affected npm package)"
   patterns:
-    - "Hand-rolled branded number types `number & { readonly __brand: 'X' }` — no ts-brand/uuid/Zod helper lib (KISS)"
-    - "Single-location `as` cast confined to each constructor (mib/gib/...); converters operate brand-to-brand"
-    - "Engines stay Zod-free (01-RESEARCH.md A8) — branded types are the engine-layer contract; Zod lives only at the parser boundary in 01-04"
-    - "NO `* 1.048576` SI inflation factor anywhere — RVTools 'MB' is reinterpreted as MiB, never converted (ADR-0010)"
-    - "Deterministic fixture generation: SheetJS writeFile with compression:false → byte-identical re-runs for clean git diffs"
-    - "SheetJS Node ESM requires explicit XLSX.set_fs(fs) before writeFile"
+- "Hand-rolled branded number types `number & { readonly __brand: 'X' }` — no ts-brand/uuid/Zod helper lib (KISS)"
+- "Single-location `as` cast confined to each constructor (mib/gib/...); converters operate brand-to-brand"
+- "Engines stay Zod-free (01-RESEARCH.md A8) — branded types are the engine-layer contract; Zod lives only at the parser boundary in 01-04"
+- "NO `* 1.048576` SI inflation factor anywhere — RVTools 'MB' is reinterpreted as MiB, never converted (ADR-0010)"
+- "Deterministic fixture generation: SheetJS writeFile with compression:false → byte-identical re-runs for clean git diffs"
+- "SheetJS Node ESM requires explicit XLSX.set_fs(fs) before writeFile"
 
 key-files:
-  created:
-    - "src/engines/units/types.ts"
-    - "src/engines/units/constants.ts"
-    - "src/engines/units/converters.ts"
-    - "src/engines/units/index.ts"
-    - "src/engines/units/types.test.ts"
-    - "src/engines/units/constants.test.ts"
-    - "src/engines/units/converters.test.ts"
-    - "scripts/generate-mib-canary.mjs"
-    - "src/__fixtures__/rvtools-mib-canary.xlsx"
-    - "docs/adr/0010-rvtools-mb-as-mib.md"
+created:
+- "src/engines/units/types.ts"
+- "src/engines/units/constants.ts"
+- "src/engines/units/converters.ts"
+- "src/engines/units/index.ts"
+- "src/engines/units/types.test.ts"
+- "src/engines/units/constants.test.ts"
+- "src/engines/units/converters.test.ts"
+- "scripts/generate-mib-canary.mjs"
+- "src/**fixtures**/rvtools-mib-canary.xlsx"
+- "docs/adr/0010-rvtools-mb-as-mib.md"
   modified:
-    - "package.json (xlsx pin + generate-mib-canary script)"
-    - "package-lock.json (xlsx + dependency resolved)"
+- "package.json (xlsx pin + generate-mib-canary script)"
+- "package-lock.json (xlsx + dependency resolved)"
 
 key-decisions:
-  - "xlsx SheetJS tarball pin landed in Plan 01-03 (not 01-04 as Plan 01-01 SUMMARY anticipated) — the canary generator is a hard dependency of THIS plan's deliverable and the plan's key_links explicitly name `package.json::xlsx (CDN tarball)`. Plan 02's supply-chain gate already anticipated/accepts the pin (REQUIRED_XLSX_PIN matches exactly)."
-  - "ADR-0010 inherited from the LIVE store-predict/docs/adr/017-rvtools-mb-as-mib.md (reachable), verbatim, with the three sanctioned substitutions plus the vatlas branded-type/canary Consequences bullets the plan's Task 3 canonical block mandates."
-  - "constants.test.ts: replaced the plan's brittle `(BYTES_PER_MIB as unknown as number) = 999` cast-assignment test with a clean canonical-value assertion (Rule 1 — the original mixes a non-deterministic invalid-assignment-target with not.toThrow)."
-  - "Added an explicit ROADMAP success-criterion test: 2 sockets × 12 cores × mhzToGhz(mhz(2600)) === 62.4 GHz."
+- "xlsx SheetJS tarball pin landed in Plan 01-03 (not 01-04 as Plan 01-01 SUMMARY anticipated) — the canary generator is a hard dependency of THIS plan's deliverable and the plan's key_links explicitly name `package.json::xlsx (CDN tarball)`. Plan 02's supply-chain gate already anticipated/accepts the pin (REQUIRED_XLSX_PIN matches exactly)."
+- "ADR-0010 inherited from the LIVE store-predict/docs/adr/017-rvtools-mb-as-mib.md (reachable), verbatim, with the three sanctioned substitutions plus the vatlas branded-type/canary Consequences bullets the plan's Task 3 canonical block mandates."
+- "constants.test.ts: replaced the plan's brittle `(BYTES_PER_MIB as unknown as number) = 999` cast-assignment test with a clean canonical-value assertion (Rule 1 — the original mixes a non-deterministic invalid-assignment-target with not.toThrow)."
+- "Added an explicit ROADMAP success-criterion test: 2 sockets × 12 cores × mhzToGhz(mhz(2600)) === 62.4 GHz."
 
 patterns-established:
-  - "Branded units module is the canonical engine-layer numeric contract — Plan 04 schemas import `{ MiB, MHz, Cores }` from @engines/units for Zod transform outputs."
-  - "MiB canary fixture: synthetic, PII-free, deterministic; Plan 04 owns the parser integration test that asserts mibToGib(parsed.vinfo[0].provisionedMib) === gib(100)."
-  - "Documentary mentions of the forbidden factor are phrased to NOT match the lexical anti-pattern grep `\\* ?1\\.048576|/ ?1\\.048576|1048576\\.[0-9]` (the gate guards against a real multiplicand, not the word)."
+- "Branded units module is the canonical engine-layer numeric contract — Plan 04 schemas import `{ MiB, MHz, Cores }` from @engines/units for Zod transform outputs."
+- "MiB canary fixture: synthetic, PII-free, deterministic; Plan 04 owns the parser integration test that asserts mibToGib(parsed.vinfo[0].provisionedMib) === gib(100)."
+- "Documentary mentions of the forbidden factor are phrased to NOT match the lexical anti-pattern grep `\\* ?1\\.048576|/ ?1\\.048576|1048576\\.[0-9]` (the gate guards against a real multiplicand, not the word)."
 
 requirements-completed: [PAR-04]
 
@@ -108,12 +109,12 @@ ADR-0010 was inherited from the **live** file `/Users/fjacquet/Projects/store-pr
 
 `npx vitest run --coverage --coverage.include='src/engines/units/**'`:
 
-| Metric | Result |
-|--------|--------|
+| Metric     | Result           |
+| ---------- | ---------------- |
 | Statements | **100%** (30/30) |
-| Branches | **100%** (0/0) |
-| Functions | **100%** (13/13) |
-| Lines | **100%** (17/17) |
+| Branches   | **100%** (0/0)   |
+| Functions  | **100%** (13/13) |
+| Lines      | **100%** (17/17) |
 
 Threshold gate 75% on all four — cleared with margin.
 
@@ -125,7 +126,7 @@ Threshold gate 75% on all four — cleared with margin.
 
 ## Canary test live/staged decision
 
-**STAGED for Plan 04.** This plan ships a *smoke test* of the canary (the generator runs without error, produces a non-empty file, and re-runs byte-identically — all asserted in Task 2's verify block and the SUMMARY self-check). The plan explicitly states "a tiny smoke test in this plan; Plan 04 owns the full parser integration test". No live `*.test.ts` consumes the `.xlsx` yet because the parser does not exist until Plan 04 — a live consuming test now would be a stub. The fixture content is fully documented above so Plan 04 can assert against exact hand-computed totals.
+**STAGED for Plan 04.** This plan ships a _smoke test_ of the canary (the generator runs without error, produces a non-empty file, and re-runs byte-identically — all asserted in Task 2's verify block and the SUMMARY self-check). The plan explicitly states "a tiny smoke test in this plan; Plan 04 owns the full parser integration test". No live `*.test.ts` consumes the `.xlsx` yet because the parser does not exist until Plan 04 — a live consuming test now would be a stub. The fixture content is fully documented above so Plan 04 can assert against exact hand-computed totals.
 
 ## Task Commits
 
@@ -133,7 +134,7 @@ Threshold gate 75% on all four — cleared with margin.
 2. **Task 2 (GREEN)** — `d08b92c` `feat(01-03)` — `types.ts`, `constants.ts`, `converters.ts`, `index.ts`, `scripts/generate-mib-canary.mjs`, `src/__fixtures__/rvtools-mib-canary.xlsx`, `package.json` + `package-lock.json` (xlsx pin), `converters.test.ts` (anti-pattern-string rephrase). 20/20 GREEN; typecheck validates suppressions; canary deterministic.
 3. **Task 3 (REFACTOR)** — `5d304dc` `docs(01-03)` — `docs/adr/0010-rvtools-mb-as-mib.md`. (npm script + xlsx pin already landed in Task 2's atomic GREEN unblock.)
 
-**Plan metadata:** *(this commit)* `docs(01-03): complete branded units module plan`
+**Plan metadata:** _(this commit)_ `docs(01-03): complete branded units module plan`
 
 ## Decisions Made
 
@@ -172,7 +173,7 @@ Threshold gate 75% on all four — cleared with margin.
 **4. [Rule 2 - Missing Critical] Anti-pattern grep false-positives on documentary text**
 
 - **Found during:** Task 2 (GREEN — running the plan's verify regex).
-- **Issue:** Source/test comments and `it()` descriptions that *named* the forbidden `* 1.048576` token to warn against it matched the plan's lexical CI gate regex, which would fail the automated verify and (in Plan 04's CI) any grep gate.
+- **Issue:** Source/test comments and `it()` descriptions that _named_ the forbidden `* 1.048576` token to warn against it matched the plan's lexical CI gate regex, which would fail the automated verify and (in Plan 04's CI) any grep gate.
 - **Fix:** Rephrased the documentary mentions so they describe the forbidden SI inflation factor without containing the regex-matching `* 1.048576` / `/ 1.048576` / `1048576.x` token. The warning intent is preserved; the lexical gate now passes (matches NOTHING in src/scripts/docs).
 - **Files modified:** `src/engines/units/converters.ts`, `src/engines/units/constants.ts`, `src/engines/units/converters.test.ts`.
 - **Committed in:** `d08b92c` (converters.ts/constants.ts/converters.test.ts) and `b82dd2a` baseline.
@@ -234,5 +235,6 @@ None that block PAR-04. The canary fixture has no live consuming `*.test.ts` yet
 ## Self-Check: PASSED
 
 ---
-*Phase: 01-foundation-invariants*
-*Completed: 2026-05-15*
+
+_Phase: 01-foundation-invariants_
+_Completed: 2026-05-15_

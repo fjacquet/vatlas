@@ -297,12 +297,12 @@ import type { VmSizeStats } from '@/engines/aggregation/avgVmSize'
 Then add the field to the `EstateView` interface — place it right after the `monsters: MonsterEstate` field (around line 542), with a doc comment:
 
 ```ts
-  /**
-   * Estate-wide average VM size (mean/median/max for vCPU, vRAM, and
-   * in-use storage) over ALL VMs. Produced in the single `buildEstateView`
-   * pass; `EMPTY_VM_SIZE` in `EMPTY_VIEW`. Web dashboard + PPTX only.
-   */
-  vmSize: VmSizeStats
+/**
+ * Estate-wide average VM size (mean/median/max for vCPU, vRAM, and
+ * in-use storage) over ALL VMs. Produced in the single `buildEstateView`
+ * pass; `EMPTY_VM_SIZE` in `EMPTY_VIEW`. Web dashboard + PPTX only.
+ */
+vmSize: VmSizeStats
 ```
 
 - [ ] **Step 4: Populate it in the single pass**
@@ -318,12 +318,12 @@ import { avgVmSize, EMPTY_VM_SIZE } from './avgVmSize'
 (b) Compute it next to `monsters` (right after the `computeMonsters(...)` block, ~line 340). ALL VMs, mode-independent — no power-state/mode filter:
 
 ```ts
-  // Average VM size (mean/median/max) — same single pass. ALWAYS over ALL
-  // VMs (mode-independent): "average VM size" is a physical inventory fact,
-  // not an accounting figure, so it must not shift with the accounting mode
-  // (user decision 2026-07-03). vmSize.vmCount = raw VM count, not the
-  // mode-filtered globals.vmCount.
-  const vmSize = avgVmSize(merged.vinfo)
+// Average VM size (mean/median/max) — same single pass. ALWAYS over ALL
+// VMs (mode-independent): "average VM size" is a physical inventory fact,
+// not an accounting figure, so it must not shift with the accounting mode
+// (user decision 2026-07-03). vmSize.vmCount = raw VM count, not the
+// mode-filtered globals.vmCount.
+const vmSize = avgVmSize(merged.vinfo)
 ```
 
 (c) Add `vmSize,` to the returned object literal — right after `monsters,` (~line 365):
@@ -532,7 +532,6 @@ In `src/i18n/locales/it/dashboard.json` (best-effort, native-review pending):
 ```
 
 > Place the block at the same nesting level as the existing `"stats"` key in each file, with a trailing comma appropriate to its position (JSON — no trailing comma on the last key). The `keyParity.test.ts` gate requires identical key paths across all four files.
-
 - [ ] **Step 6: Write the card component**
 
 Create `src/components/dashboard/AverageVmSizeCard.tsx`:
@@ -620,7 +619,6 @@ Run: `rtk vitest run src/components/dashboard/AverageVmSizeCard.test.tsx`
 Expected: PASS (4 tests).
 
 > If `getByRole('region', ...)` fails: a `<section>` exposes the `region` role only when it has an accessible name — the `aria-label` provides one, so this works. Keep the `aria-label`.
-
 - [ ] **Step 8: Mount it on the dashboard**
 
 In `src/components/dashboard/GlobalDashboard.tsx`:
@@ -732,7 +730,6 @@ In `src/i18n/locales/en/pptx.json`, add a top-level `"avgVm"` block (sibling of 
 ```
 
 > Same nesting level as `"overview"`; mind JSON trailing commas. `keyParity.test.ts` derives the `pptx` namespace and enforces identical paths.
-
 - [ ] **Step 2: Extend `OverviewData` and render the table**
 
 In `src/engines/export/pptx/slides/overviewSlide.ts`:
@@ -762,85 +759,84 @@ export interface OverviewData {
 (c) At the END of `addOverviewSlide` (after the OS `addKpiRow(...)` call that closes the function), insert the native table. The OS block ends around `y3 + 0.45 + row height`; anchor the table with a fixed y below it (the overview slide has room — mirror the monster-slide table idiom). Add before the function's closing brace:
 
 ```ts
-  // Average VM size — a native table (native text renders fine; the resvg
-  // trap only affects rasterized chart images). Rows = vCPU / vRAM / storage
-  // (in-use); columns = mean / median / max. Factual, brand-free.
-  const vs = d.vmSize
-  const cell = (text: string, opts: Record<string, unknown> = {}) => ({
-    text: pptxSafeFormat(text),
-    options: { fontFace: 'Arial', fontSize: 11, color: PPTX_COLORS.ink, ...opts },
-  })
-  const hOpts = { bold: true, color: PPTX_COLORS.inkMuted }
-  const rOpts = { align: 'right' as const }
-  const num = (n: number) => pptxNumber(n, locale, 1)
-  const mem = (n: number) => pptxMemMib(n, locale)
-  const avgHeader = [
-    cell(strings['avgVm.axis'] ?? 'Axis', hOpts),
-    cell(strings['avgVm.mean'] ?? 'Mean', { ...hOpts, align: 'right' }),
-    cell(strings['avgVm.median'] ?? 'Median', { ...hOpts, align: 'right' }),
-    cell(strings['avgVm.max'] ?? 'Max', { ...hOpts, align: 'right' }),
-  ]
-  const avgRows = [
-    [
-      cell(strings['avgVm.axisVcpu'] ?? 'vCPU'),
-      cell(num(vs.vcpu.mean), rOpts),
-      cell(num(vs.vcpu.median), rOpts),
-      cell(num(vs.vcpu.max), rOpts),
-    ],
-    [
-      cell(strings['avgVm.axisVram'] ?? 'vRAM'),
-      cell(mem(vs.vramMib.mean), rOpts),
-      cell(mem(vs.vramMib.median), rOpts),
-      cell(mem(vs.vramMib.max), rOpts),
-    ],
-    [
-      cell(strings['avgVm.axisStorage'] ?? 'Storage (in-use)'),
-      cell(mem(vs.storageMib.mean), rOpts),
-      cell(mem(vs.storageMib.median), rOpts),
-      cell(mem(vs.storageMib.max), rOpts),
-    ],
-  ]
-  s.addText(pptxSafeFormat(strings['avgVm.title'] ?? 'Average VM size'), {
-    x: M,
-    y: 5.7,
-    w: 6,
-    h: 0.3,
-    fontFace: 'Arial',
-    fontSize: 13,
-    bold: true,
-    color: PPTX_COLORS.ink,
-    margin: 0,
-  })
-  s.addTable([avgHeader, ...avgRows], {
-    x: M,
-    y: 6.05,
-    w: CONTENT_W,
-    colW: [CONTENT_W * 0.4, CONTENT_W * 0.2, CONTENT_W * 0.2, CONTENT_W * 0.2],
-    rowH: 0.3,
-    valign: 'middle',
-    border: { type: 'solid', pt: 0.5, color: PPTX_COLORS.hairline },
-    autoPage: false,
-  })
+// Average VM size — a native table (native text renders fine; the resvg
+// trap only affects rasterized chart images). Rows = vCPU / vRAM / storage
+// (in-use); columns = mean / median / max. Factual, brand-free.
+const vs = d.vmSize
+const cell = (text: string, opts: Record<string, unknown> = {}) => ({
+  text: pptxSafeFormat(text),
+  options: { fontFace: 'Arial', fontSize: 11, color: PPTX_COLORS.ink, ...opts },
+})
+const hOpts = { bold: true, color: PPTX_COLORS.inkMuted }
+const rOpts = { align: 'right' as const }
+const num = (n: number) => pptxNumber(n, locale, 1)
+const mem = (n: number) => pptxMemMib(n, locale)
+const avgHeader = [
+  cell(strings['avgVm.axis'] ?? 'Axis', hOpts),
+  cell(strings['avgVm.mean'] ?? 'Mean', { ...hOpts, align: 'right' }),
+  cell(strings['avgVm.median'] ?? 'Median', { ...hOpts, align: 'right' }),
+  cell(strings['avgVm.max'] ?? 'Max', { ...hOpts, align: 'right' }),
+]
+const avgRows = [
+  [
+    cell(strings['avgVm.axisVcpu'] ?? 'vCPU'),
+    cell(num(vs.vcpu.mean), rOpts),
+    cell(num(vs.vcpu.median), rOpts),
+    cell(num(vs.vcpu.max), rOpts),
+  ],
+  [
+    cell(strings['avgVm.axisVram'] ?? 'vRAM'),
+    cell(mem(vs.vramMib.mean), rOpts),
+    cell(mem(vs.vramMib.median), rOpts),
+    cell(mem(vs.vramMib.max), rOpts),
+  ],
+  [
+    cell(strings['avgVm.axisStorage'] ?? 'Storage (in-use)'),
+    cell(mem(vs.storageMib.mean), rOpts),
+    cell(mem(vs.storageMib.median), rOpts),
+    cell(mem(vs.storageMib.max), rOpts),
+  ],
+]
+s.addText(pptxSafeFormat(strings['avgVm.title'] ?? 'Average VM size'), {
+  x: M,
+  y: 5.7,
+  w: 6,
+  h: 0.3,
+  fontFace: 'Arial',
+  fontSize: 13,
+  bold: true,
+  color: PPTX_COLORS.ink,
+  margin: 0,
+})
+s.addTable([avgHeader, ...avgRows], {
+  x: M,
+  y: 6.05,
+  w: CONTENT_W,
+  colW: [CONTENT_W * 0.4, CONTENT_W * 0.2, CONTENT_W * 0.2, CONTENT_W * 0.2],
+  rowH: 0.3,
+  valign: 'middle',
+  border: { type: 'solid', pt: 0.5, color: PPTX_COLORS.hairline },
+  autoPage: false,
+})
 ```
 
 > The `y: 5.7` / `y: 6.05` anchors assume the standard 7.5"-tall slide (`SLIDE.h`) with the OS block ending near y≈5.3. If the visual check (Step 5) shows overlap with the OS row or overflow off the slide bottom, nudge these two y-values together (keep the 0.35 gap) until the title sits below the OS block and the table's last row stays above the slide edge.
-
 - [ ] **Step 3: Thread `view.vmSize` in the builder**
 
 In `src/engines/export/pptx/builder.ts`, in the `addOverviewSlide(...)` call (lines 74-83), add `vmSize`:
 
 ```ts
-  addOverviewSlide(
-    pptx,
-    {
-      globals: view.globals,
-      insights: view.operationalInsights,
-      osBreakdown: view.osBreakdown,
-      vmSize: view.vmSize,
-    },
-    strings,
-    locale,
-  )
+addOverviewSlide(
+  pptx,
+  {
+    globals: view.globals,
+    insights: view.operationalInsights,
+    osBreakdown: view.osBreakdown,
+    vmSize: view.vmSize,
+  },
+  strings,
+  locale,
+)
 ```
 
 - [ ] **Step 4: Update the builder test to feed `vmSize` and assert it runs**
@@ -857,7 +853,6 @@ it('emits a deck carrying average-VM-size data without throwing', async () => {
 ```
 
 > `buildExportView` is imported in this file as `import { buildExportView } from '../buildExportView'`. If that import is not already present, add it. The four-arg `buildPptx(view, trends, strings, locale)` signature matches the existing golden-snapshot tests in this file.
-
 - [ ] **Step 5: Run tests, typecheck, lint**
 
 Run: `rtk vitest run src/engines/export/pptx/builder.test.ts`
@@ -884,7 +879,6 @@ Then Read the overview page of `/tmp/vatlas-deck/exported.pdf` and confirm:
 - Storage row reads "Storage (in-use)" (or the localized equivalent), not "provisioned".
 
 > If no scriptable export path exists in the repo for a headless run, drive the app per the project's run/verify convention to export a deck, then apply the same soffice→PDF→Read check. Do not skip the visual check — text/tests alone do not prove deck legibility (established project discipline).
-
 - [ ] **Step 7: Commit**
 
 ```bash

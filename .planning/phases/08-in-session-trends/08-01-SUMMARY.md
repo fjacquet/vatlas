@@ -1,57 +1,58 @@
 ---
+
 phase: 08-in-session-trends
 plan: 01
 subsystem: engine
 tags: [trends, aggregation, timeseries, capture-date, react-memo]
 
 requires:
-  - phase: 04-multi-vcenter-stretched-allocation-dr
-    provides: mergeSnapshotsToEstate spine + (VI SDK UUID, vm_bios_uuid) cross-snapshot identity
-  - phase: 02
-    provides: aggregateClusters/aggregateGlobals/perDatastore pipeline + the single buildEstateView pass
-provides:
-  - Pure src/engines/trends/ module (buildTrendSeries + captureDateOrdinal)
-  - TrendSeries/TrendPoint/TrendDelta/TrendHeadline types replacing the TimelinePoint stub
-  - EstateView.trends populated inside the single buildEstateView pass (no second memo)
-  - Snapshot.rawReleased/releasedAggregate + ReleasedTrendAggregate (DD-C carry contract)
-  - ISO_DATE_RE/filenameIsoDate exported from captureDate.ts (DRY for plan 08-02)
-affects: [08-02, 08-03, trends UI, dashboard sparklines, delta panel]
+- phase: 04-multi-vcenter-stretched-allocation-dr
+  provides: mergeSnapshotsToEstate spine + (VI SDK UUID, vm_bios_uuid) cross-snapshot identity
+- phase: 02
+  provides: aggregateClusters/aggregateGlobals/perDatastore pipeline + the single buildEstateView pass
+  provides:
+- Pure src/engines/trends/ module (buildTrendSeries + captureDateOrdinal)
+- TrendSeries/TrendPoint/TrendDelta/TrendHeadline types replacing the TimelinePoint stub
+- EstateView.trends populated inside the single buildEstateView pass (no second memo)
+- Snapshot.rawReleased/releasedAggregate + ReleasedTrendAggregate (DD-C carry contract)
+- ISO_DATE_RE/filenameIsoDate exported from captureDate.ts (DRY for plan 08-02)
+  affects: [08-02, 08-03, trends UI, dashboard sparklines, delta panel]
 
 tech-stack:
-  added: []
-  patterns:
-    - "Single-pass pure composition: trends sub-call inside buildEstateView (P5/P6/P7 precedent), no second useMemo"
-    - "DD-A A2: timeline point = one capturedAt calendar day; same-day multi-vCenter spatially merged via shipped mergeSnapshotsToEstate"
-    - "DD-C A3 resolution: a released snapshot's surviving aggregate is an input fact, not a cached derivation"
+added: []
+patterns:
+- "Single-pass pure composition: trends sub-call inside buildEstateView (P5/P6/P7 precedent), no second useMemo"
+- "DD-A A2: timeline point = one capturedAt calendar day; same-day multi-vCenter spatially merged via shipped mergeSnapshotsToEstate"
+- "DD-C A3 resolution: a released snapshot's surviving aggregate is an input fact, not a cached derivation"
 
 key-files:
-  created:
-    - src/engines/trends/buildTrendSeries.ts
-    - src/engines/trends/buildTrendSeries.test.ts
-    - src/engines/trends/captureDateOrdinal.ts
-    - src/engines/trends/captureDateOrdinal.test.ts
-    - src/engines/trends/index.ts
+created:
+- src/engines/trends/buildTrendSeries.ts
+- src/engines/trends/buildTrendSeries.test.ts
+- src/engines/trends/captureDateOrdinal.ts
+- src/engines/trends/captureDateOrdinal.test.ts
+- src/engines/trends/index.ts
   modified:
-    - src/types/estate.ts
-    - src/types/index.ts
-    - src/types/snapshot.ts
-    - src/engines/parser/captureDate.ts
-    - src/engines/aggregation/estateView.ts
-    - src/hooks/useEstateView.ts
-    - src/engines/aggregation/estateView.test.ts
-    - src/components/inventory/columns/columns.test.ts
-    - src/__tests__/inventory-stress.test.tsx
+- src/types/estate.ts
+- src/types/index.ts
+- src/types/snapshot.ts
+- src/engines/parser/captureDate.ts
+- src/engines/aggregation/estateView.ts
+- src/hooks/useEstateView.ts
+- src/engines/aggregation/estateView.test.ts
+- src/components/inventory/columns/columns.test.ts
+- src/**tests**/inventory-stress.test.tsx
 
 key-decisions:
-  - "DD-A = A2 (per-capturedAt-date, same-day files spatially merged first) — counts reconcile with the dashboard by construction"
-  - "DD-B = B1 (consecutive-pair count-deltas on existing aggregate fields); identity churn rejected (deferred DIF-01)"
-  - "DD-C A3 LOCKED: releasedAggregate carried on Snapshot is consistent with inputs-only (only remaining input fact once rows are gone)"
-  - "D-05 ordinal fallback: undeterminable (epoch/NaN) capturedAt -> stable load-order ordinal + orderInferred; nothing fabricated"
-  - "Snapshot.rawReleased/releasedAggregate added in 08-01 (not 08-02) because Task 2 consumes them under sequential execution"
+- "DD-A = A2 (per-capturedAt-date, same-day files spatially merged first) — counts reconcile with the dashboard by construction"
+- "DD-B = B1 (consecutive-pair count-deltas on existing aggregate fields); identity churn rejected (deferred DIF-01)"
+- "DD-C A3 LOCKED: releasedAggregate carried on Snapshot is consistent with inputs-only (only remaining input fact once rows are gone)"
+- "D-05 ordinal fallback: undeterminable (epoch/NaN) capturedAt -> stable load-order ordinal + orderInferred; nothing fabricated"
+- "Snapshot.rawReleased/releasedAggregate added in 08-01 (not 08-02) because Task 2 consumes them under sequential execution"
 
 patterns-established:
-  - "engines/trends/ pure module, Vitest-gated (Stmts 98.8% / Branch 77.5% — >=75% gate)"
-  - "Doc-comments avoid the literal React-memo-hook token (grep-gate/security-hook matches comments)"
+- "engines/trends/ pure module, Vitest-gated (Stmts 98.8% / Branch 77.5% — >=75% gate)"
+- "Doc-comments avoid the literal React-memo-hook token (grep-gate/security-hook matches comments)"
 
 requirements-completed: [TRD-01, TRD-02, TRD-04, TRD-05]
 

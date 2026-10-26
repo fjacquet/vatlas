@@ -36,20 +36,20 @@ Bundling mechanism (D-01); exact build-failure semantics within outage-never-blo
 - EOS evolution across snapshots / trend of at-risk counts → Phase 8.
 - HTML/PPTX export of the EOS forecast → Phase 10 (P7 makes the view export-ready via the shared `EstateView` shape; does not generate the artifact).
 - Snapshot-capture-date as bucket reference — rejected for P7 (D-07 uses load-date).
-</user_constraints>
+  </user_constraints>
 
 <phase_requirements>
 
 ## Phase Requirements
 
-| ID | Description | Research Support |
-|----|-------------|------------------|
-| EOS-01 | EOS forecast view with at-risk counts at +3, +6, +9, +12 months | Bucketing engine §"Lifecycle Bucketing"; cumulative scheme recommendation; ECharts calendar/heatmap via shipped `<Chart>` |
-| EOS-02 | "Overdue" bucket for entities on already-EOS OSes | `eolFrom < today` partition member; reconciliation §"Lifecycle Bucketing" |
-| EOS-03 | Click a bucket to drill into the affected entity list | Reuse P3 `DataTable` (`objectKind: 'vm'\|'esx'`); §"Integration" |
+| ID     | Description                                                        | Research Support                                                                                                            |
+| ------ | ------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------- |
+| EOS-01 | EOS forecast view with at-risk counts at +3, +6, +9, +12 months    | Bucketing engine §"Lifecycle Bucketing"; cumulative scheme recommendation; ECharts calendar/heatmap via shipped `<Chart>`   |
+| EOS-02 | "Overdue" bucket for entities on already-EOS OSes                  | `eolFrom < today` partition member; reconciliation §"Lifecycle Bucketing"                                                   |
+| EOS-03 | Click a bucket to drill into the affected entity list              | Reuse P3 `DataTable` (`objectKind: 'vm'\|'esx'`); §"Integration"                                                            |
 | EOS-04 | ESX hosts classified by build → support state, incl. patch + major | ESXi classifier §"ESXi Build→Support-State"; v1 schema confirms **major-only** EOL — patch level → em-dash sentinel (D-09c) |
-| EOS-05 | "Unknown OS" bucket — never silently dropped | First-class unknown bucket; raw-string capture §"OS-String Normalizer"; reconciliation invariant |
-| EOS-06 | `lastVerified` date on the catalogue (refreshed at CI build time) | Build-time constant baked into the snapshot; §"Catalogue Bundling"; freshness UX D-03 |
+| EOS-05 | "Unknown OS" bucket — never silently dropped                       | First-class unknown bucket; raw-string capture §"OS-String Normalizer"; reconciliation invariant                            |
+| EOS-06 | `lastVerified` date on the catalogue (refreshed at CI build time)  | Build-time constant baked into the snapshot; §"Catalogue Bundling"; freshness UX D-03                                       |
 
 The `.planning/REQUIREMENTS.md` coverage table currently maps EOS-01..06 to **"Phase 5"** — this is **stale**. The planner MUST reconcile it to **Phase 7** in the coverage table (and flip the EOS-0x checkboxes when the phase ships, per the manual ROADMAP-progress gotcha in CLAUDE.md).
 </phase_requirements>
@@ -64,30 +64,30 @@ Key findings: (1) endoflife.date **v1 is GA and stable** (`schema_version: 1.2.1
 
 ## Architectural Responsibility Map
 
-| Capability | Primary Tier | Secondary Tier | Rationale |
-|------------|-------------|----------------|-----------|
-| Fetch + freeze endoflife.date catalogue | Build-time tooling (`scripts/sync-eos.mjs`) | — | The ONLY place a network call is allowed; output is a committed static JSON. Runtime never fetches (privacy guard throws). |
-| Zod-validate the bundled catalogue | Build/validation boundary | — | Mirrors the parser-boundary Zod rule; engines stay pure (no Zod in `engines/eos/`). |
-| OS-string → `(slug, version)` normalization | Pure engine (`src/engines/eos/`) | — | Deterministic pure function; Vitest-gated ≥75%; composes with `osFamily.ts`. |
-| `(slug, version)` → EOL date lookup | Pure engine (`src/engines/eos/`) | — | Pure map over the bundled catalogue data structure passed in as an argument (engine never imports the JSON directly — the boundary does). |
-| ESXi build/version → support-state | Pure engine (`src/engines/eos/`) | — | Same purity contract; consumes `vhost.esxVersion` text. |
-| Lifecycle bucketing + reconciliation | Pure engine (`src/engines/eos/`), composed in `buildEstateView` | `useEstateView` (single memo) | The `eos` projection is a field on `EstateView`; no second memo (D-00). |
-| EOS view (bucket strip, chart, drill, freshness lines) | React presenter (App view-state branch) | shipped `ViewToggle`/`Chart`/`DataTable` | Presenter only — no computation in components. |
+| Capability                                             | Primary Tier                                                    | Secondary Tier                           | Rationale                                                                                                                                 |
+| ------------------------------------------------------ | --------------------------------------------------------------- | ---------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| Fetch + freeze endoflife.date catalogue                | Build-time tooling (`scripts/sync-eos.mjs`)                     | —                                        | The ONLY place a network call is allowed; output is a committed static JSON. Runtime never fetches (privacy guard throws).                |
+| Zod-validate the bundled catalogue                     | Build/validation boundary                                       | —                                        | Mirrors the parser-boundary Zod rule; engines stay pure (no Zod in `engines/eos/`).                                                       |
+| OS-string → `(slug, version)` normalization            | Pure engine (`src/engines/eos/`)                                | —                                        | Deterministic pure function; Vitest-gated ≥75%; composes with `osFamily.ts`.                                                              |
+| `(slug, version)` → EOL date lookup                    | Pure engine (`src/engines/eos/`)                                | —                                        | Pure map over the bundled catalogue data structure passed in as an argument (engine never imports the JSON directly — the boundary does). |
+| ESXi build/version → support-state                     | Pure engine (`src/engines/eos/`)                                | —                                        | Same purity contract; consumes `vhost.esxVersion` text.                                                                                   |
+| Lifecycle bucketing + reconciliation                   | Pure engine (`src/engines/eos/`), composed in `buildEstateView` | `useEstateView` (single memo)            | The `eos` projection is a field on `EstateView`; no second memo (D-00).                                                                   |
+| EOS view (bucket strip, chart, drill, freshness lines) | React presenter (App view-state branch)                         | shipped `ViewToggle`/`Chart`/`DataTable` | Presenter only — no computation in components.                                                                                            |
 
 ## Standard Stack
 
 ### Core
 
-| Library | Version | Purpose | Why Standard |
-|---------|---------|---------|--------------|
-| Zod | `^4.4.3` (already in repo) | Validate the bundled catalogue at the build/validation boundary | Project's boundary-validation tool; mirrors `src/engines/parser/schemas.ts`. `[VERIFIED: package.json]` |
-| ECharts + `echarts-for-react` | `^6.0.0` / `^3.0.6` (shipped P2 `<Chart>`) | Calendar/heatmap forecast timeline, SVG renderer | Shipped P2 infra; single `option` prop; SVG mandated project-wide. `[VERIFIED: CLAUDE.md + src/components/Chart.tsx exists]` |
-| `@tanstack/react-table` + `react-virtual` (via shipped `DataTable`) | shipped P3 | Bucket→entity drill | D-08 reuse; `objectKind: 'vm' \| 'esx'` already supported. `[VERIFIED: src/components/inventory/DataTable.csv.test.tsx]` |
+| Library                                                             | Version                                    | Purpose                                                         | Why Standard                                                                                                                 |
+| ------------------------------------------------------------------- | ------------------------------------------ | --------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| Zod                                                                 | `^4.4.3` (already in repo)                 | Validate the bundled catalogue at the build/validation boundary | Project's boundary-validation tool; mirrors `src/engines/parser/schemas.ts`.`[VERIFIED: package.json]`                       |
+| ECharts + `echarts-for-react`                                       | `^6.0.0` / `^3.0.6` (shipped P2 `<Chart>`) | Calendar/heatmap forecast timeline, SVG renderer                | Shipped P2 infra; single `option` prop; SVG mandated project-wide. `[VERIFIED: CLAUDE.md + src/components/Chart.tsx exists]` |
+| `@tanstack/react-table` + `react-virtual` (via shipped `DataTable`) | shipped P3                                 | Bucket→entity drill                                             | D-08 reuse; `objectKind: 'vm' \| 'esx'` already supported. `[VERIFIED: src/components/inventory/DataTable.csv.test.tsx]`     |
 
 ### Supporting
 
-| Library | Version | Purpose | When to Use |
-|---------|---------|---------|-------------|
+| Library                         | Version             | Purpose                                       | When to Use                                                                                                                                  |
+| ------------------------------- | ------------------- | --------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
 | Node built-in `fetch` (Node 24) | runtime: build only | `scripts/sync-eos.mjs` to fetch the catalogue | Build-time only; CI uses Node 24 (`.github/workflows/static.yml`). Never shipped to the browser. `[VERIFIED: static.yml node-version: '24']` |
 
 No new runtime dependencies. The catalogue snapshot is committed JSON; the only new "tooling dep" is a `scripts/sync-eos.mjs` using Node's built-in `fetch` (zero npm deps, mirroring `scripts/check-supply-chain.mjs`'s bare-Node style).
@@ -96,10 +96,10 @@ No new runtime dependencies. The catalogue snapshot is committed JSON; the only 
 
 ### Alternatives Considered
 
-| Instead of | Could Use | Tradeoff |
-|------------|-----------|----------|
-| Committed JSON snapshot + `npm run sync:eos` | CI build-step fetch (fetch at every deploy) | **Rejected as default.** CI fetch couples every deploy to a third-party's uptime; D-02 says outage must never block deploy, and the cleanest structural guarantee of that is "deploy never fetches at all". Snapshot is deterministic, reviewable in PR diff, reproducible offline. The maintainer runs `sync:eos` deliberately; CI only validates. |
-| endoflife.date v1 API | endoflife.date legacy v0 (`/api/{product}.json`) | v0 still works but is **superseded**; v1 (`schema_version 1.2.1`) is GA, richer (`isEol`/`isMaintained`/`eolFrom`/labels). Use v1. `[VERIFIED: live query 2026-05-17]` |
+| Instead of                                   | Could Use                                        | Tradeoff                                                                                                                                                                                                                                                                                                                                            |
+| -------------------------------------------- | ------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Committed JSON snapshot + `npm run sync:eos` | CI build-step fetch (fetch at every deploy)      | **Rejected as default.** CI fetch couples every deploy to a third-party's uptime; D-02 says outage must never block deploy, and the cleanest structural guarantee of that is "deploy never fetches at all". Snapshot is deterministic, reviewable in PR diff, reproducible offline. The maintainer runs `sync:eos` deliberately; CI only validates. |
+| endoflife.date v1 API                        | endoflife.date legacy v0 (`/api/{product}.json`) | v0 still works but is **superseded**; v1 (`schema_version 1.2.1`) is GA, richer (`isEol`/`isMaintained`/`eolFrom`/labels). Use v1. `[VERIFIED: live query 2026-05-17]`                                                                                                                                                                              |
 
 **Version verification (endoflife.date API, queried live 2026-05-17):**
 
@@ -188,18 +188,18 @@ Coverage note: `vitest.config.ts` already gates `src/engines/**/*.ts` at 75% lin
 import { z } from 'zod'
 
 const Release = z.object({
-  name: z.string(),                              // e.g. "8", "8.0", "2022"
-  label: z.string(),                             // e.g. "Windows Server 2022 (LTSC)"
-  releaseDate: z.string().nullable(),            // "YYYY-MM-DD" | null
-  isEol: z.boolean(),                            // derived by endoflife.date as of generated_at
-  eolFrom: z.string().nullable(),                // "YYYY-MM-DD" | null — THE standard-support EOL (D-04)
+  name: z.string(), // e.g. "8", "8.0", "2022"
+  label: z.string(), // e.g. "Windows Server 2022 (LTSC)"
+  releaseDate: z.string().nullable(), // "YYYY-MM-DD" | null
+  isEol: z.boolean(), // derived by endoflife.date as of generated_at
+  eolFrom: z.string().nullable(), // "YYYY-MM-DD" | null — THE standard-support EOL (D-04)
   isMaintained: z.boolean(),
   // eoesFrom / isEoes (paid extended support) intentionally NOT in the schema — D-04 single-date model
 })
 const Product = z.object({ name: z.string(), releases: z.array(Release) })
 export const EosCatalogueSchema = z.object({
-  lastVerified: z.string(),                      // "YYYY-MM-DD" — build-time constant injected by sync-eos.mjs
-  products: z.record(z.string(), Product),       // { "rhel": {...}, "windows-server": {...}, ... }
+  lastVerified: z.string(), // "YYYY-MM-DD" — build-time constant injected by sync-eos.mjs
+  products: z.record(z.string(), Product), // { "rhel": {...}, "windows-server": {...}, ... }
 })
 export type EosCatalogue = z.infer<typeof EosCatalogueSchema>
 ```
@@ -216,23 +216,38 @@ export type EosCatalogue = z.infer<typeof EosCatalogueSchema>
 const RULES: { slug: string; re: RegExp; ver: (m: RegExpMatchArray) => string | null }[] = [
   // RHEL — 4 variants seen / specified: "Red Hat Enterprise Linux 8 (64-bit)",
   // "RHEL 8 (64-bit)", "Red Hat Enterprise Linux 8.10", "redhat..." (case-insensitive, D-12)
-  { slug: 'rhel',           re: /red\s*hat\s*enterprise\s*linux\s*(\d+)|^rhel\s*(\d+)/i, ver: m => m[1] ?? m[2] },
+  {
+    slug: 'rhel',
+    re: /red\s*hat\s*enterprise\s*linux\s*(\d+)|^rhel\s*(\d+)/i,
+    ver: (m) => m[1] ?? m[2],
+  },
   // Oracle Linux — 3 variants: "Oracle Linux 8", "Oracle Enterprise Linux 8", "Oracle Linux Server 8.10"
-  { slug: 'oracle-linux',   re: /oracle\s*(?:enterprise\s*)?linux(?:\s*server)?\s*(\d+)/i, ver: m => m[1] },
-  { slug: 'centos',         re: /cent\s*os\s*(\d+)/i,                       ver: m => m[1] },   // "CentOS 7 (64-bit)" — "4/5/6/7" multi-form → take last? (see Pitfall 3)
-  { slug: 'almalinux',      re: /alma\s*linux/i,                            ver: () => null },  // no version in fixture → unknown unless version present
-  { slug: 'rocky-linux',    re: /rocky\s*linux/i,                           ver: () => null },
-  { slug: 'debian',         re: /debian\s*gnu\/?linux\s*(\d+)/i,            ver: m => m[1] },
-  { slug: 'ubuntu',         re: /ubuntu/i,                                  ver: () => null },  // RVTools rarely carries Ubuntu version → likely unknown (see Pitfall 3)
-  { slug: 'sles',           re: /suse\s*linux\s*enterprise\s*(\d+)/i,       ver: m => m[1] },
-  { slug: 'windows-server', re: /windows\s*server\s*(\d{4}(?:\s*r2)?)/i,    ver: m => m[1].replace(/\s+/,' ') },
-  { slug: 'windows',        re: /windows\s*(\d+|xp|vista|2000)/i,           ver: m => m[1] }, // desktop
-  { slug: 'esxi',           re: /esxi\s*(\d+\.\d+)/i,                        ver: m => m[1] },  // also handles "VMware ESXi 6.5 or later" guest-OS rows
+  {
+    slug: 'oracle-linux',
+    re: /oracle\s*(?:enterprise\s*)?linux(?:\s*server)?\s*(\d+)/i,
+    ver: (m) => m[1],
+  },
+  { slug: 'centos', re: /cent\s*os\s*(\d+)/i, ver: (m) => m[1] }, // "CentOS 7 (64-bit)" — "4/5/6/7" multi-form → take last? (see Pitfall 3)
+  { slug: 'almalinux', re: /alma\s*linux/i, ver: () => null }, // no version in fixture → unknown unless version present
+  { slug: 'rocky-linux', re: /rocky\s*linux/i, ver: () => null },
+  { slug: 'debian', re: /debian\s*gnu\/?linux\s*(\d+)/i, ver: (m) => m[1] },
+  { slug: 'ubuntu', re: /ubuntu/i, ver: () => null }, // RVTools rarely carries Ubuntu version → likely unknown (see Pitfall 3)
+  { slug: 'sles', re: /suse\s*linux\s*enterprise\s*(\d+)/i, ver: (m) => m[1] },
+  {
+    slug: 'windows-server',
+    re: /windows\s*server\s*(\d{4}(?:\s*r2)?)/i,
+    ver: (m) => m[1].replace(/\s+/, ' '),
+  },
+  { slug: 'windows', re: /windows\s*(\d+|xp|vista|2000)/i, ver: (m) => m[1] }, // desktop
+  { slug: 'esxi', re: /esxi\s*(\d+\.\d+)/i, ver: (m) => m[1] }, // also handles "VMware ESXi 6.5 or later" guest-OS rows
 ]
 export function normalizeOs(raw: string): { slug: string; version: string | null } | null {
-  const norm = raw.replace(/\s+/g, ' ').trim()        // whitespace-normalize, matching only (D-12: raw preserved by caller)
-  for (const r of RULES) { const m = norm.match(r.re); if (m) return { slug: r.slug, version: r.ver(m) } }
-  return null                                          // → first-class unknown bucket (D-10), raw kept verbatim
+  const norm = raw.replace(/\s+/g, ' ').trim() // whitespace-normalize, matching only (D-12: raw preserved by caller)
+  for (const r of RULES) {
+    const m = norm.match(r.re)
+    if (m) return { slug: r.slug, version: r.ver(m) }
+  }
+  return null // → first-class unknown bucket (D-10), raw kept verbatim
 }
 ```
 
@@ -244,13 +259,30 @@ export function normalizeOs(raw: string): { slug: string; version: string | null
 ```typescript
 // EosProjection shape (the new EstateView.eos field)
 interface EosProjection {
-  reference: { today: string; lastVerified: string }   // D-07 + D-03 (both surfaced)
+  reference: { today: string; lastVerified: string } // D-07 + D-03 (both surfaced)
   // disjoint partition — sums to vmTotal (+ esxTotal if hosts unified split-by-kind)
-  partition: { overdue: Row[]; w3: Row[]; w3to6: Row[]; w6to9: Row[]; w9to12: Row[]; beyond12: Row[]; unknown: Row[] }
+  partition: {
+    overdue: Row[]
+    w3: Row[]
+    w3to6: Row[]
+    w6to9: Row[]
+    w9to12: Row[]
+    beyond12: Row[]
+    unknown: Row[]
+  }
   // cumulative display counts (presentation overlay; NOT used for reconciliation)
-  cumulative: { overdue: number; le3: number; le6: number; le9: number; le12: number; unknown: number }
-  rawUnknown: { osString: string; count: number }[]     // D-11 — verbatim, occurrence-counted, NEVER aggregated-only
-  esxi: { /* split by kind — D-09b: host counts NEVER summed with VM counts */ }
+  cumulative: {
+    overdue: number
+    le3: number
+    le6: number
+    le9: number
+    le12: number
+    unknown: number
+  }
+  rawUnknown: { osString: string; count: number }[] // D-11 — verbatim, occurrence-counted, NEVER aggregated-only
+  esxi: {
+    /* split by kind — D-09b: host counts NEVER summed with VM counts */
+  }
 }
 ```
 
@@ -265,15 +297,15 @@ interface EosProjection {
 
 ## Don't Hand-Roll
 
-| Problem | Don't Build | Use Instead | Why |
-|---------|-------------|-------------|-----|
-| Windows/Linux/other coarse split | A new family classifier | `classifyOsFamily` in `src/engines/aggregation/osFamily.ts` | Already shipped, tested; DRY — compose, don't duplicate (CONTEXT D-00). |
-| Bucket→entity table (sort/filter/columns/CSV) | A bespoke EOS table | Shipped P3 `DataTable` + `ColumnPicker` with `objectKind: 'vm'\|'esx'` | D-08; 4th-context reuse of a DRY-justified primitive. |
-| Forecast timeline chart | A new chart wrapper / raw ECharts import | Shipped P2 `<Chart>` (single `option` prop, SVG inherited) | `src/components/Chart.tsx` is the ONLY ECharts import site project-wide. |
-| Top-level nav for the EOS view | A new nav component | Extend `ViewToggle` `AppView` union + `VIEWS` array with `'eos'` | Proven twice (P5 'hosts', P6 'planning'); keep `role="group"`+`aria-pressed`+arrow-wraparound verbatim. |
-| Catalogue date formatting | Inline `toLocaleDateString` | A new locale-aware date helper added to `src/utils/format.ts` | **`utils/format.ts` has NO date formatter today** (verified — only number/GHz/MiB/percent). Add `fmtDate(iso, locale)` there (DRY-compose, don't inline; no pre-formatted dates in i18n strings). |
-| HTTP client for the sync script | `axios`/`node-fetch` | Node 24 built-in global `fetch` | CI is Node 24; zero deps; mirrors `check-supply-chain.mjs` bare-Node style. |
-| Catalogue schema validation | Hand-rolled shape checks | Zod (already a dep) at the `catalogue.ts` boundary | Mirrors `parser/schemas.ts`; consistent boundary-validation pattern. |
+| Problem                                       | Don't Build                              | Use Instead                                                            | Why                                                                                                                                                                                               |
+| --------------------------------------------- | ---------------------------------------- | ---------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Windows/Linux/other coarse split              | A new family classifier                  | `classifyOsFamily` in `src/engines/aggregation/osFamily.ts`            | Already shipped, tested; DRY — compose, don't duplicate (CONTEXT D-00).                                                                                                                           |
+| Bucket→entity table (sort/filter/columns/CSV) | A bespoke EOS table                      | Shipped P3 `DataTable` + `ColumnPicker` with `objectKind: 'vm'\|'esx'` | D-08; 4th-context reuse of a DRY-justified primitive.                                                                                                                                             |
+| Forecast timeline chart                       | A new chart wrapper / raw ECharts import | Shipped P2 `<Chart>` (single `option` prop, SVG inherited)             | `src/components/Chart.tsx` is the ONLY ECharts import site project-wide.                                                                                                                          |
+| Top-level nav for the EOS view                | A new nav component                      | Extend `ViewToggle` `AppView` union + `VIEWS` array with `'eos'`       | Proven twice (P5 'hosts', P6 'planning'); keep `role="group"`+`aria-pressed`+arrow-wraparound verbatim.                                                                                           |
+| Catalogue date formatting                     | Inline `toLocaleDateString`              | A new locale-aware date helper added to `src/utils/format.ts`          | **`utils/format.ts` has NO date formatter today** (verified — only number/GHz/MiB/percent). Add `fmtDate(iso, locale)` there (DRY-compose, don't inline; no pre-formatted dates in i18n strings). |
+| HTTP client for the sync script               | `axios`/`node-fetch`                     | Node 24 built-in global `fetch`                                        | CI is Node 24; zero deps; mirrors `check-supply-chain.mjs` bare-Node style.                                                                                                                       |
+| Catalogue schema validation                   | Hand-rolled shape checks                 | Zod (already a dep) at the `catalogue.ts` boundary                     | Mirrors `parser/schemas.ts`; consistent boundary-validation pattern.                                                                                                                              |
 
 **Key insight:** Almost everything this phase needs is already shipped (chart, table, nav, family classifier, store, single-memo bridge). The genuinely new code is small and pure: a regex bank, a date-math bucketer, an ESXi classifier, a Zod schema, and a build-time fetch script. The risk is **not** missing libraries — it is OS-string-variant coverage and the no-runtime-network discipline.
 
@@ -281,13 +313,13 @@ interface EosProjection {
 
 > Greenfield feature for vatlas (no rename/refactor). One build-time-state item is worth flagging:
 
-| Category | Items Found | Action Required |
-|----------|-------------|------------------|
-| Stored data | `src/engines/eos/catalogue.json` — a NEW committed build artifact carrying `lastVerified` + per-product releases. Not user data; not a privacy concern (public lifecycle dates, no workbook content). | Commit it; regenerate via `npm run sync:eos`. Review the diff in PR. |
-| Live service config | None — vatlas makes zero runtime calls; `endoflife.date` is contacted ONLY by the maintainer-run `sync:eos` script, never by CI deploy or the app. | None. |
-| OS-registered state | None. | None — verified, no OS-level registration. |
-| Secrets/env vars | None — endoflife.date API is public, unauthenticated (verified: live curl with no headers succeeded). | None. |
-| Build artifacts | `catalogue.json` is the only new build-time input; `vite build` bundles it as a static import. No stale-artifact risk (it is source-controlled, not generated into `dist/` separately). | None beyond committing it. |
+| Category            | Items Found                                                                                                                                                                                           | Action Required                                                      |
+| ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| Stored data         | `src/engines/eos/catalogue.json` — a NEW committed build artifact carrying `lastVerified` + per-product releases. Not user data; not a privacy concern (public lifecycle dates, no workbook content). | Commit it; regenerate via `npm run sync:eos`. Review the diff in PR. |
+| Live service config | None — vatlas makes zero runtime calls; `endoflife.date` is contacted ONLY by the maintainer-run `sync:eos` script, never by CI deploy or the app.                                                    | None.                                                                |
+| OS-registered state | None.                                                                                                                                                                                                 | None — verified, no OS-level registration.                           |
+| Secrets/env vars    | None — endoflife.date API is public, unauthenticated (verified: live curl with no headers succeeded).                                                                                                 | None.                                                                |
+| Build artifacts     | `catalogue.json` is the only new build-time input; `vite build` bundles it as a static import. No stale-artifact risk (it is source-controlled, not generated into `dist/` separately).               | None beyond committing it.                                           |
 
 ## Common Pitfalls
 
@@ -328,7 +360,7 @@ interface EosProjection {
 
 ### Pitfall 6: ESXi guest-OS rows vs real ESXi hosts
 
-**What goes wrong:** `osConfig`/`osTools` themselves sometimes contain `"VMware ESXi 6.5 or later"`, `"VMware ESXi 6.x"`, `"VMware ESXi 8.0 or later"` (harvested — these are nested-ESXi *VMs*). Counting these as "ESXi hosts" conflates VM and host cardinality (violates D-09b).
+**What goes wrong:** `osConfig`/`osTools` themselves sometimes contain `"VMware ESXi 6.5 or later"`, `"VMware ESXi 6.x"`, `"VMware ESXi 8.0 or later"` (harvested — these are nested-ESXi _VMs_). Counting these as "ESXi hosts" conflates VM and host cardinality (violates D-09b).
 **Why it happens:** Nested virtualization shows ESXi as a guest OS string on a VM row.
 **How to avoid:** ESXi-host classification consumes **`vhost.esxVersion`** (the real host), never the VM `osConfig`. A VM whose guest OS is "VMware ESXi …" is just a VM — bucket it by its (likely unknown / versionless) guest string, in the VM partition, never in the host count.
 **Warning signs:** An ESXi host count that exceeds the `vHost` row count.
@@ -373,49 +405,84 @@ interface EosProjection {
 // (success criterion 5) and the RHEL-8 / Oracle-Linux variant tests (criterion 6).
 export const REAL_OS_STRINGS = [
   // Windows Server (matchable → windows-server)
-  'Microsoft Windows Server 2022 (64-bit)', 'Microsoft Windows Server 2019 (64-bit)',
-  'Microsoft Windows Server 2016 or later (64-bit)', 'Microsoft Windows Server 2016 (64-bit)',
-  'Microsoft Windows Server 2012 (64-bit)', 'Microsoft Windows Server 2008 R2 (64-bit)',
-  'Microsoft Windows Server 2025 (64-bit)', 'Microsoft Windows 2000 Server',
+  'Microsoft Windows Server 2022 (64-bit)',
+  'Microsoft Windows Server 2019 (64-bit)',
+  'Microsoft Windows Server 2016 or later (64-bit)',
+  'Microsoft Windows Server 2016 (64-bit)',
+  'Microsoft Windows Server 2012 (64-bit)',
+  'Microsoft Windows Server 2008 R2 (64-bit)',
+  'Microsoft Windows Server 2025 (64-bit)',
+  'Microsoft Windows 2000 Server',
   // Windows desktop (matchable → windows)
-  'Microsoft Windows 10 (64-bit)', 'Microsoft Windows 11 (64-bit)', 'Microsoft Windows 7 (64-bit)',
-  'Microsoft Windows 8 (64-bit)', 'Microsoft Windows 2000',
+  'Microsoft Windows 10 (64-bit)',
+  'Microsoft Windows 11 (64-bit)',
+  'Microsoft Windows 7 (64-bit)',
+  'Microsoft Windows 8 (64-bit)',
+  'Microsoft Windows 2000',
   // RHEL — the FOUR variants the success criterion + Oracle-3 test target.
   // RVTools real space gives osConfig "Red Hat Enterprise Linux 8 (64-bit)"
   // and osTools "Red Hat Enterprise Linux 8.10" (see rvtools.test.ts L85-86,
   // canary.test.ts L44-45). The 4 RHEL-8 forms the test must cover:
-  'Red Hat Enterprise Linux 8 (64-bit)', 'Red Hat Enterprise Linux 8.10',
-  'RHEL 8 (64-bit)', 'redhat enterprise linux 8',          // case-insensitive (D-12)
-  'Red Hat Enterprise Linux 7 (64-bit)', 'Red Hat Enterprise Linux 9 (64-bit)',
+  'Red Hat Enterprise Linux 8 (64-bit)',
+  'Red Hat Enterprise Linux 8.10',
+  'RHEL 8 (64-bit)',
+  'redhat enterprise linux 8', // case-insensitive (D-12)
+  'Red Hat Enterprise Linux 7 (64-bit)',
+  'Red Hat Enterprise Linux 9 (64-bit)',
   'Red Hat Enterprise Linux 6 (64-bit)',
   // Oracle Linux — the THREE variants the success criterion targets:
-  'Oracle Linux 8', 'Oracle Enterprise Linux 8', 'Oracle Linux Server 8.10',
+  'Oracle Linux 8',
+  'Oracle Enterprise Linux 8',
+  'Oracle Linux Server 8.10',
   // CentOS (incl. real multi-version forms → unknown per Pitfall 3)
-  'CentOS 7 (64-bit)', 'CentOS 8 (64-bit)', 'CentOS 4/5 (64-bit)',
-  'CentOS 4/5/6/7 (64-bit)', 'CentOS 4/5/6 (64-bit)', 'CentOS 6 (64-bit)',
+  'CentOS 7 (64-bit)',
+  'CentOS 8 (64-bit)',
+  'CentOS 4/5 (64-bit)',
+  'CentOS 4/5/6/7 (64-bit)',
+  'CentOS 4/5/6 (64-bit)',
+  'CentOS 6 (64-bit)',
   // Debian / SUSE / Ubuntu (Debian+SLES matchable; Ubuntu versionless → unknown)
-  'Debian GNU/Linux 10 (64-bit)', 'Debian GNU/Linux 12 (64-bit)', 'Debian GNU/Linux 6 (64-bit)',
-  'Debian GNU/Linux 11 (64-bit)', 'Debian GNU/Linux 7 (64-bit)', 'Debian GNU/Linux 8 (64-bit)',
-  'Debian GNU/Linux 9 (64-bit)', 'Debian GNU/Linux 5 (64-bit)',
-  'SUSE Linux Enterprise 11 (64-bit)', 'SUSE Linux Enterprise 12 (64-bit)',
-  'SUSE Linux Enterprise 15 (64-bit)', 'SUSE openSUSE (64-bit)',
+  'Debian GNU/Linux 10 (64-bit)',
+  'Debian GNU/Linux 12 (64-bit)',
+  'Debian GNU/Linux 6 (64-bit)',
+  'Debian GNU/Linux 11 (64-bit)',
+  'Debian GNU/Linux 7 (64-bit)',
+  'Debian GNU/Linux 8 (64-bit)',
+  'Debian GNU/Linux 9 (64-bit)',
+  'Debian GNU/Linux 5 (64-bit)',
+  'SUSE Linux Enterprise 11 (64-bit)',
+  'SUSE Linux Enterprise 12 (64-bit)',
+  'SUSE Linux Enterprise 15 (64-bit)',
+  'SUSE openSUSE (64-bit)',
   'Ubuntu Linux (64-bit)',
   // Legitimately UNKNOWN long tail (must reconcile into the unknown bucket, D-10):
-  'Other (64-bit)', 'Other (32-bit)', 'Other Linux (64-bit)',
-  'Other 3.x or later Linux (64-bit)', 'Other 2.6.x Linux (64-bit)',
-  'Other 3.x Linux (64-bit)', 'Other 4.x or later Linux (64-bit)',
-  'Other 4.x Linux (64-bit)', 'Other 5.x Linux (64-bit)',
-  'VMware Photon OS (64-bit)', 'VMware ESXi 6.5 or later', 'VMware ESXi 6.x',
-  'VMware ESXi 8.0 or later', 'FreeBSD (32-bit)', 'FreeBSD Pre-11 versions (32-bit)',
-  'Rocky Linux (64-bit)', 'AlmaLinux (64-bit)',
+  'Other (64-bit)',
+  'Other (32-bit)',
+  'Other Linux (64-bit)',
+  'Other 3.x or later Linux (64-bit)',
+  'Other 2.6.x Linux (64-bit)',
+  'Other 3.x Linux (64-bit)',
+  'Other 4.x or later Linux (64-bit)',
+  'Other 4.x Linux (64-bit)',
+  'Other 5.x Linux (64-bit)',
+  'VMware Photon OS (64-bit)',
+  'VMware ESXi 6.5 or later',
+  'VMware ESXi 6.x',
+  'VMware ESXi 8.0 or later',
+  'FreeBSD (32-bit)',
+  'FreeBSD Pre-11 versions (32-bit)',
+  'Rocky Linux (64-bit)',
+  'AlmaLinux (64-bit)',
   'FortiManager-VM64 v7.4.6-build2588 241218 (GA.M)',
   'FortiAnalyzer-VM64 v7.4.8-build2744 250926 (GA.M)',
 ] as const
 // ESX Version strings (vHost "ESX Version") — all four real fixtures are 8.0.3:
 export const REAL_ESX_VERSIONS = [
-  'VMware ESXi 8.0.3 build-24674464', 'VMware ESXi 8.0.3 build-24859861',
-  'VMware ESXi 8.0.3 build-24784735', 'VMware ESXi 8.0.3 build-24585383',
-] as const  // → classify to esxi major "8.0" (eolFrom 2027-10-11); patch level → em-dash
+  'VMware ESXi 8.0.3 build-24674464',
+  'VMware ESXi 8.0.3 build-24859861',
+  'VMware ESXi 8.0.3 build-24784735',
+  'VMware ESXi 8.0.3 build-24585383',
+] as const // → classify to esxi major "8.0" (eolFrom 2027-10-11); patch level → em-dash
 ```
 
 ### Integration: attach `eos` to EstateView inside the existing single pass
@@ -442,7 +509,7 @@ return { ...existingFields, eos }   // EstateView gains `eos: EosProjection`
 ```tsx
 // src/components/ViewToggle.tsx — EXTEND (verbatim P5/P6 pattern):
 export type AppView = 'dashboard' | 'inventory' | 'hosts' | 'planning' | 'eos'
-const VIEWS = ['dashboard','inventory','hosts','planning','eos'] as const
+const VIEWS = ['dashboard', 'inventory', 'hosts', 'planning', 'eos'] as const
 // keep <fieldset role="group"> + biome-ignore + aria-pressed + arrow wraparound UNCHANGED.
 // add i18n key nav.eos to BOTH en/ and fr/ (EN/FR parity).
 
@@ -468,10 +535,10 @@ const VIEWS = ['dashboard','inventory','hosts','planning','eos'] as const
 
 ## State of the Art
 
-| Old Approach | Current Approach | When Changed | Impact |
-|--------------|------------------|--------------|--------|
-| endoflife.date legacy v0 (`/api/{product}.json`, flat `cycle`/`eol` keys) | v1 API `/api/v1/products/{slug}/`, `releases[].eolFrom` + `isEol` + labels, `schema_version` field | v1 GA (current `1.2.1`, queried 2026-05-17) | Use v1; richer + versioned schema; v0 superseded. |
-| Runtime fetch of a lifecycle API | Build-time-baked, Zod-validated, source-controlled snapshot | This phase (privacy invariant) | No runtime network is structurally enforced (P1 guard throws); freshness is a maintainer/CI concern, not a runtime one. |
+| Old Approach                                                              | Current Approach                                                                                   | When Changed                                | Impact                                                                                                                  |
+| ------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- | ------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| endoflife.date legacy v0 (`/api/{product}.json`, flat `cycle`/`eol` keys) | v1 API `/api/v1/products/{slug}/`, `releases[].eolFrom` + `isEol` + labels, `schema_version` field | v1 GA (current `1.2.1`, queried 2026-05-17) | Use v1; richer + versioned schema; v0 superseded.                                                                       |
+| Runtime fetch of a lifecycle API                                          | Build-time-baked, Zod-validated, source-controlled snapshot                                        | This phase (privacy invariant)              | No runtime network is structurally enforced (P1 guard throws); freshness is a maintainer/CI concern, not a runtime one. |
 
 **Deprecated/outdated:**
 
@@ -479,12 +546,12 @@ const VIEWS = ['dashboard','inventory','hosts','planning','eos'] as const
 
 ## Assumptions Log
 
-| # | Claim | Section | Risk if Wrong |
-|---|-------|---------|---------------|
-| A1 | The RHEL "4 variants" in success criterion 6 are the forms `{Red Hat Enterprise Linux 8 (64-bit)` / `Red Hat Enterprise Linux 8.10` / `RHEL 8 (64-bit)` / case-insensitive `redhat...`}. CONTEXT/ROADMAP name "RHEL 8's four variants" without enumerating them; the codebase shows the first two as real (`rvtools.test.ts`, `canary.test.ts`). | Code Examples, normalizeOs | LOW — the regex bank handles all four regardless; the test fixture should assert all four normalize to `(rhel, 8)`. Planner should confirm the exact 4 forms with the user if a precise list is contractually required. |
-| A2 | Oracle Linux "3 variants" = `{Oracle Linux N` / `Oracle Enterprise Linux N` / `Oracle Linux Server N}`. No Oracle Linux strings appear in the harvested fixtures (none present) — these are the standard RVTools/vCenter Oracle forms from training knowledge, not verified in-repo. | Code Examples, normalizeOs | MEDIUM — Oracle Linux is absent from the 3 real fixtures, so the variant test is synthetic. Confirm the 3 forms with the user or add an Oracle-bearing fixture. The slug `oracle-linux` IS verified live (releases `["10","9","8",...]`). |
-| A3 | CentOS multi-version forms (`4/5/6/7`) and versionless Ubuntu should bucket as **unknown** rather than guess a version. | Pitfall 3, Pitfall 2 | LOW — this is the honest/factual choice (D-00) and keeps reconciliation correct; but it does increase the unknown-bucket count. Planner should confirm this counts toward (not against) the <5% target interpretation, or treat the <5% target as measured on *resolvable* strings. **Flag for discuss-phase.** |
-| A4 | <5% unknown is measured over the harvested ≥50-string fixture treating each *distinct* string once (not weighted by occurrence). | Validation Architecture | MEDIUM — weighting by occurrence (Windows Server dominates counts) makes <5% trivially easier; per-distinct-string is stricter. ROADMAP says "fixture of 50+ real OS strings" (suggests per-string). Planner should lock the denominator definition. **Flag for discuss-phase.** |
+| #   | Claim                                                                                                                                                                                                                                                                                                                                            | Section                    | Risk if Wrong                                                                                                                                                                                                                                                                                                   |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| A1  | The RHEL "4 variants" in success criterion 6 are the forms `{Red Hat Enterprise Linux 8 (64-bit)` / `Red Hat Enterprise Linux 8.10` / `RHEL 8 (64-bit)` / case-insensitive `redhat...`}. CONTEXT/ROADMAP name "RHEL 8's four variants" without enumerating them; the codebase shows the first two as real (`rvtools.test.ts`, `canary.test.ts`). | Code Examples, normalizeOs | LOW — the regex bank handles all four regardless; the test fixture should assert all four normalize to `(rhel, 8)`. Planner should confirm the exact 4 forms with the user if a precise list is contractually required.                                                                                         |
+| A2  | Oracle Linux "3 variants" = `{Oracle Linux N` / `Oracle Enterprise Linux N` / `Oracle Linux Server N}`. No Oracle Linux strings appear in the harvested fixtures (none present) — these are the standard RVTools/vCenter Oracle forms from training knowledge, not verified in-repo.                                                             | Code Examples, normalizeOs | MEDIUM — Oracle Linux is absent from the 3 real fixtures, so the variant test is synthetic. Confirm the 3 forms with the user or add an Oracle-bearing fixture. The slug `oracle-linux` IS verified live (releases `["10","9","8",...]`).                                                                       |
+| A3  | CentOS multi-version forms (`4/5/6/7`) and versionless Ubuntu should bucket as **unknown** rather than guess a version.                                                                                                                                                                                                                          | Pitfall 3, Pitfall 2       | LOW — this is the honest/factual choice (D-00) and keeps reconciliation correct; but it does increase the unknown-bucket count. Planner should confirm this counts toward (not against) the <5% target interpretation, or treat the <5% target as measured on *resolvable* strings. **Flag for discuss-phase.** |
+| A4  | <5% unknown is measured over the harvested ≥50-string fixture treating each *distinct* string once (not weighted by occurrence).                                                                                                                                                                                                                 | Validation Architecture    | MEDIUM — weighting by occurrence (Windows Server dominates counts) makes <5% trivially easier; per-distinct-string is stricter. ROADMAP says "fixture of 50+ real OS strings" (suggests per-string). Planner should lock the denominator definition. **Flag for discuss-phase.**                                |
 
 ## Open Questions
 
@@ -495,12 +562,12 @@ const VIEWS = ['dashboard','inventory','hosts','planning','eos'] as const
 
 ## Environment Availability
 
-| Dependency | Required By | Available | Version | Fallback |
-|------------|------------|-----------|---------|----------|
-| `endoflife.date/api/v1` (public, unauth) | `npm run sync:eos` (build-time only) | ✓ | schema_version 1.2.1 | Last-good committed `catalogue.json` (D-02) |
-| Node global `fetch` | `scripts/sync-eos.mjs` | ✓ | Node 24 (CI) / local Node 18+ | — (built in) |
-| Zod | catalogue boundary | ✓ | ^4.4.3 (package.json) | — |
-| Shipped `<Chart>` / `DataTable` / `ViewToggle` | EOS view | ✓ | P2/P3 shipped | — |
+| Dependency                                     | Required By                          | Available | Version                       | Fallback                                    |
+| ---------------------------------------------- | ------------------------------------ | --------- | ----------------------------- | ------------------------------------------- |
+| `endoflife.date/api/v1` (public, unauth)       | `npm run sync:eos` (build-time only) | ✓         | schema_version 1.2.1          | Last-good committed `catalogue.json` (D-02) |
+| Node global `fetch`                            | `scripts/sync-eos.mjs`               | ✓         | Node 24 (CI) / local Node 18+ | — (built in)                                |
+| Zod                                            | catalogue boundary                   | ✓         | ^4.4.3 (package.json)         | —                                           |
+| Shipped `<Chart>` / `DataTable` / `ViewToggle` | EOS view                             | ✓         | P2/P3 shipped                 | —                                           |
 
 **Missing dependencies with no fallback:** none.
 **Missing dependencies with fallback:** endoflife.date reachability at sync-time — fallback is the committed last-good snapshot (D-02); never blocks deploy.
@@ -509,26 +576,26 @@ const VIEWS = ['dashboard','inventory','hosts','planning','eos'] as const
 
 ### Test Framework
 
-| Property | Value |
-|----------|-------|
-| Framework | Vitest `^4.1.2` |
-| Config file | `vitest.config.ts` (coverage `include: ['src/engines/**/*.ts', ...]`, global thresholds 75/75/75/75) |
-| Quick run command | `npx vitest run src/engines/eos` |
-| Full suite command | `npm run test:run` (CI: `npm run test:run` + coverage gate) |
+| Property           | Value                                                                                                |
+| ------------------ | ---------------------------------------------------------------------------------------------------- |
+| Framework          | Vitest `^4.1.2`                                                                                      |
+| Config file        | `vitest.config.ts` (coverage `include: ['src/engines/**/*.ts', ...]`, global thresholds 75/75/75/75) |
+| Quick run command  | `npx vitest run src/engines/eos`                                                                     |
+| Full suite command | `npm run test:run` (CI: `npm run test:run` + coverage gate)                                          |
 
 `src/engines/eos/` is **auto-gated at ≥75%** by the existing `src/engines/**/*.ts` coverage include — **no `vitest.config.ts` change needed** (EOS-06 satisfied structurally; verified L21-33). `catalogue.json` is data, not `.ts` — outside coverage.
 
 ### Phase Requirements → Test Map
 
-| Req ID | Behavior | Test Type | Automated Command | File Exists? |
-|--------|----------|-----------|-------------------|-------------|
-| EOS-01/02/03 | disjoint partition reconciles to entity total; +3/6/9/12 + overdue + unknown present | unit | `npx vitest run src/engines/eos/bucketEos.test.ts` | ❌ Wave 0 |
-| EOS-04 | `VMware ESXi 8.0.3 build-N` → major `8.0` eol `2027-10-11`; patch level → em-dash; `7.0` → overdue | unit | `npx vitest run src/engines/eos/classifyEsxi.test.ts` | ❌ Wave 0 |
-| EOS-05 | unmatched OS → unknown bucket; raw string verbatim (D-12) + occurrence count (D-11); nothing dropped | unit | `npx vitest run src/engines/eos/normalizeOs.test.ts` | ❌ Wave 0 |
-| EOS-06 (crit. 6) | RHEL-8 four variants all → `(rhel,8)`; Oracle-Linux three variants all → `(oracle-linux,8)` | unit | `npx vitest run src/engines/eos/normalizeOs.test.ts` | ❌ Wave 0 |
-| crit. 5 | `<5%` unknown on `REAL_OS_STRINGS` (≥50 harvested) — assert and print both per-string + weighted | unit | `npx vitest run src/engines/eos/normalizeOs.test.ts` | ❌ Wave 0 |
-| EOS-06 freshness | `lastVerified` parsed; >90d → caption; CI warn-only | unit + CI | `npx vitest run src/engines/eos/catalogue.test.ts` | ❌ Wave 0 |
-| D-12 | original RVTools string preserved verbatim through matching | unit | included in `normalizeOs.test.ts` | ❌ Wave 0 |
+| Req ID           | Behavior                                                                                             | Test Type | Automated Command                                     | File Exists? |
+| ---------------- | ---------------------------------------------------------------------------------------------------- | --------- | ----------------------------------------------------- | ------------ |
+| EOS-01/02/03     | disjoint partition reconciles to entity total; +3/6/9/12 + overdue + unknown present                 | unit      | `npx vitest run src/engines/eos/bucketEos.test.ts`    | ❌ Wave 0    |
+| EOS-04           | `VMware ESXi 8.0.3 build-N` → major `8.0` eol `2027-10-11`; patch level → em-dash; `7.0` → overdue   | unit      | `npx vitest run src/engines/eos/classifyEsxi.test.ts` | ❌ Wave 0    |
+| EOS-05           | unmatched OS → unknown bucket; raw string verbatim (D-12) + occurrence count (D-11); nothing dropped | unit      | `npx vitest run src/engines/eos/normalizeOs.test.ts`  | ❌ Wave 0    |
+| EOS-06 (crit. 6) | RHEL-8 four variants all → `(rhel,8)`; Oracle-Linux three variants all → `(oracle-linux,8)`          | unit      | `npx vitest run src/engines/eos/normalizeOs.test.ts`  | ❌ Wave 0    |
+| crit. 5          | `<5%` unknown on `REAL_OS_STRINGS` (≥50 harvested) — assert and print both per-string + weighted     | unit      | `npx vitest run src/engines/eos/normalizeOs.test.ts`  | ❌ Wave 0    |
+| EOS-06 freshness | `lastVerified` parsed; >90d → caption; CI warn-only                                                  | unit + CI | `npx vitest run src/engines/eos/catalogue.test.ts`    | ❌ Wave 0    |
+| D-12             | original RVTools string preserved verbatim through matching                                          | unit      | included in `normalizeOs.test.ts`                     | ❌ Wave 0    |
 
 ### Sampling Rate
 
@@ -552,22 +619,22 @@ const VIEWS = ['dashboard','inventory','hosts','planning','eos'] as const
 
 ### Applicable ASVS Categories
 
-| ASVS Category | Applies | Standard Control |
-|---------------|---------|-----------------|
-| V2 Authentication | no | endoflife.date is public/unauth; no secrets. |
-| V3 Session Management | no | No sessions; client-only. |
-| V4 Access Control | no | Read-only derived view. |
-| V5 Input Validation | yes | Zod validates `catalogue.json` at the boundary; malformed/poisoned snapshot → build fails (not silently trusted). RVTools OS strings already Zod-trimmed at the parser boundary. |
-| V6 Cryptography | no | No crypto; no secrets. |
-| V10 Malicious Code / Supply Chain | yes | `catalogue.json` is a committed, PR-reviewable artifact; `sync:eos` fetches over HTTPS from a single known host; no new npm runtime dep (no new supply-chain surface). The privacy guard (P1) ensures the app itself never fetches it at runtime. |
+| ASVS Category                     | Applies | Standard Control                                                                                                                                                                                                                                  |
+| --------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| V2 Authentication                 | no      | endoflife.date is public/unauth; no secrets.                                                                                                                                                                                                      |
+| V3 Session Management             | no      | No sessions; client-only.                                                                                                                                                                                                                         |
+| V4 Access Control                 | no      | Read-only derived view.                                                                                                                                                                                                                           |
+| V5 Input Validation               | yes     | Zod validates `catalogue.json` at the boundary; malformed/poisoned snapshot → build fails (not silently trusted). RVTools OS strings already Zod-trimmed at the parser boundary.                                                                  |
+| V6 Cryptography                   | no      | No crypto; no secrets.                                                                                                                                                                                                                            |
+| V10 Malicious Code / Supply Chain | yes     | `catalogue.json` is a committed, PR-reviewable artifact; `sync:eos` fetches over HTTPS from a single known host; no new npm runtime dep (no new supply-chain surface). The privacy guard (P1) ensures the app itself never fetches it at runtime. |
 
 ### Known Threat Patterns for this stack
 
-| Pattern | STRIDE | Standard Mitigation |
-|---------|--------|---------------------|
-| Poisoned/tampered catalogue snapshot | Tampering | Zod schema validation at the boundary (build fails on bad shape); committed JSON reviewed in PR diff; single trusted HTTPS source. |
-| Runtime exfiltration via a "freshness fetch" | Information disclosure | Architecturally impossible: P1 privacy guard throws on any non-same-origin fetch; D-01 mandates zero runtime network; CI deploy never fetches. |
-| Stale lifecycle data presented as current | Repudiation (misleading) | `lastVerified` always surfaced (D-03); >90d neutral caption; CI warn. Factual, not hidden. |
+| Pattern                                      | STRIDE                   | Standard Mitigation                                                                                                                            |
+| -------------------------------------------- | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| Poisoned/tampered catalogue snapshot         | Tampering                | Zod schema validation at the boundary (build fails on bad shape); committed JSON reviewed in PR diff; single trusted HTTPS source.             |
+| Runtime exfiltration via a "freshness fetch" | Information disclosure   | Architecturally impossible: P1 privacy guard throws on any non-same-origin fetch; D-01 mandates zero runtime network; CI deploy never fetches. |
+| Stale lifecycle data presented as current    | Repudiation (misleading) | `lastVerified` always surfaced (D-03); >90d neutral caption; CI warn. Factual, not hidden.                                                     |
 
 ## Sources
 
@@ -597,4 +664,4 @@ const VIEWS = ['dashboard','inventory','hosts','planning','eos'] as const
 - <5%-unknown metric definition: MEDIUM — depends on a denominator decision (A3/A4) the planner must lock.
 
 **Research date:** 2026-05-17
-**Valid until:** 2026-06-16 (30 days — endoflife.date v1 schema is stable; dates shift but the *schema* and *slugs* are durable. Re-run `sync:eos` for current dates at build time.)
+**Valid until:** 2026-06-16 (30 days — endoflife.date v1 schema is stable; dates shift but the _schema_ and _slugs_ are durable. Re-run `sync:eos` for current dates at build time.)

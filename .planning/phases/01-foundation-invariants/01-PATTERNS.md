@@ -11,93 +11,93 @@
 
 ### Plan 1 — Bootstrap
 
-| New/Modified File | Role | Data Flow | Closest Analog | Match Quality |
-|-------------------|------|-----------|----------------|---------------|
-| `package.json` | config | — | `/Users/fjacquet/Projects/vsizer/package.json` | exact (with deltas) |
-| `vite.config.ts` | config | — | `/Users/fjacquet/Projects/vsizer/vite.config.ts` | exact (base path delta) |
-| `vitest.config.ts` | config | — | `/Users/fjacquet/Projects/vsizer/vitest.config.ts` | exact (coverage include delta) |
-| `tsconfig.json` | config | — | `/Users/fjacquet/Projects/vsizer/tsconfig.json` | exact (port verbatim) |
-| `tsconfig.app.json` | config | — | `/Users/fjacquet/Projects/vsizer/tsconfig.app.json` | exact (port verbatim) |
-| `tsconfig.node.json` | config | — | `/Users/fjacquet/Projects/vsizer/tsconfig.node.json` | exact (port verbatim) |
-| `biome.json` | config | — | `/Users/fjacquet/Projects/vsizer/biome.json` | exact + `noConsole` extension |
-| `index.html` | infra | — | `/Users/fjacquet/Projects/vsizer/index.html` | role-match (must add CSP meta — see Plan 2) |
-| `.gitignore` | config | — | `/Users/fjacquet/Projects/vsizer/.gitignore` | exact (port verbatim) |
-| `.dockerignore` | config | — | `/Users/fjacquet/Projects/vsizer/.dockerignore` | exact (port verbatim) |
-| `osv-scanner.toml` | config | — | `/Users/fjacquet/Projects/vsizer/osv-scanner.toml` | exact (port verbatim) |
-| `.github/workflows/static.yml` | infra | event-driven | `/Users/fjacquet/Projects/vsizer/.github/workflows/static.yml` | exact (base path + denylist step deltas) |
-| `src/main.tsx` | infra | — | `/Users/fjacquet/Projects/vsizer/src/main.tsx` | exact (privacy guard import added in Plan 2) |
-| `src/App.tsx` | component | request-response | `/Users/fjacquet/Projects/vsizer/src/App.tsx` | role-match (Cockpit→sidebar, EmptyState→dropzone) |
-| `src/index.css` | config | — | `/Users/fjacquet/Projects/vsizer/src/index.css` | exact (port verbatim) |
-| `src/i18n/index.ts` | infra | — | `/Users/fjacquet/Projects/vsizer/src/i18n/index.ts` | exact (drop 3 namespaces, rename storage key) |
-| `src/i18n/locales/en/common.json` | infra | — | `/Users/fjacquet/Projects/vsizer/src/i18n/locales/en/common.json` | exact (project-name fork) |
-| `src/i18n/locales/fr/common.json` | infra | — | `/Users/fjacquet/Projects/vsizer/src/i18n/locales/fr/common.json` | exact (project-name fork) |
-| `src/i18n/locales/en/upload.json` | infra | — | `/Users/fjacquet/Projects/vsizer/src/i18n/locales/en/upload.json` | exact (drop liveOptics keys) |
-| `src/i18n/locales/fr/upload.json` | infra | — | `/Users/fjacquet/Projects/vsizer/src/i18n/locales/fr/upload.json` | exact (drop liveOptics keys) |
-| `src/hooks/useTheme.ts` | hook | event-driven | `/Users/fjacquet/Projects/vsizer/src/hooks/useTheme.ts` | exact (storage key rename) |
-| `src/components/ThemeToggle.tsx` | component | event-driven | `/Users/fjacquet/Projects/vsizer/src/components/inputs/ThemeToggle.tsx` | exact (port verbatim) |
-| `src/components/LanguageToggle.tsx` | component | event-driven | `/Users/fjacquet/Projects/vsizer/src/components/layout/Header.tsx` (lines 34-57 inline) | role-match (extract from Header.tsx) |
-| `src/components/UploadZone.tsx` | component | event-driven | `/Users/fjacquet/Projects/vsizer/src/components/inputs/FileDropzone.tsx` | exact (extension-allowlist delta) |
-| `public/theme-init.js` | infra | — | `/Users/fjacquet/Projects/vsizer/public/theme-init.js` | exact (storage key rename) |
-| `src/test/setup.ts` | test | — | `/Users/fjacquet/Projects/vsizer/src/test/setup.ts` | exact (port verbatim) |
+| New/Modified File                   | Role      | Data Flow        | Closest Analog                                                                          | Match Quality                                     |
+| ----------------------------------- | --------- | ---------------- | --------------------------------------------------------------------------------------- | ------------------------------------------------- |
+| `package.json`                      | config    | —                | `/Users/fjacquet/Projects/vsizer/package.json`                                          | exact (with deltas)                               |
+| `vite.config.ts`                    | config    | —                | `/Users/fjacquet/Projects/vsizer/vite.config.ts`                                        | exact (base path delta)                           |
+| `vitest.config.ts`                  | config    | —                | `/Users/fjacquet/Projects/vsizer/vitest.config.ts`                                      | exact (coverage include delta)                    |
+| `tsconfig.json`                     | config    | —                | `/Users/fjacquet/Projects/vsizer/tsconfig.json`                                         | exact (port verbatim)                             |
+| `tsconfig.app.json`                 | config    | —                | `/Users/fjacquet/Projects/vsizer/tsconfig.app.json`                                     | exact (port verbatim)                             |
+| `tsconfig.node.json`                | config    | —                | `/Users/fjacquet/Projects/vsizer/tsconfig.node.json`                                    | exact (port verbatim)                             |
+| `biome.json`                        | config    | —                | `/Users/fjacquet/Projects/vsizer/biome.json`                                            | exact + `noConsole` extension                     |
+| `index.html`                        | infra     | —                | `/Users/fjacquet/Projects/vsizer/index.html`                                            | role-match (must add CSP meta — see Plan 2)       |
+| `.gitignore`                        | config    | —                | `/Users/fjacquet/Projects/vsizer/.gitignore`                                            | exact (port verbatim)                             |
+| `.dockerignore`                     | config    | —                | `/Users/fjacquet/Projects/vsizer/.dockerignore`                                         | exact (port verbatim)                             |
+| `osv-scanner.toml`                  | config    | —                | `/Users/fjacquet/Projects/vsizer/osv-scanner.toml`                                      | exact (port verbatim)                             |
+| `.github/workflows/static.yml`      | infra     | event-driven     | `/Users/fjacquet/Projects/vsizer/.github/workflows/static.yml`                          | exact (base path + denylist step deltas)          |
+| `src/main.tsx`                      | infra     | —                | `/Users/fjacquet/Projects/vsizer/src/main.tsx`                                          | exact (privacy guard import added in Plan 2)      |
+| `src/App.tsx`                       | component | request-response | `/Users/fjacquet/Projects/vsizer/src/App.tsx`                                           | role-match (Cockpit→sidebar, EmptyState→dropzone) |
+| `src/index.css`                     | config    | —                | `/Users/fjacquet/Projects/vsizer/src/index.css`                                         | exact (port verbatim)                             |
+| `src/i18n/index.ts`                 | infra     | —                | `/Users/fjacquet/Projects/vsizer/src/i18n/index.ts`                                     | exact (drop 3 namespaces, rename storage key)     |
+| `src/i18n/locales/en/common.json`   | infra     | —                | `/Users/fjacquet/Projects/vsizer/src/i18n/locales/en/common.json`                       | exact (project-name fork)                         |
+| `src/i18n/locales/fr/common.json`   | infra     | —                | `/Users/fjacquet/Projects/vsizer/src/i18n/locales/fr/common.json`                       | exact (project-name fork)                         |
+| `src/i18n/locales/en/upload.json`   | infra     | —                | `/Users/fjacquet/Projects/vsizer/src/i18n/locales/en/upload.json`                       | exact (drop liveOptics keys)                      |
+| `src/i18n/locales/fr/upload.json`   | infra     | —                | `/Users/fjacquet/Projects/vsizer/src/i18n/locales/fr/upload.json`                       | exact (drop liveOptics keys)                      |
+| `src/hooks/useTheme.ts`             | hook      | event-driven     | `/Users/fjacquet/Projects/vsizer/src/hooks/useTheme.ts`                                 | exact (storage key rename)                        |
+| `src/components/ThemeToggle.tsx`    | component | event-driven     | `/Users/fjacquet/Projects/vsizer/src/components/inputs/ThemeToggle.tsx`                 | exact (port verbatim)                             |
+| `src/components/LanguageToggle.tsx` | component | event-driven     | `/Users/fjacquet/Projects/vsizer/src/components/layout/Header.tsx` (lines 34-57 inline) | role-match (extract from Header.tsx)              |
+| `src/components/UploadZone.tsx`     | component | event-driven     | `/Users/fjacquet/Projects/vsizer/src/components/inputs/FileDropzone.tsx`                | exact (extension-allowlist delta)                 |
+| `public/theme-init.js`              | infra     | —                | `/Users/fjacquet/Projects/vsizer/public/theme-init.js`                                  | exact (storage key rename)                        |
+| `src/test/setup.ts`                 | test      | —                | `/Users/fjacquet/Projects/vsizer/src/test/setup.ts`                                     | exact (port verbatim)                             |
 
 ### Plan 2 — Privacy guard
 
-| New/Modified File | Role | Data Flow | Closest Analog | Match Quality |
-|-------------------|------|-----------|----------------|---------------|
-| `src/privacy/fetchGuard.ts` | engine | runtime-monkeypatch | NEW — no vsizer analog | NEW (RESEARCH.md Pattern 9 is canonical) |
-| `src/privacy/fetchGuard.test.ts` | test | — | `/Users/fjacquet/Projects/vsizer/src/test/setup.ts` (jsdom matchMedia stub shape) | partial — test patterns only |
-| `index.html` (CSP meta extension) | infra | — | `/Users/fjacquet/Projects/vsizer/index.html` | role-match (vsizer has no CSP meta) |
-| `src/main.tsx` (guard import wiring) | infra | — | `/Users/fjacquet/Projects/vsizer/src/main.tsx` | role-match (insert as first import) |
-| `scripts/check-telemetry-denylist.mjs` | script | batch | NEW | NEW (RESEARCH.md Pattern 9 — denylist script) |
-| `scripts/check-sheetjs-pin.mjs` | script | batch | NEW (combined with denylist in research) | NEW — same script may fold both checks |
-| `.github/workflows/static.yml` (denylist step) | infra | event-driven | `/Users/fjacquet/Projects/vsizer/.github/workflows/static.yml` (lines 34-91 — same step shape) | role-match |
-| `docs/adr/0001-privacy-invariant.md` | doc | — | vsizer ADRs (referenced in `CLAUDE.md` lines 64-79 — Nygard format) | role-match (Nygard append-only) |
+| New/Modified File                              | Role   | Data Flow           | Closest Analog                                                                                 | Match Quality                                 |
+| ---------------------------------------------- | ------ | ------------------- | ---------------------------------------------------------------------------------------------- | --------------------------------------------- |
+| `src/privacy/fetchGuard.ts`                    | engine | runtime-monkeypatch | NEW — no vsizer analog                                                                         | NEW (RESEARCH.md Pattern 9 is canonical)      |
+| `src/privacy/fetchGuard.test.ts`               | test   | —                   | `/Users/fjacquet/Projects/vsizer/src/test/setup.ts` (jsdom matchMedia stub shape)              | partial — test patterns only                  |
+| `index.html` (CSP meta extension)              | infra  | —                   | `/Users/fjacquet/Projects/vsizer/index.html`                                                   | role-match (vsizer has no CSP meta)           |
+| `src/main.tsx` (guard import wiring)           | infra  | —                   | `/Users/fjacquet/Projects/vsizer/src/main.tsx`                                                 | role-match (insert as first import)           |
+| `scripts/check-telemetry-denylist.mjs`         | script | batch               | NEW                                                                                            | NEW (RESEARCH.md Pattern 9 — denylist script) |
+| `scripts/check-sheetjs-pin.mjs`                | script | batch               | NEW (combined with denylist in research)                                                       | NEW — same script may fold both checks        |
+| `.github/workflows/static.yml` (denylist step) | infra  | event-driven        | `/Users/fjacquet/Projects/vsizer/.github/workflows/static.yml` (lines 34-91 — same step shape) | role-match                                    |
+| `docs/adr/0001-privacy-invariant.md`           | doc    | —                   | vsizer ADRs (referenced in `CLAUDE.md` lines 64-79 — Nygard format)                            | role-match (Nygard append-only)               |
 
 ### Plan 3 — Units module + ADR-0010
 
-| New/Modified File | Role | Data Flow | Closest Analog | Match Quality |
-|-------------------|------|-----------|----------------|---------------|
-| `src/engines/units/types.ts` | type | — | `/Users/fjacquet/Projects/vsizer/src/types/vinfo.ts` (interface shape) | partial — branded type style is NEW |
-| `src/engines/units/constants.ts` | engine | — | NEW | NEW (RESEARCH.md Pattern 7) |
-| `src/engines/units/converters.ts` | engine | transform | `/Users/fjacquet/Projects/vsizer/src/utils/format.ts` (lines 12-16 `fmtGhz` MHz→GHz pattern) | partial — same math, branded types |
-| `src/engines/units/index.ts` | engine | — | `/Users/fjacquet/Projects/vsizer/src/types/index.ts` (barrel pattern) | exact (barrel re-exports) |
-| `src/engines/units/*.test.ts` | test | — | `/Users/fjacquet/Projects/vsizer/src/utils/format.ts` (pure-function test shape implied) | role-match |
-| `docs/adr/0010-rvtools-mb-as-mib.md` | doc | — | `/Users/fjacquet/Projects/store-predict/docs/adr/017-rvtools-mb-as-mib.md` (verbatim inherit, project name only) | exact (inherit verbatim) |
-| `src/__fixtures__/rvtools-mib-canary.xlsx` | test | — | `/Users/fjacquet/Projects/vsizer/public/samples/rvtools-sample.xlsx` (synthetic .xlsx shape) | partial — generated, not committed by hand |
-| `scripts/generate-mib-canary.mjs` | script | batch | `/Users/fjacquet/Projects/vsizer/scripts/generate-sample.mjs` (referenced in package.json line 19; same `node scripts/*.mjs` shape) | role-match |
+| New/Modified File                          | Role   | Data Flow | Closest Analog                                                                                                                      | Match Quality                              |
+| ------------------------------------------ | ------ | --------- | ----------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------ |
+| `src/engines/units/types.ts`               | type   | —         | `/Users/fjacquet/Projects/vsizer/src/types/vinfo.ts` (interface shape)                                                              | partial — branded type style is NEW        |
+| `src/engines/units/constants.ts`           | engine | —         | NEW                                                                                                                                 | NEW (RESEARCH.md Pattern 7)                |
+| `src/engines/units/converters.ts`          | engine | transform | `/Users/fjacquet/Projects/vsizer/src/utils/format.ts` (lines 12-16 `fmtGhz` MHz→GHz pattern)                                        | partial — same math, branded types         |
+| `src/engines/units/index.ts`               | engine | —         | `/Users/fjacquet/Projects/vsizer/src/types/index.ts` (barrel pattern)                                                               | exact (barrel re-exports)                  |
+| `src/engines/units/*.test.ts`              | test   | —         | `/Users/fjacquet/Projects/vsizer/src/utils/format.ts` (pure-function test shape implied)                                            | role-match                                 |
+| `docs/adr/0010-rvtools-mb-as-mib.md`       | doc    | —         | `/Users/fjacquet/Projects/store-predict/docs/adr/017-rvtools-mb-as-mib.md` (verbatim inherit, project name only)                    | exact (inherit verbatim)                   |
+| `src/__fixtures__/rvtools-mib-canary.xlsx` | test   | —         | `/Users/fjacquet/Projects/vsizer/public/samples/rvtools-sample.xlsx` (synthetic .xlsx shape)                                        | partial — generated, not committed by hand |
+| `scripts/generate-mib-canary.mjs`          | script | batch     | `/Users/fjacquet/Projects/vsizer/scripts/generate-sample.mjs` (referenced in package.json line 19; same `node scripts/*.mjs` shape) | role-match                                 |
 
 ### Plan 4 — Parser engine in Web Worker
 
-| New/Modified File | Role | Data Flow | Closest Analog | Match Quality |
-|-------------------|------|-----------|----------------|---------------|
-| `src/engines/parser/parseXlsx.ts` | engine | transform | `/Users/fjacquet/Projects/vsizer/src/engines/parser/parseXlsx.ts` | exact (port unchanged, add `{ dense: true }` per RESEARCH.md) |
-| `src/engines/parser/parser.worker.ts` | engine | request-response | NEW | NEW (RESEARCH.md Pattern 1; imports parser pieces) |
-| `src/engines/parser/parseInWorker.ts` | engine | request-response | NEW (main-thread side of worker) | NEW (RESEARCH.md Pattern 1) |
-| `src/engines/parser/adapters/rvtools.ts` | engine | transform | `/Users/fjacquet/Projects/vsizer/src/engines/parser/adapters/rvtools.ts` | exact + EXTEND (add OS, vDatastore, vPartition; drop Live Optics path) |
-| `src/engines/parser/adapters/columnMap.ts` | engine | transform | `/Users/fjacquet/Projects/vsizer/src/engines/parser/adapters/columnMap.ts` | exact (port unchanged) |
-| `src/engines/parser/normalizeColumns.ts` | engine | transform | `/Users/fjacquet/Projects/vsizer/src/engines/parser/normalizeColumns.ts` | exact + TRIM (drop `detectSource` + `extractWorkbookBytes` + `adaptLiveOptics` branches) |
-| `src/engines/parser/synthesizeOrphanClusters.ts` | engine | transform | `/Users/fjacquet/Projects/vsizer/src/engines/parser/synthesizeOrphanClusters.ts` | exact (port verbatim) |
-| `src/engines/parser/schemas.ts` | engine | transform | `/Users/fjacquet/Projects/vsizer/src/engines/parser/schemas.ts` | exact + EXTEND (branded outputs, VDatastoreRow, VPartitionRow) |
-| `src/engines/parser/captureDate.ts` | engine | transform | NEW | NEW (RESEARCH.md Pattern 4 — inference chain) |
-| `src/engines/parser/index.ts` | engine | — | `/Users/fjacquet/Projects/vsizer/src/types/index.ts` (barrel pattern) | exact (barrel re-exports) |
-| `src/types/snapshot.ts` | type | — | `/Users/fjacquet/Projects/vsizer/src/types/source.ts` + `vinfo.ts` (interface shape) | role-match (new Snapshot interface) |
-| `src/types/vinfo.ts` | type | — | `/Users/fjacquet/Projects/vsizer/src/types/vinfo.ts` | exact + EXTEND (add OS columns, viSdkUuid, vmBiosUuid) |
-| `src/types/vhost.ts` | type | — | `/Users/fjacquet/Projects/vsizer/src/types/vhost.ts` | exact (port verbatim, may rebrand to `memoryMib`) |
-| `src/types/index.ts` | type | — | `/Users/fjacquet/Projects/vsizer/src/types/index.ts` | exact (barrel pattern) |
-| `src/engines/parser/*.test.ts` | test | — | (vsizer has implied test pattern next to source) | role-match |
-| `src/__fixtures__/*.xlsx` (4 real workbooks) | test | — | `/Users/fjacquet/Projects/vsizer/public/samples/rvtools-sample.xlsx` | role-match (real RVTools workbooks per RESEARCH.md A7) |
+| New/Modified File                                | Role   | Data Flow        | Closest Analog                                                                       | Match Quality                                                                            |
+| ------------------------------------------------ | ------ | ---------------- | ------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------- |
+| `src/engines/parser/parseXlsx.ts`                | engine | transform        | `/Users/fjacquet/Projects/vsizer/src/engines/parser/parseXlsx.ts`                    | exact (port unchanged, add `{ dense: true }` per RESEARCH.md)                            |
+| `src/engines/parser/parser.worker.ts`            | engine | request-response | NEW                                                                                  | NEW (RESEARCH.md Pattern 1; imports parser pieces)                                       |
+| `src/engines/parser/parseInWorker.ts`            | engine | request-response | NEW (main-thread side of worker)                                                     | NEW (RESEARCH.md Pattern 1)                                                              |
+| `src/engines/parser/adapters/rvtools.ts`         | engine | transform        | `/Users/fjacquet/Projects/vsizer/src/engines/parser/adapters/rvtools.ts`             | exact + EXTEND (add OS, vDatastore, vPartition; drop Live Optics path)                   |
+| `src/engines/parser/adapters/columnMap.ts`       | engine | transform        | `/Users/fjacquet/Projects/vsizer/src/engines/parser/adapters/columnMap.ts`           | exact (port unchanged)                                                                   |
+| `src/engines/parser/normalizeColumns.ts`         | engine | transform        | `/Users/fjacquet/Projects/vsizer/src/engines/parser/normalizeColumns.ts`             | exact + TRIM (drop `detectSource` + `extractWorkbookBytes` + `adaptLiveOptics` branches) |
+| `src/engines/parser/synthesizeOrphanClusters.ts` | engine | transform        | `/Users/fjacquet/Projects/vsizer/src/engines/parser/synthesizeOrphanClusters.ts`     | exact (port verbatim)                                                                    |
+| `src/engines/parser/schemas.ts`                  | engine | transform        | `/Users/fjacquet/Projects/vsizer/src/engines/parser/schemas.ts`                      | exact + EXTEND (branded outputs, VDatastoreRow, VPartitionRow)                           |
+| `src/engines/parser/captureDate.ts`              | engine | transform        | NEW                                                                                  | NEW (RESEARCH.md Pattern 4 — inference chain)                                            |
+| `src/engines/parser/index.ts`                    | engine | —                | `/Users/fjacquet/Projects/vsizer/src/types/index.ts` (barrel pattern)                | exact (barrel re-exports)                                                                |
+| `src/types/snapshot.ts`                          | type   | —                | `/Users/fjacquet/Projects/vsizer/src/types/source.ts` + `vinfo.ts` (interface shape) | role-match (new Snapshot interface)                                                      |
+| `src/types/vinfo.ts`                             | type   | —                | `/Users/fjacquet/Projects/vsizer/src/types/vinfo.ts`                                 | exact + EXTEND (add OS columns, viSdkUuid, vmBiosUuid)                                   |
+| `src/types/vhost.ts`                             | type   | —                | `/Users/fjacquet/Projects/vsizer/src/types/vhost.ts`                                 | exact (port verbatim, may rebrand to `memoryMib`)                                        |
+| `src/types/index.ts`                             | type   | —                | `/Users/fjacquet/Projects/vsizer/src/types/index.ts`                                 | exact (barrel pattern)                                                                   |
+| `src/engines/parser/*.test.ts`                   | test   | —                | (vsizer has implied test pattern next to source)                                     | role-match                                                                               |
+| `src/__fixtures__/*.xlsx` (4 real workbooks)     | test   | —                | `/Users/fjacquet/Projects/vsizer/public/samples/rvtools-sample.xlsx`                 | role-match (real RVTools workbooks per RESEARCH.md A7)                                   |
 
 ### Plan 5 — Snapshot store + sidebar UI shell
 
-| New/Modified File | Role | Data Flow | Closest Analog | Match Quality |
-|-------------------|------|-----------|----------------|---------------|
-| `src/store/snapshotStore.ts` | store | pub-sub | `/Users/fjacquet/Projects/vsizer/src/store/datasetStore.ts` | role-match (DEVIATES: Map<id,Snapshot>, NO aggregates, append-only) |
-| `src/store/snapshotStore.test.ts` | test | — | (vsizer has no store test exposed) | role-match |
-| `src/hooks/useSnapshotUpload.ts` | hook | event-driven | `/Users/fjacquet/Projects/vsizer/src/hooks/useDatasetUpload.ts` | role-match (single-file → multi-file, worker boundary, no aggregation here) |
-| `src/components/SnapshotListSidebar.tsx` | component | pub-sub | `/Users/fjacquet/Projects/vsizer/src/components/layout/UploadSidebar.tsx` + `sources/SourceFileList.tsx` | role-match |
-| `src/components/SnapshotCard.tsx` | component | pub-sub | `/Users/fjacquet/Projects/vsizer/src/components/sources/SourceFileList.tsx` (lines 24-72 chip pattern) | role-match |
-| `src/components/FallbackError.tsx` | component | request-response | `/Users/fjacquet/Projects/vsizer/src/App.tsx` (lines 15-26 inline FallbackError) | exact (extract + harden — NEVER read `error.cause`) |
-| End-to-end smoke test | test | event-driven | (vsizer has no E2E smoke test in src/) | NEW (RESEARCH.md A7 — fixture-driven) |
+| New/Modified File                        | Role      | Data Flow        | Closest Analog                                                                                           | Match Quality                                                               |
+| ---------------------------------------- | --------- | ---------------- | -------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| `src/store/snapshotStore.ts`             | store     | pub-sub          | `/Users/fjacquet/Projects/vsizer/src/store/datasetStore.ts`                                              | role-match (DEVIATES: Map<id,Snapshot>, NO aggregates, append-only)         |
+| `src/store/snapshotStore.test.ts`        | test      | —                | (vsizer has no store test exposed)                                                                       | role-match                                                                  |
+| `src/hooks/useSnapshotUpload.ts`         | hook      | event-driven     | `/Users/fjacquet/Projects/vsizer/src/hooks/useDatasetUpload.ts`                                          | role-match (single-file → multi-file, worker boundary, no aggregation here) |
+| `src/components/SnapshotListSidebar.tsx` | component | pub-sub          | `/Users/fjacquet/Projects/vsizer/src/components/layout/UploadSidebar.tsx` + `sources/SourceFileList.tsx` | role-match                                                                  |
+| `src/components/SnapshotCard.tsx`        | component | pub-sub          | `/Users/fjacquet/Projects/vsizer/src/components/sources/SourceFileList.tsx` (lines 24-72 chip pattern)   | role-match                                                                  |
+| `src/components/FallbackError.tsx`       | component | request-response | `/Users/fjacquet/Projects/vsizer/src/App.tsx` (lines 15-26 inline FallbackError)                         | exact (extract + harden — NEVER read `error.cause`)                         |
+| End-to-end smoke test                    | test      | event-driven     | (vsizer has no E2E smoke test in src/)                                                                   | NEW (RESEARCH.md A7 — fixture-driven)                                       |
 
 ---
 
@@ -418,7 +418,7 @@ i18n
 **One delta** (line 6):
 
 ```typescript
-const STORAGE_KEY = 'vatlas-theme'   // was: 'vsizer-theme'
+const STORAGE_KEY = 'vatlas-theme' // was: 'vsizer-theme'
 ```
 
 **Port verbatim otherwise.** Critical patterns to preserve:
@@ -625,8 +625,16 @@ Drop `.xlsm, .xlsb, .csv, .ods, .zip` from vsizer's list. vatlas is RVTools-`.xl
 import { readFileSync } from 'node:fs'
 
 const FORBIDDEN_PATTERNS = [
-  /^@sentry\//, /^posthog-/, /^@amplitude\//, /^mixpanel/, /^@datadog\//,
-  /^logrocket/, /^@bugsnag\//, /^heap-analytics/, /^segment-analytics/, /^fullstory/,
+  /^@sentry\//,
+  /^posthog-/,
+  /^@amplitude\//,
+  /^mixpanel/,
+  /^@datadog\//,
+  /^logrocket/,
+  /^@bugsnag\//,
+  /^heap-analytics/,
+  /^segment-analytics/,
+  /^fullstory/,
 ]
 
 const pkg = JSON.parse(readFileSync('package.json', 'utf-8'))
@@ -676,26 +684,26 @@ if (allDeps.xlsx !== 'https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz') {
 
 ```typescript
 // src/engines/units/types.ts
-export type MiB    = number & { readonly __brand: 'MiB' }
-export type GiB    = number & { readonly __brand: 'GiB' }
-export type TiB    = number & { readonly __brand: 'TiB' }
-export type Bytes  = number & { readonly __brand: 'Bytes' }
-export type MHz    = number & { readonly __brand: 'MHz' }
-export type GHz    = number & { readonly __brand: 'GHz' }
-export type Cores  = number & { readonly __brand: 'Cores' }
+export type MiB = number & { readonly __brand: 'MiB' }
+export type GiB = number & { readonly __brand: 'GiB' }
+export type TiB = number & { readonly __brand: 'TiB' }
+export type Bytes = number & { readonly __brand: 'Bytes' }
+export type MHz = number & { readonly __brand: 'MHz' }
+export type GHz = number & { readonly __brand: 'GHz' }
+export type Cores = number & { readonly __brand: 'Cores' }
 export type Sockets = number & { readonly __brand: 'Sockets' }
 
-export const mib   = (n: number): MiB    => n as MiB
-export const gib   = (n: number): GiB    => n as GiB
+export const mib = (n: number): MiB => n as MiB
+export const gib = (n: number): GiB => n as GiB
 // …
 ```
 
 ```typescript
 // src/engines/units/constants.ts
 export const BYTES_PER_MIB = 1_048_576 as const
-export const MIB_PER_GIB   = 1_024 as const
-export const GIB_PER_TIB   = 1_024 as const
-export const MHZ_PER_GHZ   = 1_000 as const
+export const MIB_PER_GIB = 1_024 as const
+export const GIB_PER_TIB = 1_024 as const
+export const MHZ_PER_GHZ = 1_000 as const
 ```
 
 ```typescript
@@ -703,8 +711,8 @@ export const MHZ_PER_GHZ   = 1_000 as const
 import { type MiB, type GiB, gib /* … */ } from './types'
 import { MIB_PER_GIB /* … */ } from './constants'
 
-export const mibToGib   = (n: MiB): GiB => gib(n / MIB_PER_GIB)
-export const mhzToGhz   = (n: MHz): GHz => ghz(n / MHZ_PER_GHZ)
+export const mibToGib = (n: MiB): GiB => gib(n / MIB_PER_GIB)
+export const mhzToGhz = (n: MHz): GHz => ghz(n / MHZ_PER_GHZ)
 ```
 
 **Barrel pattern** (mirroring vsizer/src/types/index.ts):
@@ -752,7 +760,7 @@ Uses SheetJS `XLSX.utils.aoa_to_sheet` + `XLSX.utils.book_new` + `XLSX.writeFile
 
 ```typescript
 /// <reference lib="webworker" />
-import '../../privacy/fetchGuard'  // MUST be first; workers have their own global scope
+import '../../privacy/fetchGuard' // MUST be first; workers have their own global scope
 import { parseXlsx } from './parseXlsx'
 import { adaptRvtools } from './adapters/rvtools'
 import { inferCaptureDate } from './captureDate'
@@ -767,7 +775,7 @@ self.onmessage = (e: MessageEvent<ParseRequest>) => {
     // DROP the SheetJS WorkBook reference immediately — out of scope, GC will collect
     self.postMessage({
       kind: 'ok',
-      snapshot: { filename: e.data.filename, /* canonical rows only */ },
+      snapshot: { filename: e.data.filename /* canonical rows only */ },
     })
   } catch (err) {
     const e2 = err as { name?: string; message?: string; column?: string; sheet?: string }
@@ -933,7 +941,10 @@ export const VInfoRowSchema: z.ZodType<VInfoRow> = z.object({
 4. **Branded outputs** — use the hand-rolled brand from `engines/units/` (NOT Zod's `.brand<'MiB'>()` — RESEARCH.md line 816 explicitly recommends hand-rolled). Pattern (RESEARCH.md line 809):
 
 ```typescript
-const MibSchema = z.number().nonnegative().transform((n) => n as MiB)
+const MibSchema = z
+  .number()
+  .nonnegative()
+  .transform((n) => n as MiB)
 ```
 
 1. New schemas: `VDatastoreRowSchema`, `VPartitionRowSchema`, `VMetaDataRowSchema`.
@@ -958,7 +969,9 @@ export const inferCaptureDate = (
   if (explicit) return explicit
   // 1. Filename ISO regex
   const m = filename.match(/(\d{4})-(\d{2})-(\d{2})(?:[_T](\d{2})[.:](\d{2})[.:](\d{2}))?/)
-  if (m) { /* parse */ }
+  if (m) {
+    /* parse */
+  }
   // 2. vMetaData sheet `Exported Timestamp`
   // 3. file.lastModified mtime
   return new Date(mtime)
@@ -979,15 +992,15 @@ Companion inference helpers also live here per RESEARCH.md line 693: `inferVCent
 import type { MiB } from '../engines/units'
 
 export interface Snapshot {
-  id: string                  // crypto.randomUUID()
+  id: string // crypto.randomUUID()
   filename: string
-  fileSize: number            // Bytes
-  capturedAt: Date            // inferred per Pattern 4
-  vCenterLabel: string        // inferred; user-editable in Phase 4
-  rvtoolsVersion: string      // 'unknown' | '3.10' | '3.11' | '4.0' | '4.4'
+  fileSize: number // Bytes
+  capturedAt: Date // inferred per Pattern 4
+  vCenterLabel: string // inferred; user-editable in Phase 4
+  rvtoolsVersion: string // 'unknown' | '3.10' | '3.11' | '4.0' | '4.4'
   parsedAt: Date
-  source: 'rvtools'           // future-proof; only this in v1
-  viSdkUuid: string | null    // captured now for Phase 4 multi-vCenter merge
+  source: 'rvtools' // future-proof; only this in v1
+  viSdkUuid: string | null // captured now for Phase 4 multi-vCenter merge
   vinfo: VInfoRow[]
   vhost: VHostRow[]
   vdatastore: VDatastoreRow[]
@@ -1014,14 +1027,14 @@ export interface ParseError {
 
 ```typescript
 // Add to vsizer's VInfoRow:
-osConfig: string             // RVTools `OS according to the configuration file`
-osTools: string              // RVTools `OS according to the VMware Tools` — preferred over osConfig
-vmBiosUuid: string           // BIOS UUID — identity key for Phase 4
-vmInstanceUuid: string       // Instance UUID — secondary identity
-viSdkUuid: string            // vCenter UUID — required for Phase 4 dedupe
-viSdkServer: string          // vCenter server FQDN
-provisionedMib: MiB          // branded; NOT bare number
-inUseMib: MiB                // branded
+osConfig: string // RVTools `OS according to the configuration file`
+osTools: string // RVTools `OS according to the VMware Tools` — preferred over osConfig
+vmBiosUuid: string // BIOS UUID — identity key for Phase 4
+vmInstanceUuid: string // Instance UUID — secondary identity
+viSdkUuid: string // vCenter UUID — required for Phase 4 dedupe
+viSdkServer: string // vCenter server FQDN
+provisionedMib: MiB // branded; NOT bare number
+inUseMib: MiB // branded
 ```
 
 Note: `vramMb` in vsizer should be renamed `vramMib: MiB` in vatlas — the brand carries the unit.
@@ -1037,7 +1050,7 @@ Note: `vramMb` in vsizer should be renamed `vramMib: MiB` in vatlas — the bran
 ```typescript
 cores: Cores
 speedMhz: MHz
-memoryMib: MiB   // was memoryMb in vsizer; rename to encode the unit
+memoryMib: MiB // was memoryMb in vsizer; rename to encode the unit
 ```
 
 ---
@@ -1065,13 +1078,13 @@ Drop vsizer's `ClusterAggregate`, `GlobalSummary`, `SourceFile` re-exports (Phas
 
 **Key DEVIATIONS from vsizer (per ARCHITECTURE.md §5 + RESEARCH.md Pattern 8):**
 
-| vsizer pattern | vatlas pattern | Why |
-|----------------|----------------|-----|
-| `vinfo: VInfoRow[]` + `vhost: VHostRow[]` on the store | `snapshots: Map<string, Snapshot>` | Multi-snapshot model; each Snapshot owns its rows. |
+| vsizer pattern                                                     | vatlas pattern                                                                       | Why                                                                                                  |
+| ------------------------------------------------------------------ | ------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------- |
+| `vinfo: VInfoRow[]` + `vhost: VHostRow[]` on the store             | `snapshots: Map<string, Snapshot>`                                                   | Multi-snapshot model; each Snapshot owns its rows.                                                   |
 | `aggregates: Record<string, ClusterAggregate>` cached on the store | **NO aggregates on the store.** Computed in `useEstateView` (Phase 2) via `useMemo`. | DR sim + EOS + trends have too many invalidation axes; cache-in-store is mistakes-waiting-to-happen. |
-| `toggleStretched` atomically re-aggregates (lines 121-150) | No re-aggregation action. Mutations only set `snapshots: Map`. | Aggregation is a derivation, not a store concern. |
-| Single source (`source: SourceFormat`) | Snapshot field, not store field | Each snapshot may be from a different RVTools version (but always `source: 'rvtools'` in v1). |
-| `parseErrors` flat array on store | `parseErrors: ParseError[]` lives **inside each Snapshot** | Errors are per-workbook; aggregating them across snapshots loses provenance. |
+| `toggleStretched` atomically re-aggregates (lines 121-150)         | No re-aggregation action. Mutations only set `snapshots: Map`.                       | Aggregation is a derivation, not a store concern.                                                    |
+| Single source (`source: SourceFormat`)                             | Snapshot field, not store field                                                      | Each snapshot may be from a different RVTools version (but always `source: 'rvtools'` in v1).        |
+| `parseErrors` flat array on store                                  | `parseErrors: ParseError[]` lives **inside each Snapshot**                           | Errors are per-workbook; aggregating them across snapshots loses provenance.                         |
 
 **Imports pattern** (lines 1-6 of vsizer — port shape, change targets):
 
@@ -1114,7 +1127,7 @@ addSnapshot: (s) =>
 ```typescript
 export const selectHasSnapshots = (s: SnapshotState): boolean => s.snapshots.size > 0
 export const selectActiveSnapshot = (s: SnapshotState): Snapshot | null =>
-  s.activeSnapshotId ? s.snapshots.get(s.activeSnapshotId) ?? null : null
+  s.activeSnapshotId ? (s.snapshots.get(s.activeSnapshotId) ?? null) : null
 ```
 
 > KEEP vsizer's caveat (lines 156-162): "Don't compute new arrays/objects inside a selector — Zustand uses strict equality and an unstable reference triggers an infinite re-render loop."
@@ -1143,8 +1156,8 @@ vsizer does (lines 50-66):
 
 ```typescript
 const buffer = await file.arrayBuffer()
-const workbookBytes = extractWorkbookBytes(buffer, file.name)  // DROP — Live Optics zip
-const parsed = parseDataset(workbookBytes)                      // MAIN THREAD — replace
+const workbookBytes = extractWorkbookBytes(buffer, file.name) // DROP — Live Optics zip
+const parsed = parseDataset(workbookBytes) // MAIN THREAD — replace
 ```
 
 vatlas does:
@@ -1152,7 +1165,7 @@ vatlas does:
 ```typescript
 import { parseInWorker } from '../engines/parser/parseInWorker'
 
-const snapshot = await parseInWorker(file)  // WORKER — async, transferable
+const snapshot = await parseInWorker(file) // WORKER — async, transferable
 store.addSnapshot({ id: crypto.randomUUID(), parsedAt: new Date(), ...snapshot })
 ```
 
@@ -1221,8 +1234,13 @@ export interface SnapshotCardProps {
 export function SnapshotCard({ snapshot, active, onClick }: SnapshotCardProps) {
   const { t } = useTranslation('upload')
   return (
-    <li className={`panel cursor-pointer text-xs ${active ? 'ring-2 ring-accent-500' : ''}`} onClick={onClick}>
-      <p className="break-all font-semibold text-slate-700 dark:text-slate-200">{snapshot.filename}</p>
+    <li
+      className={`panel cursor-pointer text-xs ${active ? 'ring-2 ring-accent-500' : ''}`}
+      onClick={onClick}
+    >
+      <p className="break-all font-semibold text-slate-700 dark:text-slate-200">
+        {snapshot.filename}
+      </p>
       <p className="text-slate-500">
         {t('snapshots.card.vCenterLabel')}: {snapshot.vCenterLabel} ·
         {t('snapshots.card.capturedAt')}: {snapshot.capturedAt.toLocaleDateString()} ·
@@ -1300,7 +1318,8 @@ export function FallbackError({ error }: FallbackProps) {
 Example (UploadSidebar.tsx line 60-61):
 
 ```tsx
-className="bg-white dark:bg-surface-900 border-slate-200 dark:border-surface-700 text-slate-700 dark:text-slate-200"
+className =
+  'bg-white dark:bg-surface-900 border-slate-200 dark:border-surface-700 text-slate-700 dark:text-slate-200'
 ```
 
 ### i18n via `useTranslation()`
@@ -1355,24 +1374,24 @@ Vitest coverage gate (75% lines/functions/branches/statements) applies to `src/e
 
 Files that have no vsizer match — planner falls back to RESEARCH.md patterns:
 
-| File | Role | Data Flow | Reason | RESEARCH.md reference |
-|------|------|-----------|--------|----------------------|
-| `src/privacy/fetchGuard.ts` | engine | runtime-monkeypatch | vsizer has no privacy guard layer | Pattern 9 (lines 920-1017) |
-| `src/privacy/fetchGuard.test.ts` | test | — | New module, new tests | Pattern 9 test guidance |
-| `scripts/check-telemetry-denylist.mjs` | script | batch | New supply-chain gate | Pattern 9 (lines 1047-1083) |
-| `scripts/check-sheetjs-pin.mjs` | script | batch | New supply-chain gate (may fold into above) | Pattern 9 (lines 1077-1080) |
-| `src/engines/units/types.ts` | type | — | vsizer has no branded units | Pattern 7 (lines 762-782) |
-| `src/engines/units/constants.ts` | engine | — | vsizer has no `BYTES_PER_MIB` constant module | Pattern 7 (lines 782-786) |
-| `src/engines/units/converters.ts` | engine | transform | vsizer has format helpers (`utils/format.ts`) but no branded converters | Pattern 7 (lines 789-797) |
-| `src/engines/parser/parser.worker.ts` | engine | request-response | vsizer parses on main thread | Pattern 1 (lines 459-499) |
-| `src/engines/parser/parseInWorker.ts` | engine | request-response | vsizer parses on main thread | Pattern 1 (lines 425-456) |
-| `src/engines/parser/captureDate.ts` | engine | transform | vsizer has no capture-date concept | Pattern 4 (lines 663-691) |
-| `docs/adr/0001-privacy-invariant.md` | doc | — | vsizer has its own ADR-0001 (Nygard format) | Reference vsizer CLAUDE.md ADR list |
-| `docs/adr/0010-rvtools-mb-as-mib.md` | doc | — | **Inherit verbatim** from store-predict ADR-017 | RESEARCH.md constraint |
-| `src/__fixtures__/rvtools-mib-canary.xlsx` | test | — | Synthetic canary, generated by script | RESEARCH.md line 823 (canary specification) |
-| `scripts/generate-mib-canary.mjs` | script | batch | New script | (analog: vsizer scripts/generate-sample.mjs referenced in package.json line 19) |
-| `src/__fixtures__/*.xlsx` (4 real RVTools workbooks) | test | — | Real harvests from disk per RESEARCH.md A7 | RESEARCH.md (Test Fixtures § / A7) |
-| End-to-end smoke test (Plan 5) | test | event-driven | New | None — first integration test in vatlas |
+| File                                                 | Role   | Data Flow           | Reason                                                                  | RESEARCH.md reference                                                           |
+| ---------------------------------------------------- | ------ | ------------------- | ----------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| `src/privacy/fetchGuard.ts`                          | engine | runtime-monkeypatch | vsizer has no privacy guard layer                                       | Pattern 9 (lines 920-1017)                                                      |
+| `src/privacy/fetchGuard.test.ts`                     | test   | —                   | New module, new tests                                                   | Pattern 9 test guidance                                                         |
+| `scripts/check-telemetry-denylist.mjs`               | script | batch               | New supply-chain gate                                                   | Pattern 9 (lines 1047-1083)                                                     |
+| `scripts/check-sheetjs-pin.mjs`                      | script | batch               | New supply-chain gate (may fold into above)                             | Pattern 9 (lines 1077-1080)                                                     |
+| `src/engines/units/types.ts`                         | type   | —                   | vsizer has no branded units                                             | Pattern 7 (lines 762-782)                                                       |
+| `src/engines/units/constants.ts`                     | engine | —                   | vsizer has no `BYTES_PER_MIB` constant module                           | Pattern 7 (lines 782-786)                                                       |
+| `src/engines/units/converters.ts`                    | engine | transform           | vsizer has format helpers (`utils/format.ts`) but no branded converters | Pattern 7 (lines 789-797)                                                       |
+| `src/engines/parser/parser.worker.ts`                | engine | request-response    | vsizer parses on main thread                                            | Pattern 1 (lines 459-499)                                                       |
+| `src/engines/parser/parseInWorker.ts`                | engine | request-response    | vsizer parses on main thread                                            | Pattern 1 (lines 425-456)                                                       |
+| `src/engines/parser/captureDate.ts`                  | engine | transform           | vsizer has no capture-date concept                                      | Pattern 4 (lines 663-691)                                                       |
+| `docs/adr/0001-privacy-invariant.md`                 | doc    | —                   | vsizer has its own ADR-0001 (Nygard format)                             | Reference vsizer CLAUDE.md ADR list                                             |
+| `docs/adr/0010-rvtools-mb-as-mib.md`                 | doc    | —                   | **Inherit verbatim** from store-predict ADR-017                         | RESEARCH.md constraint                                                          |
+| `src/__fixtures__/rvtools-mib-canary.xlsx`           | test   | —                   | Synthetic canary, generated by script                                   | RESEARCH.md line 823 (canary specification)                                     |
+| `scripts/generate-mib-canary.mjs`                    | script | batch               | New script                                                              | (analog: vsizer scripts/generate-sample.mjs referenced in package.json line 19) |
+| `src/__fixtures__/*.xlsx` (4 real RVTools workbooks) | test   | —                   | Real harvests from disk per RESEARCH.md A7                              | RESEARCH.md (Test Fixtures § / A7)                                              |
+| End-to-end smoke test (Plan 5)                       | test   | event-driven        | New                                                                     | None — first integration test in vatlas                                         |
 
 ---
 
@@ -1389,7 +1408,7 @@ Files that have no vsizer match — planner falls back to RESEARCH.md patterns:
    - `~/Library/CloudStorage/OneDrive-Home/JTI/RVTools_export_all_2026-04-17_16.51.38-MOM-vCenter.xlsx`
    - `~/Library/CloudStorage/OneDrive-Home/live-optics/RVTools_export_all_2026-01-14_17.23.32.xlsx`
    - `/Users/fjacquet/Projects/vsizer/public/samples/rvtools-sample.xlsx`
-   Plan 4 must copy these into `src/__fixtures__/`.
+     Plan 4 must copy these into `src/__fixtures__/`.
 
 5. **Container & Dockerfile.** vsizer ships `Dockerfile`, `docker/`, `CHANGELOG.md`, `CONTRIBUTING.md`, `SECURITY.md`. **Phase 1 does NOT need these** per the file list — the planner should NOT propose them unless a later phase requires them. (Note for ROADMAP: container support is currently out of scope for vatlas v1.)
 

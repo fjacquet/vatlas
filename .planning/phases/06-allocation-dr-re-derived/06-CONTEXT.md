@@ -67,7 +67,7 @@ No new top-level capabilities beyond the planning lens + the DR-mode rework.
 - Site-loss disabled-state vs always-shown when zero stretched clusters (D-08).
 - Whether the `Verdict` enum word is shown vs pure-numbers-only for the physical survivor verdict (D-09).
 - Exact label strings (factual, EN/FR parity, no editorial verbs), the Planning-screen layout grid, the minimal-blast-radius wiring of planned ratios into `drSim`, and the precise re-derived requirement IDs/wording (D-12).
-</decisions>
+  </decisions>
 
 <canonical_refs>
 
@@ -96,7 +96,7 @@ No new top-level capabilities beyond the planning lens + the DR-mode rework.
 - `.planning/REQUIREMENTS.md` §Allocated Resources / §Disaster Recovery Simulation — ALC-01..04 + DRS-01..06 are STALE; planner re-derives per D-12.
 
 > The original `04-RESEARCH.md` / `04-PATTERNS.md` / `04-UI-SPEC.md` are **pre-replan** artifacts — historical only; the replan brief + this CONTEXT supersede them for the re-derived P6 scope.
-</canonical_refs>
+> </canonical_refs>
 
 <code_context>
 
@@ -125,7 +125,7 @@ No new top-level capabilities beyond the planning lens + the DR-mode rework.
 - `drSim` public surface changes (two modes, physical impact, no `confidence`) — enumerate every consumer/test fixture and update; coverage gate ≥75% on `engines/drSim`.
 - Planned-ratio inputs add a Zustand inputs slice (in-memory, no persist — privacy/D-06); planned what-if reads through the single memo.
 - `EstateView` gains a planned-projection + reworked DR-result shape (drop `confidence`, keep `caveats`); produced in aggregation, consumed via the memo.
-</code_context>
+  </code_context>
 
 <specifics>
 ## Specific Ideas
@@ -134,7 +134,7 @@ No new top-level capabilities beyond the planning lens + the DR-mode rework.
 - Preset values for the planned CPU lens: **1:1, 4:1, 8:1, VDI 10:1**; default CPU 4:1 / RAM 1:1 (echo of the old ALC-02 default, now applied only to the explicitly-"planned" lens).
 - Custom Failover is phrased as "the same Server/Site sim, but with my planned ratios" — not a new failure primitive.
 - Reference depth target overall: `azure.github.io/RVToolsAnalyzer` (illustrative, not pixel-match).
-</specifics>
+  </specifics>
 
 <deferred>
 ## Deferred Ideas
@@ -148,5 +148,5 @@ None of the above are acted on in P6.
 
 ---
 
-*Phase: 06-allocation-dr-re-derived*
-*Context gathered: 2026-05-17*
+_Phase: 06-allocation-dr-re-derived_
+_Context gathered: 2026-05-17_

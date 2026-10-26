@@ -41,12 +41,13 @@ Executed inline (atomic commits, gate-verified). Full detail + per-phase success
 
 ## Progress
 
-| Milestone | Phases | Status | Shipped |
-|-----------|--------|--------|---------|
-| v1.0 RVTools Atlas (MVP) | 1–11 | ✅ Complete — released & deployed | 2026-05-19 |
-| v2.0 Offline-Capable, Redesigned, Better Deck | 12–18 | ✅ Complete — installable PWA, redesigned UI, vsizer-grade deck | 2026-05-20 |
+| Milestone                                     | Phases | Status                                                          | Shipped    |
+| --------------------------------------------- | ------ | --------------------------------------------------------------- | ---------- |
+| v1.0 RVTools Atlas (MVP)                      | 1–11   | ✅ Complete — released & deployed                               | 2026-05-19 |
+| v2.0 Offline-Capable, Redesigned, Better Deck | 12–18  | ✅ Complete — installable PWA, redesigned UI, vsizer-grade deck | 2026-05-20 |
 
 Full v1.0 detail archived in [milestones/v1.0-ROADMAP.md](milestones/v1.0-ROADMAP.md) · v2.0 in [milestones/v2.0-ROADMAP.md](milestones/v2.0-ROADMAP.md). Audits: [v1.0](milestones/v1.0-MILESTONE-AUDIT.md) · [v2.0](milestones/v2.0-MILESTONE-AUDIT.md).
 
 ---
-*v2.0 shipped 2026-05-20 — installable offline PWA (audited ADR-0001 SW exception), KPI-tile redesign with one left column + cluster table, Capacity Planning visual return, and a vsizer-grade brand-free PPTX deck (all charts native). 506 tests green. Carry-forward: consolidated Playwright UAT (offline cold-boot, web-layout) + minor polish (DR bare slide, icon exact-set). Next milestone: `/gsd-new-milestone`.*
+
+_v2.0 shipped 2026-05-20 — installable offline PWA (audited ADR-0001 SW exception), KPI-tile redesign with one left column + cluster table, Capacity Planning visual return, and a vsizer-grade brand-free PPTX deck (all charts native). 506 tests green. Carry-forward: consolidated Playwright UAT (offline cold-boot, web-layout) + minor polish (DR bare slide, icon exact-set). Next milestone: `/gsd-new-milestone`._

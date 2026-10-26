@@ -6,7 +6,7 @@
 
 ## Summary
 
-Phase 4 turns vatlas from a single-snapshot viewer into the analytics atlas. Four capabilities ship together over the existing pure-engine spine: (1) **multi-vCenter merge** — N RVTools workbooks (and, per a real-data discovery, *also* N vCenters inside one RVTools 4.x workbook) collapse into one logical estate keyed on `(viSdkUuid, clusterName)` for clusters and `vmBiosUuid` (the vCenter-assigned `VM UUID`, never SMBIOS) for VMs; (2) the **Étendu/Stretched pill** with per-site reservation math (not flat 50 %) and a `confidence` indicator derived from the *actual* `vHost.vSAN Fault Domain Name` column found in the real file; (3) **CPU/RAM allocation sliders** with named presets, URL-hash-only persistence; (4) **DR simulation** in 3 modes with an explicit assumptions panel and a `caveats[]` array. Every later phase reads the merged estate.
+Phase 4 turns vatlas from a single-snapshot viewer into the analytics atlas. Four capabilities ship together over the existing pure-engine spine: (1) **multi-vCenter merge** — N RVTools workbooks (and, per a real-data discovery, _also_ N vCenters inside one RVTools 4.x workbook) collapse into one logical estate keyed on `(viSdkUuid, clusterName)` for clusters and `vmBiosUuid` (the vCenter-assigned `VM UUID`, never SMBIOS) for VMs; (2) the **Étendu/Stretched pill** with per-site reservation math (not flat 50 %) and a `confidence` indicator derived from the _actual_ `vHost.vSAN Fault Domain Name` column found in the real file; (3) **CPU/RAM allocation sliders** with named presets, URL-hash-only persistence; (4) **DR simulation** in 3 modes with an explicit assumptions panel and a `caveats[]` array. Every later phase reads the merged estate.
 
 The architecture is locked by PROJECT.md and the shipped P1–P3 codebase: engines are pure functions (no React/Zustand/Zod; Zod parser-boundary only), `useEstateView` is the project's ONLY `useMemo`, the store holds inputs only, no `localStorage` of dataset rows. The dependency bar is decided and non-negotiable: **no external math/stats library** — Phase-4 math is elementary integer/ratio arithmetic, hand-rolled in `src/engines/`, Vitest-gated ≥75 %, consistent with Phases 1–3.
 
@@ -16,17 +16,17 @@ The single biggest correctness risk in v1 lives here: wrong DR numbers feed budg
 
 ## Architectural Responsibility Map
 
-| Capability | Primary Tier | Secondary Tier | Rationale |
-|------------|-------------|----------------|-----------|
-| N-workbook → 1 estate merge | `engines/snapshotMerge/` (pure) | `store` (selection inputs) | Pure transform `Snapshot[] → mergedRows`; store only holds the snapshot Map + active selection (already shipped) |
-| Cluster-collision visual suffix | `engines/snapshotMerge/` (pure) | UI (renders suffixed name) | Suffix is a data transform on `cluster`, not a render concern (vsizer `resolveClusterCollisions` pattern) |
-| `(viSdkUuid, clusterName)` / `vmBiosUuid` keying | `engines/snapshotMerge/` (pure) | parser (carries `viSdkUuid`/`vmBiosUuid` — already done P1) | Identity is a merge concern; parser already surfaces the columns |
-| Stretched per-site reservation | `engines/aggregation/aggregateClusters.ts` (pure, extend) | UI (pill toggle is an input) | Math owner is aggregation (ported vsizer ADR-0007); pill is a `stretchedClusters` Set input |
-| Stretched `confidence` derivation | `engines/aggregation/` (pure) | parser (must surface `vSAN Fault Domain Name`) | Confidence is derived from parsed fault-domain presence — needs a new parsed column |
-| Allocation ratio recompute | `engines/aggregation/` (pure, via mode/ratio params) | `useEstateView` (threads ratios) | Ratios are scalar inputs threaded like the existing `AccountingMode` param |
-| URL-hash persistence | UI hook (`window.location.hash`) | — | Browser location is the only sanctioned persistence (NOT localStorage) |
-| DR simulation | `engines/drSim/` (pure, NEW) | `useEstateView` + store scenario slice | DR = aggregation re-run on a host subset; scenario is an inputs-only store slice |
-| Assumptions panel + caveats | `engines/drSim/` produces `caveats[]`; UI renders panel | i18n (FR+EN strings) | Engine emits the structured caveats; UI is a pure presenter |
+| Capability                                       | Primary Tier                                              | Secondary Tier                                              | Rationale                                                                                                        |
+| ------------------------------------------------ | --------------------------------------------------------- | ----------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| N-workbook → 1 estate merge                      | `engines/snapshotMerge/` (pure)                           | `store` (selection inputs)                                  | Pure transform `Snapshot[] → mergedRows`; store only holds the snapshot Map + active selection (already shipped) |
+| Cluster-collision visual suffix                  | `engines/snapshotMerge/` (pure)                           | UI (renders suffixed name)                                  | Suffix is a data transform on `cluster`, not a render concern (vsizer `resolveClusterCollisions` pattern)        |
+| `(viSdkUuid, clusterName)` / `vmBiosUuid` keying | `engines/snapshotMerge/` (pure)                           | parser (carries `viSdkUuid`/`vmBiosUuid` — already done P1) | Identity is a merge concern; parser already surfaces the columns                                                 |
+| Stretched per-site reservation                   | `engines/aggregation/aggregateClusters.ts` (pure, extend) | UI (pill toggle is an input)                                | Math owner is aggregation (ported vsizer ADR-0007); pill is a `stretchedClusters` Set input                      |
+| Stretched `confidence` derivation                | `engines/aggregation/` (pure)                             | parser (must surface `vSAN Fault Domain Name`)              | Confidence is derived from parsed fault-domain presence — needs a new parsed column                              |
+| Allocation ratio recompute                       | `engines/aggregation/` (pure, via mode/ratio params)      | `useEstateView` (threads ratios)                            | Ratios are scalar inputs threaded like the existing `AccountingMode` param                                       |
+| URL-hash persistence                             | UI hook (`window.location.hash`)                          | —                                                           | Browser location is the only sanctioned persistence (NOT localStorage)                                           |
+| DR simulation                                    | `engines/drSim/` (pure, NEW)                              | `useEstateView` + store scenario slice                      | DR = aggregation re-run on a host subset; scenario is an inputs-only store slice                                 |
+| Assumptions panel + caveats                      | `engines/drSim/` produces `caveats[]`; UI renders panel   | i18n (FR+EN strings)                                        | Engine emits the structured caveats; UI is a pure presenter                                                      |
 
 ## User Constraints
 
@@ -37,7 +37,7 @@ The single biggest correctness risk in v1 lives here: wrong DR numbers feed budg
 - **No external math/stats library.** `tslovers/maths.ts` evaluated and REJECTED (abandoned, jQuery+CLI transitive deps, fails bundle/privacy/supply-chain gates). Phase-4 math is elementary arithmetic — hand-rolled in pure `src/engines/` functions, Vitest-gated ≥75 %, consistent with Phases 1–3. Do NOT propose `mathjs`/`decimal.js`/`d3-array`/`simple-statistics`/etc. `simple-statistics` is a Phase-6-ONLY flagged candidate (out of scope here). [VERIFIED: objective brief DEPENDENCY CONSTRAINT + memory `feedback_dependency_bar.md`]
 - **JS-double precision boundary noted as a known limit only.** JS doubles are exact for integers ≤ 2^53; MiB-scale integer sums are safe (a 2^53-MiB estate is ~9 PiB). Note the 2^53 boundary as a documented limit, do not add a bignum library. [VERIFIED: objective brief]
 - **Engines are pure functions.** No React/Zustand/Zod inside `engines/`. Zod lives only at the parser boundary (01-04). No domain classes. [VERIFIED: PROJECT.md line 52 + 01-04-SUMMARY + ARCHITECTURE.md §1]
-- **`useEstateView` is the project's ONLY `useMemo`.** Phase 4 must add NO second `useMemo`. The store already holds N snapshots; merge runs *inside* the existing single memo, keyed on `(selected snapshot identities, stretched set, scenario, ratios, mode)`. [VERIFIED: src/hooks/useEstateView.ts + 02-02-SUMMARY + grep gates in 03-01/03-03-SUMMARY]
+- **`useEstateView` is the project's ONLY `useMemo`.** Phase 4 must add NO second `useMemo`. The store already holds N snapshots; merge runs _inside_ the existing single memo, keyed on `(selected snapshot identities, stretched set, scenario, ratios, mode)`. [VERIFIED: src/hooks/useEstateView.ts + 02-02-SUMMARY + grep gates in 03-01/03-03-SUMMARY]
 - **Store holds inputs only.** No cached aggregates. Scenario/stretched are inputs-only store slices (Sets, replaced not mutated). [VERIFIED: src/store/snapshotStore.ts + ARCHITECTURE.md §5]
 - **No `localStorage` of dataset rows or scenario/slider state.** Allocation ratios persist in the **URL hash ONLY** (ALC-03). DR scenario + stretched flags live in the in-memory store. Only `vatlas-theme` + `vatlas-lang` localStorage keys are permitted. [VERIFIED: PROJECT.md line 53 + REQUIREMENTS ALC-03 + CLAUDE.md "no localStorage of dataset rows"]
 - **No editorial recommendations.** DR/stretched output carries factual numbers + verdicts only. No "you should" / "recommend" / "poor" / "good". i18n string lint enforces the denylist. [VERIFIED: PROJECT.md line 39 + FEATURES.md D12]
@@ -48,7 +48,7 @@ The single biggest correctness risk in v1 lives here: wrong DR numbers feed budg
 ### Claude's Discretion
 
 - Exact `snapshotMerge` function signature + module file layout (within `engines/snapshotMerge/`).
-- Exact per-site reservation formula shape (the *principle* is locked: per-site, not flat 50 %; `max(siteCap)/totalCap`).
+- Exact per-site reservation formula shape (the _principle_ is locked: per-site, not flat 50 %; `max(siteCap)/totalCap`).
 - `confidence` tier thresholds (high/medium/low) — derive from fault-domain presence; exact rule is yours.
 - URL-hash encoding scheme (recommend a compact `#alloc=cpu:8,ram:1.25` style; yours to finalize).
 - DR `caveats[]` schema shape + the exact assumptions-panel copy (must be factual; ADR-style).
@@ -62,65 +62,65 @@ The single biggest correctness risk in v1 lives here: wrong DR numbers feed budg
 - `simple-statistics` percentile work — Phase 6 only.
 - Multi-file `.zip` bundle ingestion — out of scope per PROJECT.md.
 - Trends timeline / sparklines — Phase 6 (consumes Phase-4 stable keys).
-- HA admission-control *hard enforcement* in DR — surfaced as a caveat only; hard modeling is a future enhancement (Moderate-10).
-- Anti-affinity *hard enforcement* — soft surfacing only if `vRP`/`Cluster rule(s)` expose it; not a v1 placement engine.
+- HA admission-control _hard enforcement_ in DR — surfaced as a caveat only; hard modeling is a future enhancement (Moderate-10).
+- Anti-affinity _hard enforcement_ — soft surfacing only if `vRP`/`Cluster rule(s)` expose it; not a v1 placement engine.
 
 ## Phase Requirements
 
-| ID | Description | Research Support |
-|----|-------------|------------------|
-| MVC-01 | N workbooks → one estate | `snapshotMerge` engine; vsizer `resolveClusterCollisions` port; **also handles N vCenters in ONE workbook** (real-data discovery §Pitfall-1) |
-| MVC-02 | Visual suffix on colliding cluster names (NEVER silent merge) | Generalize vsizer `resolveClusterCollisions` to key on `(viSdkUuid, clusterName)`; suffix `"<cluster> (<vCenterLabel>)"` |
-| MVC-03 | Keyed on `(VI SDK UUID, vm BIOS UUID)`; cross-vCenter vMotion dedupes | Parser already carries `viSdkUuid`/`vmBiosUuid`; **`vmBiosUuid` = RVTools `VM UUID` (vCenter-assigned), NOT SMBIOS** (§Pitfall-2, verified) |
-| MVC-04 | Per-snapshot vCenter label + RVTools version in snapshot list | `Snapshot.vCenterLabel`/`rvtoolsVersion` exist; **needs the RVTools 4.x columnar `vMetaData` parser fix** (§Pitfall-3) |
-| STR-01 | Étendu/Stretched pill | `stretchedClusters` Set input → ported `aggregateClusters` DR math (already dormant in code); pill = aria-pressed idiom |
-| STR-02 | Per-site CPU+RAM reservation (NOT flat 50 %) for asymmetric (6+4) | Extend `aggregateClusters` with per-site reservation; `vHost.vSAN Fault Domain Name` is the site key (verified present) |
-| STR-03 | Confidence high/medium/low from site/fault-domain metadata presence | `vSAN Fault Domain Name` populated 8/111 in real file → drives confidence; absence ⇒ "assumed symmetric" medium/low |
-| STR-04 | Low-confidence warning chip | UI chip bound to `ClusterAggregate.stretchedConfidence === 'low'` |
-| ALC-01 | CPU/RAM sliders + presets (1:1, 4:1, 8:1, VDI 10:1) | New allocation UI; presets are a small enum; recompute via `useEstateView` ratio params |
-| ALC-02 | Defaults CPU 4:1, RAM 1:1 | FEATURES.md allocation table (HIGH confidence, VMware vCAT/Broadcom sourced) |
-| ALC-03 | URL-hash-only persistence (NO localStorage) | `window.location.hash` codec hook; NO Zustand persist middleware |
-| ALC-04 | Consolidation vs physical cores (not hyperthreads) | Already correct: `ClusterAggregate.vcpuPerPcpu` uses `usablePhysicalCores`; `VHostRow` structurally has no threads field (Moderate-4 type-prevented — confirmed 02-02) |
-| DRS-01 | Host-loss mode | `drSim` removes selected hosts; re-run aggregation on survivors |
-| DRS-02 | Cluster-loss mode | `drSim` removes selected clusters' hosts; evacuee = their VM vCPU/vRAM sum |
-| DRS-03 | vCenter-loss mode | `drSim` removes all hosts of a `viSdkUuid`; needs merged estate (depends on MVC) |
-| DRS-04 | Explicit assumptions panel (does/doesn't model HA adm. ctrl, anti-affinity, restart priority) | Static factual copy + the parsed `vCluster.AdmissionControlEnabled`/`Failover Level` surfaced as context (verified present) |
-| DRS-05 | Confidence + caveats[] on every result | `DrSimResult.confidence` + `caveats: string[]`; reservation-vs-capacity check (Moderate-10) |
-| DRS-06 | Before/after numbers, evacuee totals, per-survivor verdict | `drSim` returns before/after `GlobalSummary` + per-cluster verdict (`absorbs`/`tight`/`overflows`) |
+| ID     | Description                                                                                   | Research Support                                                                                                                                                       |
+| ------ | --------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| MVC-01 | N workbooks → one estate                                                                      | `snapshotMerge` engine; vsizer `resolveClusterCollisions` port; **also handles N vCenters in ONE workbook** (real-data discovery §Pitfall-1)                           |
+| MVC-02 | Visual suffix on colliding cluster names (NEVER silent merge)                                 | Generalize vsizer `resolveClusterCollisions` to key on `(viSdkUuid, clusterName)`; suffix `"<cluster> (<vCenterLabel>)"`                                               |
+| MVC-03 | Keyed on `(VI SDK UUID, vm BIOS UUID)`; cross-vCenter vMotion dedupes                         | Parser already carries `viSdkUuid`/`vmBiosUuid`; **`vmBiosUuid` = RVTools `VM UUID` (vCenter-assigned), NOT SMBIOS** (§Pitfall-2, verified)                            |
+| MVC-04 | Per-snapshot vCenter label + RVTools version in snapshot list                                 | `Snapshot.vCenterLabel`/`rvtoolsVersion` exist; **needs the RVTools 4.x columnar `vMetaData` parser fix** (§Pitfall-3)                                                 |
+| STR-01 | Étendu/Stretched pill                                                                         | `stretchedClusters` Set input → ported `aggregateClusters` DR math (already dormant in code); pill = aria-pressed idiom                                                |
+| STR-02 | Per-site CPU+RAM reservation (NOT flat 50 %) for asymmetric (6+4)                             | Extend `aggregateClusters` with per-site reservation; `vHost.vSAN Fault Domain Name` is the site key (verified present)                                                |
+| STR-03 | Confidence high/medium/low from site/fault-domain metadata presence                           | `vSAN Fault Domain Name` populated 8/111 in real file → drives confidence; absence ⇒ "assumed symmetric" medium/low                                                    |
+| STR-04 | Low-confidence warning chip                                                                   | UI chip bound to `ClusterAggregate.stretchedConfidence === 'low'`                                                                                                      |
+| ALC-01 | CPU/RAM sliders + presets (1:1, 4:1, 8:1, VDI 10:1)                                           | New allocation UI; presets are a small enum; recompute via `useEstateView` ratio params                                                                                |
+| ALC-02 | Defaults CPU 4:1, RAM 1:1                                                                     | FEATURES.md allocation table (HIGH confidence, VMware vCAT/Broadcom sourced)                                                                                           |
+| ALC-03 | URL-hash-only persistence (NO localStorage)                                                   | `window.location.hash` codec hook; NO Zustand persist middleware                                                                                                       |
+| ALC-04 | Consolidation vs physical cores (not hyperthreads)                                            | Already correct: `ClusterAggregate.vcpuPerPcpu` uses `usablePhysicalCores`; `VHostRow` structurally has no threads field (Moderate-4 type-prevented — confirmed 02-02) |
+| DRS-01 | Host-loss mode                                                                                | `drSim` removes selected hosts; re-run aggregation on survivors                                                                                                        |
+| DRS-02 | Cluster-loss mode                                                                             | `drSim` removes selected clusters' hosts; evacuee = their VM vCPU/vRAM sum                                                                                             |
+| DRS-03 | vCenter-loss mode                                                                             | `drSim` removes all hosts of a `viSdkUuid`; needs merged estate (depends on MVC)                                                                                       |
+| DRS-04 | Explicit assumptions panel (does/doesn't model HA adm. ctrl, anti-affinity, restart priority) | Static factual copy + the parsed `vCluster.AdmissionControlEnabled`/`Failover Level` surfaced as context (verified present)                                            |
+| DRS-05 | Confidence + caveats[] on every result                                                        | `DrSimResult.confidence` + `caveats: string[]`; reservation-vs-capacity check (Moderate-10)                                                                            |
+| DRS-06 | Before/after numbers, evacuee totals, per-survivor verdict                                    | `drSim` returns before/after `GlobalSummary` + per-cluster verdict (`absorbs`/`tight`/`overflows`)                                                                     |
 
 ## Standard Stack
 
 ### Core (all already shipped P1–P3 — Phase 4 adds ZERO new runtime deps)
 
-| Library | Version | Purpose | Why Standard |
-|---------|---------|---------|--------------|
-| React | `^19.2.6` | UI runtime | Shipped; pill/sliders/panels are plain components |
-| Zustand | `^5.0.13` | Inputs-only store | Shipped `snapshotStore`; add scenario/stretched slices (Sets) |
-| TypeScript | `~5.9.3` strict | Branded units | `noUncheckedIndexedAccess` + branded `MiB`/`GHz`/`Cores` shipped |
-| Vitest | `^4.1.2` | ≥75 % engine gate | Shipped; the 4+4 / 6+4 / 8+0 / 2+2 stretched matrix + collision/vMotion fixtures land here |
-| ECharts (`echarts-for-react`) | `^6` / `^3.0.6` | Optional DR before/after bar | Only if a chart is added; via shipped `<Chart>` SVG wrapper |
-| `@biomejs/biome` | `^2.4.15` | Lint/format | Shipped; run `npx @biomejs/biome check .` NOT `npm run lint` (RTK intercept) |
+| Library                       | Version         | Purpose                      | Why Standard                                                                               |
+| ----------------------------- | --------------- | ---------------------------- | ------------------------------------------------------------------------------------------ |
+| React                         | `^19.2.6`       | UI runtime                   | Shipped; pill/sliders/panels are plain components                                          |
+| Zustand                       | `^5.0.13`       | Inputs-only store            | Shipped `snapshotStore`; add scenario/stretched slices (Sets)                              |
+| TypeScript                    | `~5.9.3` strict | Branded units                | `noUncheckedIndexedAccess` + branded `MiB`/`GHz`/`Cores` shipped                           |
+| Vitest                        | `^4.1.2`        | ≥75 % engine gate            | Shipped; the 4+4 / 6+4 / 8+0 / 2+2 stretched matrix + collision/vMotion fixtures land here |
+| ECharts (`echarts-for-react`) | `^6` / `^3.0.6` | Optional DR before/after bar | Only if a chart is added; via shipped `<Chart>` SVG wrapper                                |
+| `@biomejs/biome`              | `^2.4.15`       | Lint/format                  | Shipped; run `npx @biomejs/biome check .` NOT `npm run lint` (RTK intercept)               |
 
 **No new dependencies.** Phase-4 math is hand-rolled pure arithmetic (locked decision). [VERIFIED: package.json review via STACK.md + DEPENDENCY CONSTRAINT]
 
 ### Supporting (existing modules to extend, not new deps)
 
-| Module | Action | Phase-4 Use |
-|--------|--------|-------------|
-| `src/engines/parser/adapters/rvtools.ts` | Extend | Add `vDatastore.Hosts`/`# Hosts` parse; surface `vHost.vSAN Fault Domain Name` |
-| `src/engines/parser/captureDate.ts` | Fix | RVTools 4.x columnar `vMetaData` (`RVTools version` column, not Property/Value) |
-| `src/engines/aggregation/aggregateClusters.ts` | Extend | Per-site reservation + `confidence` (the dormant 50 % math is already ported) |
-| vsizer `engines/parser/resolveClusterCollisions.ts` | Port + generalize | Key on `viSdkUuid` not filename; suffix on `vCenterLabel` |
-| `src/hooks/useEstateView.ts` | Extend signature | Thread `selectedSnapshots[]`, `stretched`, `scenario`, `ratios` (still ONE memo) |
+| Module                                              | Action            | Phase-4 Use                                                                      |
+| --------------------------------------------------- | ----------------- | -------------------------------------------------------------------------------- |
+| `src/engines/parser/adapters/rvtools.ts`            | Extend            | Add `vDatastore.Hosts`/`# Hosts` parse; surface `vHost.vSAN Fault Domain Name`   |
+| `src/engines/parser/captureDate.ts`                 | Fix               | RVTools 4.x columnar `vMetaData` (`RVTools version` column, not Property/Value)  |
+| `src/engines/aggregation/aggregateClusters.ts`      | Extend            | Per-site reservation + `confidence` (the dormant 50 % math is already ported)    |
+| vsizer `engines/parser/resolveClusterCollisions.ts` | Port + generalize | Key on `viSdkUuid` not filename; suffix on `vCenterLabel`                        |
+| `src/hooks/useEstateView.ts`                        | Extend signature  | Thread `selectedSnapshots[]`, `stretched`, `scenario`, `ratios` (still ONE memo) |
 
 ### Alternatives Considered
 
-| Instead of | Could Use | Tradeoff |
-|------------|-----------|----------|
-| Hand-rolled per-site reservation | `simple-statistics` / `d3-array` | REJECTED by locked decision — math is `max()`/`sum()`/division, library is pure overhead + supply-chain risk |
-| URL hash | `localStorage` / Zustand persist | FORBIDDEN — ALC-03 + privacy invariant; hash is the only sanctioned share-state surface |
-| `vmBiosUuid` = SMBIOS UUID | RVTools `SMBIOS UUID` column | WRONG — SMBIOS is not unique (clone/template collisions); RVTools 4.3.1+ `VM UUID` column is the vCenter-assigned unique key (§Pitfall-2) |
-| Separate `useMemo` for merge | New hook with its own memo | FORBIDDEN — single-useMemo invariant; merge runs inside `useEstateView` |
+| Instead of                       | Could Use                        | Tradeoff                                                                                                                                  |
+| -------------------------------- | -------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| Hand-rolled per-site reservation | `simple-statistics` / `d3-array` | REJECTED by locked decision — math is `max()`/`sum()`/division, library is pure overhead + supply-chain risk                              |
+| URL hash                         | `localStorage` / Zustand persist | FORBIDDEN — ALC-03 + privacy invariant; hash is the only sanctioned share-state surface                                                   |
+| `vmBiosUuid` = SMBIOS UUID       | RVTools `SMBIOS UUID` column     | WRONG — SMBIOS is not unique (clone/template collisions); RVTools 4.3.1+ `VM UUID` column is the vCenter-assigned unique key (§Pitfall-2) |
+| Separate `useMemo` for merge     | New hook with its own memo       | FORBIDDEN — single-useMemo invariant; merge runs inside `useEstateView`                                                                   |
 
 ## Architecture Patterns
 
@@ -285,32 +285,32 @@ src/components/
 - **Second `useMemo`.** Merge/DR/stretched all run inside `useEstateView`. Adding `useMemo` anywhere else breaks the invariant + the grep gate.
 - **`localStorage`/`sessionStorage`/Zustand-persist for ratios or scenario.** ALC-03 + privacy invariant. URL hash for ratios; in-memory store for scenario.
 - **Editorial verbs in DR/stretched output or i18n.** "recommend/should/poor/good" are denylisted. Verdict is `absorbs|tight|overflows` (factual enum).
-- **Treating the real `allvCenters.xlsx` as 3 separate files.** It is ONE workbook with 3 vCenters (3 `vMetaData` rows). The merge engine must split by `viSdkUuid` *within* a snapshot too — not only across snapshots (§Pitfall-1).
+- **Treating the real `allvCenters.xlsx` as 3 separate files.** It is ONE workbook with 3 vCenters (3 `vMetaData` rows). The merge engine must split by `viSdkUuid` _within_ a snapshot too — not only across snapshots (§Pitfall-1).
 
 ## Don't Hand-Roll
 
-| Problem | Don't Build | Use Instead | Why |
-|---------|-------------|-------------|-----|
-| Cluster-collision suffixing | New collision algorithm | Port vsizer `resolveClusterCollisions.ts` (generalize key) | Battle-tested; same algorithm, only the key changes (filename→viSdkUuid) |
-| Cluster aggregation + DR reservation | New cluster math | Extend shipped `aggregateClusters.ts` (50 % math already ported + tested, dormant) | 02-02 ported it intact with a regression test specifically for Phase 4 |
-| Branded unit arithmetic | New number wrappers | `src/engines/units` (`mib`/`ghz`/`cores` + converters) | Shipped, gated; prevents MB-is-MiB + MHz-vs-GHz bugs by type |
-| XLSX parsing for new columns | New parser | Extend `adapters/rvtools.ts` column maps (`mapColumns`) | Alias-dictionary pattern shipped; just add `Hosts`/`vSAN Fault Domain Name` |
-| Pill/slider/segmented control a11y | New toggle component | Reuse the `ThemeToggle`/`AccountingModeToggle` `<fieldset role="group">` + `aria-pressed` idiom | CLAUDE.md mandates reuse; shipped + a11y-verified P2/P3 |
-| Per-VM/host/datastore display rows | New projections | Existing `EstateView.vmRows`/`hosts`/`datastores` | Shipped P2/P3; Phase 4 consumes, doesn't re-derive |
+| Problem                              | Don't Build             | Use Instead                                                                                     | Why                                                                         |
+| ------------------------------------ | ----------------------- | ----------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| Cluster-collision suffixing          | New collision algorithm | Port vsizer `resolveClusterCollisions.ts` (generalize key)                                      | Battle-tested; same algorithm, only the key changes (filename→viSdkUuid)    |
+| Cluster aggregation + DR reservation | New cluster math        | Extend shipped `aggregateClusters.ts` (50 % math already ported + tested, dormant)              | 02-02 ported it intact with a regression test specifically for Phase 4      |
+| Branded unit arithmetic              | New number wrappers     | `src/engines/units` (`mib`/`ghz`/`cores` + converters)                                          | Shipped, gated; prevents MB-is-MiB + MHz-vs-GHz bugs by type                |
+| XLSX parsing for new columns         | New parser              | Extend `adapters/rvtools.ts` column maps (`mapColumns`)                                         | Alias-dictionary pattern shipped; just add `Hosts`/`vSAN Fault Domain Name` |
+| Pill/slider/segmented control a11y   | New toggle component    | Reuse the `ThemeToggle`/`AccountingModeToggle` `<fieldset role="group">` + `aria-pressed` idiom | CLAUDE.md mandates reuse; shipped + a11y-verified P2/P3                     |
+| Per-VM/host/datastore display rows   | New projections         | Existing `EstateView.vmRows`/`hosts`/`datastores`                                               | Shipped P2/P3; Phase 4 consumes, doesn't re-derive                          |
 
-**Key insight:** Phase 4 is mostly *extension and composition* of shipped pure engines, not greenfield. The genuinely new code is the `snapshotMerge` module and the `drSim` module — both small pure functions over already-validated rows. The math (max, sum, division, ratio) is grade-school arithmetic; a library would be pure liability against the locked dependency bar.
+**Key insight:** Phase 4 is mostly _extension and composition_ of shipped pure engines, not greenfield. The genuinely new code is the `snapshotMerge` module and the `drSim` module — both small pure functions over already-validated rows. The math (max, sum, division, ratio) is grade-school arithmetic; a library would be pure liability against the locked dependency bar.
 
 ## Runtime State Inventory
 
 > Phase 4 is code/config-only (new pure engines + UI + store slices). No rename/refactor of existing stored identifiers. The only "state" touched is in-memory (Zustand) + URL hash.
 
-| Category | Items Found | Action Required |
-|----------|-------------|------------------|
-| Stored data | None — no DB/datastore; snapshots are in-memory `Map` (privacy invariant). | None — verified by `src/store/snapshotStore.ts` (module-scope `new Map()`, no persist middleware) |
-| Live service config | None — 100 % client-side, no external services. | None — verified by PRV-01 fetch guard (Phase 1) |
-| OS-registered state | None — browser app, no OS registration. | None |
-| Secrets/env vars | None — no secrets; allocation ratios live in URL hash (shareable, non-secret by design). | None |
-| Build artifacts | None — new TS files; no package rename/egg-info. The shipped bundle gates (echarts ≤300 KiB gz, @tanstack ≤60 KiB gz) must stay green; Phase 4 adds no chart/table deps so no new chunk. | Run `node scripts/check-bundle-size.mjs` in plan verify (existing gate, no new artifact) |
+| Category            | Items Found                                                                                                                                                                              | Action Required                                                                                   |
+| ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| Stored data         | None — no DB/datastore; snapshots are in-memory `Map` (privacy invariant).                                                                                                               | None — verified by `src/store/snapshotStore.ts` (module-scope `new Map()`, no persist middleware) |
+| Live service config | None — 100 % client-side, no external services.                                                                                                                                          | None — verified by PRV-01 fetch guard (Phase 1)                                                   |
+| OS-registered state | None — browser app, no OS registration.                                                                                                                                                  | None                                                                                              |
+| Secrets/env vars    | None — no secrets; allocation ratios live in URL hash (shareable, non-secret by design).                                                                                                 | None                                                                                              |
+| Build artifacts     | None — new TS files; no package rename/egg-info. The shipped bundle gates (echarts ≤300 KiB gz, @tanstack ≤60 KiB gz) must stay green; Phase 4 adds no chart/table deps so no new chunk. | Run `node scripts/check-bundle-size.mjs` in plan verify (existing gate, no new artifact)          |
 
 ## Common Pitfalls
 
@@ -318,14 +318,14 @@ src/components/
 
 **What goes wrong:** The merge engine is designed only for `Snapshot[]` (one vCenter per file). The real `~/Library/CloudStorage/OneDrive-Home/20260430_1400_allvCenters.xlsx` is a **single RVTools 4.7 workbook containing 3 vCenters** — `vMetaData` has **3 rows** (one per `Server`: `spvspherevc11/13/14.ad.net.fr.ch`), and `vInfo`/`vHost`/`vCluster` rows carry 3 distinct `VI SDK UUID` values (`dcfb0dd2…` 1345 VMs, `f0cb2dc9…` 40 VMs, `4415e891…` 62 VMs). RVTools 4.x natively exports multiple vCenters into one workbook.
 **Why it happens:** The brief and ARCHITECTURE.md frame merge as "N files → 1 estate"; the parser produces one `Snapshot` per file. A 3-vCenter file becomes ONE `Snapshot` whose rows span 3 `viSdkUuid` values.
-**How to avoid:** `mergeSnapshotsToEstate` and `aggregateClusters` must group/key by `viSdkUuid` carried on the *rows*, NOT by `Snapshot` identity. The vCenter index is built from row `viSdkUuid`, not from one-snapshot-one-vCenter. The cluster collision check operates on `(viSdkUuid, clusterName)` regardless of which snapshot the rows came from.
-**Warning signs:** Estate vCenter count = number of files instead of distinct `viSdkUuid`; cluster aggregates merge `CL_11` from vc11 with a same-named cluster from vc14 (no collision in *this* file — 0/18 — but a synthetic fixture must prove it).
+**How to avoid:** `mergeSnapshotsToEstate` and `aggregateClusters` must group/key by `viSdkUuid` carried on the _rows_, NOT by `Snapshot` identity. The vCenter index is built from row `viSdkUuid`, not from one-snapshot-one-vCenter. The cluster collision check operates on `(viSdkUuid, clusterName)` regardless of which snapshot the rows came from.
+**Warning signs:** Estate vCenter count = number of files instead of distinct `viSdkUuid`; cluster aggregates merge `CL_11` from vc11 with a same-named cluster from vc14 (no collision in _this_ file — 0/18 — but a synthetic fixture must prove it).
 **Source:** [VERIFIED: direct inspection of the real workbook, 2026-05-16]
 
 ### Pitfall 2: `vmInstanceUuid` does not exist in RVTools 4.7; key on `VM UUID` not SMBIOS
 
 **What goes wrong:** The brief's secondary key `vmInstanceUuid` and the adapter alias (`'vm instance uuid'`/`'instance uuid'`) match NO column in RVTools 4.7 — `vInfo` has `SMBIOS UUID` and `VM UUID` only (no `VM Instance UUID`). Keying VMs on SMBIOS UUID double-counts cloned/templated VMs (SMBIOS is not unique); keying on the per-vCenter MoRef (`VM ID` = `vm-2408033`) fails across vCenters.
-**Why it happens:** RVTools changed UUID semantics in 4.3.1 — the `UUID`/`VM UUID` column is now the **vCenter-assigned unique 128-bit UUID** (previously it held the non-unique SMBIOS value). The current adapter maps `vmBiosUuid ← ['vm uuid','bios uuid','uuid']` which correctly resolves to `VM UUID` in 4.7. Good — but the *name* `vmBiosUuid` is misleading and `vmInstanceUuid` is dead.
+**Why it happens:** RVTools changed UUID semantics in 4.3.1 — the `UUID`/`VM UUID` column is now the **vCenter-assigned unique 128-bit UUID** (previously it held the non-unique SMBIOS value). The current adapter maps `vmBiosUuid ← ['vm uuid','bios uuid','uuid']` which correctly resolves to `VM UUID` in 4.7. Good — but the _name_ `vmBiosUuid` is misleading and `vmInstanceUuid` is dead.
 **How to avoid:** Dedupe on `vmBiosUuid` (which is RVTools `VM UUID`, the vCenter-unique key). Treat `vmInstanceUuid` as optional/absent — do NOT make it a required secondary path. Fallback when `VM UUID` is blank: `(viSdkUuid, vmName, cluster)`. In the real file: 1446/1447 distinct `VM UUID`, exactly 1 duplicate pair (a real cross-vCenter clone or vMotion — the dedupe target).
 **Warning signs:** Estate VM total > sum of per-vCenter totals; 31 templates double-counted; the 1 dup pair not collapsed.
 **Source:** [VERIFIED: real workbook inspection + RVTools 4.3.1 changelog via web search — virtual-allan.com / RVTools docs]
@@ -334,7 +334,7 @@ src/components/
 
 **What goes wrong:** The shipped `captureDate.ts`/`adaptRvtoolsVMetaData` read `vMetaData` as a `Property`/`Value` 2-column sheet. RVTools 4.7's `vMetaData` is **columnar**: headers `["RVTools major version","RVTools version","xlsx creation datetime","Server"]` with one row per vCenter. The version sniffer therefore falls back to marker-column sniffing and reports `"3.11+"` for a 4.7 file (01-04-SUMMARY explicitly logged this gap). MVC-04 ("per-snapshot RVTools version in snapshot list") will show the wrong version.
 **Why it happens:** Phase-1 fixtures had no explicit `vMetaData.RVTools Version` cell; the real 4.7 schema was not available then.
-**How to avoid:** Extend the `vMetaData` parser to detect the columnar 4.x shape (presence of an `RVTools version` *column*) and read `RVTools version` (e.g. `4.7.1.4`) + `xlsx creation datetime` + `Server` per row. Keep the legacy Property/Value path for older exports. This also gives a precise per-vCenter `Server` label for `vCenterLabel` and `xlsx creation datetime` for `capturedAt` (better than filename ISO). **Fold this into the merge plan (Plan 1)** — it is a prerequisite for correct MVC-04 and clean vCenter labelling.
+**How to avoid:** Extend the `vMetaData` parser to detect the columnar 4.x shape (presence of an `RVTools version` _column_) and read `RVTools version` (e.g. `4.7.1.4`) + `xlsx creation datetime` + `Server` per row. Keep the legacy Property/Value path for older exports. This also gives a precise per-vCenter `Server` label for `vCenterLabel` and `xlsx creation datetime` for `capturedAt` (better than filename ISO). **Fold this into the merge plan (Plan 1)** — it is a prerequisite for correct MVC-04 and clean vCenter labelling.
 **Warning signs:** Snapshot list shows "RVTools 3.11+" for a 4.7 workbook; `capturedAt` from filename when a precise `xlsx creation datetime` exists.
 **Source:** [VERIFIED: real workbook `vMetaData` dump + 01-04-SUMMARY "A7 gap" note]
 
@@ -350,7 +350,7 @@ src/components/
 
 **What goes wrong:** DR sim says "survivors absorb the load" while real vSphere HA admission control would refuse to power on half the VMs (it doesn't model HA reservations, memory reservations vs configured, anti-affinity, restart priority, stretched split-brain).
 **Why it happens:** Pure capacity arithmetic ignores policy. Operators base budget decisions on the number.
-**How to avoid:** Every `DrSimResult` carries `confidence` + `caveats: string[]`. The UI shows an explicit assumptions panel listing what IS and ISN'T modeled (factual, no "should"). Surface the *parsed* `vCluster.AdmissionControlEnabled` + `Failover Level` (both present in the real file: `CL_11` Failover=1/admCtl=True, `CL_12` Failover=2) as factual context — do NOT enforce, just disclose mismatch as a caveat. Reservation-vs-capacity check: if survivor memory *reservation* (not configured) > 80 % survivor RAM, emit a caveat. Powered-off VMs respected via the shipped 3 accounting modes (real file: 1373 on / 74 off / 31 templates).
+**How to avoid:** Every `DrSimResult` carries `confidence` + `caveats: string[]`. The UI shows an explicit assumptions panel listing what IS and ISN'T modeled (factual, no "should"). Surface the _parsed_ `vCluster.AdmissionControlEnabled` + `Failover Level` (both present in the real file: `CL_11` Failover=1/admCtl=True, `CL_12` Failover=2) as factual context — do NOT enforce, just disclose mismatch as a caveat. Reservation-vs-capacity check: if survivor memory _reservation_ (not configured) > 80 % survivor RAM, emit a caveat. Powered-off VMs respected via the shipped 3 accounting modes (real file: 1373 on / 74 off / 31 templates).
 **Warning signs:** No assumptions panel beside the verdict; verdict is editorial ("you should add hosts") instead of `overflows`; caveats array empty on a stretched/asymmetric scenario.
 **Source:** [VERIFIED: PITFALLS.md Moderate-10 + real `vCluster` HA-field inspection; CITED: Broadcom vSphere HA Admission Control techdocs via PITFALLS sources]
 
@@ -369,7 +369,12 @@ src/components/
 ```typescript
 // Source: derived from src/store/snapshotStore.ts shape + real-data §Pitfall-1
 // Pure: group selected snapshots' rows by row.viSdkUuid (NOT snapshot id).
-interface VCenterEntry { viSdkUuid: string; server: string; label: string; vmCount: number }
+interface VCenterEntry {
+  viSdkUuid: string
+  server: string
+  label: string
+  vmCount: number
+}
 // For each selected Snapshot, for each vinfo row → bucket by viSdkUuid;
 // label = vMetaData.Server for that uuid (4.x columnar fix) ?? viSdkServer
 //         ?? snapshot.vCenterLabel.
@@ -406,28 +411,28 @@ interface VCenterEntry { viSdkUuid: string; server: string; label: string; vmCou
 
 ## State of the Art
 
-| Old Approach | Current Approach | When Changed | Impact |
-|--------------|------------------|--------------|--------|
-| RVTools `UUID`/`VM UUID` = SMBIOS UUID (non-unique) | `VM UUID` = vCenter-assigned unique 128-bit UUID | RVTools 4.3.1 | MVC-03 dedupe MUST use `VM UUID`; SMBIOS would double-count clones |
-| One vCenter per RVTools workbook | RVTools 4.x exports N vCenters into one workbook | RVTools 4.x | Merge must key by row `viSdkUuid`, not Snapshot identity |
-| `vMetaData` as Property/Value sheet | `vMetaData` columnar (one row/vCenter, `RVTools version` col) | RVTools 4.x | Parser fix needed for correct MVC-04 version + per-vCenter label/timestamp |
-| Flat 50 % stretched reservation (vsizer ADR-0007) | Per-site `max/total` + confidence | Phase 4 (this) | Asymmetric clusters correct; absence-of-metadata surfaced as low confidence |
+| Old Approach                                        | Current Approach                                              | When Changed   | Impact                                                                      |
+| --------------------------------------------------- | ------------------------------------------------------------- | -------------- | --------------------------------------------------------------------------- |
+| RVTools `UUID`/`VM UUID` = SMBIOS UUID (non-unique) | `VM UUID` = vCenter-assigned unique 128-bit UUID              | RVTools 4.3.1  | MVC-03 dedupe MUST use `VM UUID`; SMBIOS would double-count clones          |
+| One vCenter per RVTools workbook                    | RVTools 4.x exports N vCenters into one workbook              | RVTools 4.x    | Merge must key by row `viSdkUuid`, not Snapshot identity                    |
+| `vMetaData` as Property/Value sheet                 | `vMetaData` columnar (one row/vCenter, `RVTools version` col) | RVTools 4.x    | Parser fix needed for correct MVC-04 version + per-vCenter label/timestamp  |
+| Flat 50 % stretched reservation (vsizer ADR-0007)   | Per-site `max/total` + confidence                             | Phase 4 (this) | Asymmetric clusters correct; absence-of-metadata surfaced as low confidence |
 
 **Deprecated/outdated:**
 
 - `vmInstanceUuid` as a reliable secondary VM key — the `VM Instance UUID` column does not exist in RVTools 4.7. Treat as optional enrichment, not a required path.
-- Marker-column RVTools-version sniffing as the *primary* version source — the columnar `vMetaData` is authoritative when present.
+- Marker-column RVTools-version sniffing as the _primary_ version source — the columnar `vMetaData` is authoritative when present.
 
 ## Assumptions Log
 
-| # | Claim | Section | Risk if Wrong |
-|---|-------|---------|---------------|
-| A1 | The asymmetric 6+4 stretched case (STR-02 acceptance) must be a SYNTHETIC fixture — no asymmetric stretched cluster exists in the real file (only the symmetric 4+4 `CL_VXB1K_CORE`). | Pitfall 4 | Low — synthetic fixtures are already the project norm (10k inventory fixture); planner just must build a 6+4 fixture, not expect real data |
-| A2 | `vmBiosUuid` (parser field) resolves to RVTools `VM UUID` (vCenter-unique) in 4.7 via the existing alias list — confirmed by the real-file dump showing `VM UUID` populated & 1446/1447 distinct. The field NAME is misleading but the mapping is correct. | Pitfall 2 | Low — verified by inspection; risk is only cosmetic (name) unless an older export lacks `VM UUID` and only has `SMBIOS UUID` (then alias `'uuid'` could mis-resolve — planner should add a fixture for a pre-4.3.1 export if one is obtainable) |
-| A3 | The `vDatastore.Hosts → vHost.cluster` attribution fix is in Phase-4 scope. | Pitfall 6 | Medium — if the planner/user descopes it, stretched/DR storage stays under-counted for vSAN; flag in Plan 2 for explicit user confirmation |
-| A4 | Per-site reservation formula = `maxSiteCapacity / totalCapacity` (capacity = Σ physical GHz per fault domain; RAM analogous). | Pattern 3 | Medium — this is the standard interpretation (PITFALLS Critical-3, Broadcom-sourced) but the exact capacity basis (GHz vs cores vs RAM, or the max of all three) is a modelling choice the planner should pin in an ADR |
-| A5 | DR `confidence` enum = `high|medium|low` mirroring the stretched confidence; `caveats` is `string[]` of i18n keys (not free text, to keep FR/EN parity + no editorial verbs). | Pitfall 5 | Low — consistent with shipped readiness/confidence patterns; exact schema is Claude's discretion per brief |
-| A6 | RVTools 4.x columnar `vMetaData` parser fix belongs in Plan 1 (merge) as a prerequisite for MVC-04. | Pitfall 3 | Low — it is a parser extension; could alternatively be a standalone micro-plan, but coupling to merge is natural |
+| #   | Claim                                                                                                                                                                                                                                                      | Section   | Risk if Wrong                                                                                                                                                                                                                                   |
+| --- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| A1  | The asymmetric 6+4 stretched case (STR-02 acceptance) must be a SYNTHETIC fixture — no asymmetric stretched cluster exists in the real file (only the symmetric 4+4 `CL_VXB1K_CORE`).                                                                      | Pitfall 4 | Low — synthetic fixtures are already the project norm (10k inventory fixture); planner just must build a 6+4 fixture, not expect real data                                                                                                      |
+| A2  | `vmBiosUuid` (parser field) resolves to RVTools `VM UUID` (vCenter-unique) in 4.7 via the existing alias list — confirmed by the real-file dump showing `VM UUID` populated & 1446/1447 distinct. The field NAME is misleading but the mapping is correct. | Pitfall 2 | Low — verified by inspection; risk is only cosmetic (name) unless an older export lacks `VM UUID` and only has `SMBIOS UUID` (then alias `'uuid'` could mis-resolve — planner should add a fixture for a pre-4.3.1 export if one is obtainable) |
+| A3  | The `vDatastore.Hosts → vHost.cluster` attribution fix is in Phase-4 scope.                                                                                                                                                                                | Pitfall 6 | Medium — if the planner/user descopes it, stretched/DR storage stays under-counted for vSAN; flag in Plan 2 for explicit user confirmation                                                                                                      |
+| A4  | Per-site reservation formula = `maxSiteCapacity / totalCapacity` (capacity = Σ physical GHz per fault domain; RAM analogous).                                                                                                                              | Pattern 3 | Medium — this is the standard interpretation (PITFALLS Critical-3, Broadcom-sourced) but the exact capacity basis (GHz vs cores vs RAM, or the max of all three) is a modelling choice the planner should pin in an ADR                         |
+| A5  | DR `confidence` enum = `high                                                                                                                                                                                                                               | medium    | low`mirroring the stretched confidence;`caveats`is`string[]` of i18n keys (not free text, to keep FR/EN parity + no editorial verbs).                                                                                                           | Pitfall 5 | Low — consistent with shipped readiness/confidence patterns; exact schema is Claude's discretion per brief |
+| A6  | RVTools 4.x columnar `vMetaData` parser fix belongs in Plan 1 (merge) as a prerequisite for MVC-04.                                                                                                                                                        | Pitfall 3 | Low — it is a parser extension; could alternatively be a standalone micro-plan, but coupling to merge is natural                                                                                                                                |
 
 **If this table is empty:** it is not — all 6 are modelling/scope assumptions the planner (and a discuss pass, if run) should confirm. None are compliance/security claims.
 
@@ -454,12 +459,12 @@ interface VCenterEntry { viSdkUuid: string; server: string; label: string; vmCou
 
 ## Environment Availability
 
-| Dependency | Required By | Available | Version | Fallback |
-|------------|------------|-----------|---------|----------|
-| Real multi-vCenter workbook | Merge validation (mandatory per `feedback_real_file_uat`) | ✓ | RVTools 4.7.1.4, 3.4 MB, 3 vCenters, 1447 vInfo | — (synthetic 6+4 fixture also required for STR-02) |
-| `xlsx` (SheetJS 0.20.3 tarball) | Parser (shipped) | ✓ | 0.20.3 | — |
-| Node + Vitest 4 | Engine tests | ✓ | shipped | — |
-| `~/Library/CloudStorage/OneDrive-Home/` access | Local UAT only (not CI) | ✓ (dev box) | — | CI uses committed canary fixtures (gitignored real files unavailable in CI — expected, per 01-04-SUMMARY) |
+| Dependency                                     | Required By                                               | Available   | Version                                         | Fallback                                                                                                  |
+| ---------------------------------------------- | --------------------------------------------------------- | ----------- | ----------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| Real multi-vCenter workbook                    | Merge validation (mandatory per `feedback_real_file_uat`) | ✓           | RVTools 4.7.1.4, 3.4 MB, 3 vCenters, 1447 vInfo | — (synthetic 6+4 fixture also required for STR-02)                                                        |
+| `xlsx` (SheetJS 0.20.3 tarball)                | Parser (shipped)                                          | ✓           | 0.20.3                                          | —                                                                                                         |
+| Node + Vitest 4                                | Engine tests                                              | ✓           | shipped                                         | —                                                                                                         |
+| `~/Library/CloudStorage/OneDrive-Home/` access | Local UAT only (not CI)                                   | ✓ (dev box) | —                                               | CI uses committed canary fixtures (gitignored real files unavailable in CI — expected, per 01-04-SUMMARY) |
 
 **Missing dependencies with no fallback:** None.
 **Missing dependencies with fallback:** Asymmetric-stretched real data is absent → synthetic 6+4 fixture (fallback is the project norm).
@@ -470,25 +475,25 @@ interface VCenterEntry { viSdkUuid: string; server: string; label: string; vmCou
 
 ### Applicable ASVS Categories
 
-| ASVS Category | Applies | Standard Control |
-|---------------|---------|-----------------|
-| V2 Authentication | no | No auth surface (client-only, no accounts — anti-feature A2) |
-| V3 Session Management | no | No sessions; refresh = data gone |
-| V4 Access Control | no | No multi-user / no server |
-| V5 Input Validation | yes | Zod at the parser boundary (shipped P1); URL-hash codec MUST validate/clamp `#alloc=` input (untrusted: a shared link could carry a malformed/oversized hash → parse defensively, clamp to slider bounds, fall back to defaults — never `eval`/`JSON.parse` of attacker-controlled hash without bounds) |
-| V6 Cryptography | no | No crypto (no secrets; ratios are non-secret shareable state) |
-| V12 Files/Resources | yes | XLSX parse stays in the shipped Web Worker; new column reads are pure cell access (no path/formula evaluation) |
-| V14 Configuration | yes | CSP `connect-src 'self'` + runtime fetch guard (shipped P1) — Phase 4 must add NO network call; bundle gates stay green |
+| ASVS Category         | Applies | Standard Control                                                                                                                                                                                                                                                                                        |
+| --------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| V2 Authentication     | no      | No auth surface (client-only, no accounts — anti-feature A2)                                                                                                                                                                                                                                            |
+| V3 Session Management | no      | No sessions; refresh = data gone                                                                                                                                                                                                                                                                        |
+| V4 Access Control     | no      | No multi-user / no server                                                                                                                                                                                                                                                                               |
+| V5 Input Validation   | yes     | Zod at the parser boundary (shipped P1); URL-hash codec MUST validate/clamp `#alloc=` input (untrusted: a shared link could carry a malformed/oversized hash → parse defensively, clamp to slider bounds, fall back to defaults — never `eval`/`JSON.parse` of attacker-controlled hash without bounds) |
+| V6 Cryptography       | no      | No crypto (no secrets; ratios are non-secret shareable state)                                                                                                                                                                                                                                           |
+| V12 Files/Resources   | yes     | XLSX parse stays in the shipped Web Worker; new column reads are pure cell access (no path/formula evaluation)                                                                                                                                                                                          |
+| V14 Configuration     | yes     | CSP `connect-src 'self'` + runtime fetch guard (shipped P1) — Phase 4 must add NO network call; bundle gates stay green                                                                                                                                                                                 |
 
 ### Known Threat Patterns for client-side XLSX analytics
 
-| Pattern | STRIDE | Standard Mitigation |
-|---------|--------|---------------------|
-| Malicious URL hash (`#alloc=`) → ReDoS / huge-number / injection | Tampering / DoS | Strict regex with bounded quantifiers; numeric clamp to slider min/max; default-on-parse-failure; no `eval`/dynamic code (semgrep gate) |
-| Privacy leak via a new dep phoning home | Information Disclosure | Phase 4 adds ZERO deps (locked); `check:supply-chain` + fetch guard re-verified in plan gates |
-| Estate-row data into an error message / console | Information Disclosure | Region `ErrorBoundary` reads only `error.message`/`error.name` (shipped idiom); Biome `noConsole` error in non-test |
-| XSS via suffixed cluster name / vCenter label rendered in pill/panel | Tampering | React text children auto-escape (shipped P3 idiom); no raw-HTML sink for merged labels |
-| DoS: merging many large snapshots in the single memo | DoS | Pure JS merge is tens of ms for ~10k VMs (02-02 benchmark); memo keyed on stable Set identities; Critical-5 snapshot-retention policy (Phase 6 concern, noted) |
+| Pattern                                                              | STRIDE                 | Standard Mitigation                                                                                                                                            |
+| -------------------------------------------------------------------- | ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Malicious URL hash (`#alloc=`) → ReDoS / huge-number / injection     | Tampering / DoS        | Strict regex with bounded quantifiers; numeric clamp to slider min/max; default-on-parse-failure; no `eval`/dynamic code (semgrep gate)                        |
+| Privacy leak via a new dep phoning home                              | Information Disclosure | Phase 4 adds ZERO deps (locked); `check:supply-chain` + fetch guard re-verified in plan gates                                                                  |
+| Estate-row data into an error message / console                      | Information Disclosure | Region `ErrorBoundary` reads only `error.message`/`error.name` (shipped idiom); Biome `noConsole` error in non-test                                            |
+| XSS via suffixed cluster name / vCenter label rendered in pill/panel | Tampering              | React text children auto-escape (shipped P3 idiom); no raw-HTML sink for merged labels                                                                         |
+| DoS: merging many large snapshots in the single memo                 | DoS                    | Pure JS merge is tens of ms for ~10k VMs (02-02 benchmark); memo keyed on stable Set identities; Critical-5 snapshot-retention policy (Phase 6 concern, noted) |
 
 ## Sources
 

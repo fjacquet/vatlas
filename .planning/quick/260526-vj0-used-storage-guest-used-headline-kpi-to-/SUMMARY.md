@@ -1,4 +1,5 @@
 ---
+
 quick_id: 260526-vj0
 slug: used-storage-guest-used-headline-kpi-to-
 date: 2026-05-26
@@ -8,12 +9,14 @@ status: complete
 # Summary — "Used storage" headline → guest-used (LiveOptics parity) + fallback
 
 ## What changed
+
 Headline "used storage" now reads **in-guest used** (LiveOptics-comparable), with a
 safe fallback to **committed** (`inUseMib`) when the optional `vPartition` sheet is
 absent so it never goes blank. The storageByX treemap / per-datastore rollups are
 untouched — they stay on committed `inUseMib` (the correct datastore-layer metric).
 
 ## Origin
+
 Validation of the VS2 RVTools export vs a LiveOptics deck showed every infra/compute
 KPI matching to the decimal, but "used storage" off by 16 %: vatlas headlined
 `vInfo "In Use MiB"` (613.9 TiB = datastore-committed, incl. .vswp + snapshots) while
@@ -21,6 +24,7 @@ LiveOptics reports in-guest used (≈ `vPartition Consumed` 522 TiB → 527.96 b
 A definition mismatch, not a bug. User chose scope = "headline only + fallback".
 
 ## Edits (18 files)
+
 - **Type** `types/estate.ts` — new `OperationalInsights.usedStorageMib: MiB`.
 - **Engine** `aggregation/estateView.ts` — `usedStorageMib = guest ? guest.consumedMib : a.inuse`
   in `insightsOf`; `mib(0)` in `EMPTY_INSIGHTS`. Pure, single `buildEstateView` pass.
@@ -36,12 +40,14 @@ A definition mismatch, not a bug. User chose scope = "headline only + fallback".
   inUseMib) + guest-present (usedStorageMib === guestUsedMib, ≠ committed).
 
 ## Verification
+
 - `npm run typecheck` (app + test) — clean
 - `npx @biomejs/biome check src` — clean (321 files)
 - `npx vitest run` — 560/560 pass (incl. i18n keyParity + 2 new tests)
 - `npx vitest run --coverage` — `success: true`; engines ≥75 % thresholds satisfied
 
 ## Notes / follow-ups
+
 - DE/IT terms ("Belegter Speicher"/"Zugesichert", "Spazio utilizzato"/"Impegnato") ride
   the existing pending-native-review flag.
 - `ClusterDetail` (drill screen, not a headline) intentionally keeps its own committed +

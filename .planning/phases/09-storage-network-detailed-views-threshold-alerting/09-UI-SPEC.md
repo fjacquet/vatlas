@@ -1,4 +1,5 @@
 ---
+
 phase: 9
 slug: storage-network-detailed-views-threshold-alerting
 status: approved
@@ -20,13 +21,13 @@ reviewed_at: 2026-05-17
 
 ## Design System
 
-| Property | Value |
-|----------|-------|
-| Tool | none (shadcn gate N/A — established 8-phase Midnight Executive system; Tailwind v4 `@theme` CSS-first, no `components.json`, no Radix) |
-| Preset | not applicable |
-| Component library | none (hand-rolled presenters on Tailwind v4 utility classes; `src/index.css` `@theme` + `@layer components`) |
-| Icon library | none — no icon font/library. **No alert/warning/alarm icons** (D-04 factual-only). The only glyph in scope is the literal back arrow `←` (shipped `ClusterDetail` precedent) |
-| Font | UI: `system-ui, -apple-system, "Segoe UI", Roboto, sans-serif` (body). Numeric/metric: `--font-mono` = `"JetBrains Mono", "Fira Code", ui-monospace, monospace` with `tabular-nums` (shipped metric-row idiom) |
+| Property          | Value                                                                                                                                                                                                          |
+| ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Tool              | none (shadcn gate N/A — established 8-phase Midnight Executive system; Tailwind v4 `@theme` CSS-first, no `components.json`, no Radix)                                                                         |
+| Preset            | not applicable                                                                                                                                                                                                 |
+| Component library | none (hand-rolled presenters on Tailwind v4 utility classes; `src/index.css` `@theme` + `@layer components`)                                                                                                   |
+| Icon library      | none — no icon font/library. **No alert/warning/alarm icons** (D-04 factual-only). The only glyph in scope is the literal back arrow `←` (shipped `ClusterDetail` precedent)                                   |
+| Font              | UI: `system-ui, -apple-system, "Segoe UI", Roboto, sans-serif` (body). Numeric/metric: `--font-mono` = `"JetBrains Mono", "Fira Code", ui-monospace, monospace` with `tabular-nums` (shipped metric-row idiom) |
 
 **Source of truth for tokens:** `src/index.css` `@theme` block. Do NOT invent palette values — every
 color below is an existing CSS custom property already shipped and used P3–P8.
@@ -37,15 +38,15 @@ color below is an existing CSS custom property already shipped and used P3–P8.
 
 Declared values (Tailwind v4 default 4px-base scale; all multiples of 4 — shipped P3–P8 verbatim):
 
-| Token | Value | Tailwind | Usage in Phase 9 |
-|-------|-------|----------|------------------|
-| xs | 4px | `gap-1` `p-1` | Segmented-toggle inner gap/padding (`gap-1`, `p-0.5` = 2px is the one shipped sub-4 exception, see below), metric-row vertical rhythm |
-| sm | 8px | `gap-2` `py-1.5` (6px) | Detail metric `Row` vertical padding (`py-1.5`), badge inner padding |
-| md | 16px | `gap-4` `p-4` | `.panel` padding (shipped), default element spacing, view-shell section gaps |
-| lg | 24px | `gap-6` | Storage/Network view column gaps, lens-toggle ↔ chart separation |
-| xl | 32px | `p-8` `gap-x-10` (40px) | Detail-screen outer padding (`p-8`, shipped `ClusterDetail`), detail grid column gap (`gap-x-10`) |
-| 2xl | 48px | `gap-12` | Major section breaks within a view shell |
-| 3xl | 64px | — | Reserved; not expected in Phase 9 (screen-fit detail screens forbid large vertical gaps) |
+| Token | Value | Tailwind                | Usage in Phase 9                                                                                                                      |
+| ----- | ----- | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| xs    | 4px   | `gap-1` `p-1`           | Segmented-toggle inner gap/padding (`gap-1`, `p-0.5` = 2px is the one shipped sub-4 exception, see below), metric-row vertical rhythm |
+| sm    | 8px   | `gap-2` `py-1.5` (6px)  | Detail metric `Row` vertical padding (`py-1.5`), badge inner padding                                                                  |
+| md    | 16px  | `gap-4` `p-4`           | `.panel` padding (shipped), default element spacing, view-shell section gaps                                                          |
+| lg    | 24px  | `gap-6`                 | Storage/Network view column gaps, lens-toggle ↔ chart separation                                                                      |
+| xl    | 32px  | `p-8` `gap-x-10` (40px) | Detail-screen outer padding (`p-8`, shipped `ClusterDetail`), detail grid column gap (`gap-x-10`)                                     |
+| 2xl   | 48px  | `gap-12`                | Major section breaks within a view shell                                                                                              |
+| 3xl   | 64px  | —                       | Reserved; not expected in Phase 9 (screen-fit detail screens forbid large vertical gaps)                                              |
 
 Exceptions:
 
@@ -65,12 +66,12 @@ Shipped scale (Tailwind v4 defaults, used verbatim P3–P8). Exactly 3 sizes in 
 Exactly 2 weights: `font-normal` (400) and `font-semibold` (600). `font-medium` (500) appears only
 in the shipped `.label` component class — treat as the label exception, do not add a 3rd general weight.
 
-| Role | Size | Weight | Line Height | Tailwind | Usage |
-|------|------|--------|-------------|----------|-------|
-| Display (detail screen title) | 24px | 600 | 1.2 (`leading-tight` via default) | `text-2xl font-semibold` | `<h2>` cluster/datastore/VM/ESX detail title (shipped `ClusterDetail`) |
-| Heading (view/section) | 20px | 600 | 1.3 | `text-xl font-semibold` | StorageView / NetworkView section `<h2>`, threshold-config `<h2>` (shipped `PlannedRatiosControl` heading) |
-| Body / metric value | 14px | 600 | 1.5 | `text-sm font-mono font-semibold tabular-nums` (numeric) / `text-sm` (label) | Metric rows, table cells, lens-toggle/segment labels, threshold count strings |
-| Caption / factual note | 12px | 400 | 1.5 | `text-[12px] font-normal` (or `text-xs`) | Factual captions, em-dash-sentinel notes, "shared across N clusters" line, degrade message, threshold echo line (shipped `PlannedRatiosControl.echo`) |
+| Role                          | Size | Weight | Line Height                       | Tailwind                                                                     | Usage                                                                                                                                                 |
+| ----------------------------- | ---- | ------ | --------------------------------- | ---------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Display (detail screen title) | 24px | 600    | 1.2 (`leading-tight` via default) | `text-2xl font-semibold`                                                     | `<h2>` cluster/datastore/VM/ESX detail title (shipped `ClusterDetail`)                                                                                |
+| Heading (view/section)        | 20px | 600    | 1.3                               | `text-xl font-semibold`                                                      | StorageView / NetworkView section `<h2>`, threshold-config `<h2>` (shipped `PlannedRatiosControl` heading)                                            |
+| Body / metric value           | 14px | 600    | 1.5                               | `text-sm font-mono font-semibold tabular-nums` (numeric) / `text-sm` (label) | Metric rows, table cells, lens-toggle/segment labels, threshold count strings                                                                         |
+| Caption / factual note        | 12px | 400    | 1.5                               | `text-[12px] font-normal` (or `text-xs`)                                     | Factual captions, em-dash-sentinel notes, "shared across N clusters" line, degrade message, threshold echo line (shipped `PlannedRatiosControl.echo`) |
 
 Rules:
 
@@ -86,21 +87,21 @@ Rules:
 All values are existing `src/index.css` `@theme` custom properties. Every color utility MUST carry its
 `dark:` twin (shipped non-negotiable invariant — checker/grep-gated across P3–P8).
 
-| Role | Token | Usage |
-|------|-------|-------|
-| Dominant (60%) | light `bg-slate-50` / dark `bg-surface-900` (body); panels light `bg-white` / dark `bg-surface-800` | View-shell background, detail-screen background, table body |
-| Secondary (30%) | `.panel` = `border-slate-200 bg-white` / dark `border-surface-700 bg-surface-800`; segmented-control wrapper `bg-white`/`dark:bg-surface-900` | Cards, table containers, the threshold-config panel, lens-toggle wrapper, chart container panels |
-| Accent (10%) | `--color-accent-500` (gold ≈ #F9B935) | **RESERVED — see explicit list below.** Text-on-accent is `text-surface-900` |
-| Active filled control | `bg-primary-600 text-white` (navy) | The selected segment of the **storage-lens** toggle and the **threshold-preset** group (the `AccountingModeToggle`/`PlannedRatiosControl` active treatment — NOT accent) |
-| Neutral flag treatment (threshold) | `bg-accent-500/15` row tint + `border-l-2 border-accent-500` left rule; badge = `bg-accent-500/15 text-slate-700 dark:text-slate-200` pill | Flagged partition/datastore rows and the count badge — **factual marker only, NOT a verdict** (gold is the project's "factual marker, never editorial flourish" token per `index.css` comment) |
-| Destructive | none | **No destructive actions in Phase 9** (in-memory config edit is non-destructive & reversible; refresh restores defaults). Leave unused |
+| Role                               | Token                                                                                                                                         | Usage                                                                                                                                                                                          |
+| ---------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Dominant (60%)                     | light `bg-slate-50` / dark `bg-surface-900` (body); panels light `bg-white` / dark `bg-surface-800`                                           | View-shell background, detail-screen background, table body                                                                                                                                    |
+| Secondary (30%)                    | `.panel` = `border-slate-200 bg-white` / dark `border-surface-700 bg-surface-800`; segmented-control wrapper `bg-white`/`dark:bg-surface-900` | Cards, table containers, the threshold-config panel, lens-toggle wrapper, chart container panels                                                                                               |
+| Accent (10%)                       | `--color-accent-500` (gold ≈ #F9B935)                                                                                                         | **RESERVED — see explicit list below.** Text-on-accent is `text-surface-900`                                                                                                                   |
+| Active filled control              | `bg-primary-600 text-white` (navy)                                                                                                            | The selected segment of the **storage-lens** toggle and the **threshold-preset** group (the `AccountingModeToggle`/`PlannedRatiosControl` active treatment — NOT accent)                       |
+| Neutral flag treatment (threshold) | `bg-accent-500/15` row tint + `border-l-2 border-accent-500` left rule; badge = `bg-accent-500/15 text-slate-700 dark:text-slate-200` pill    | Flagged partition/datastore rows and the count badge — **factual marker only, NOT a verdict** (gold is the project's "factual marker, never editorial flourish" token per `index.css` comment) |
+| Destructive                        | none                                                                                                                                          | **No destructive actions in Phase 9** (in-memory config edit is non-destructive & reversible; refresh restores defaults). Leave unused                                                         |
 
 **Accent (gold) reserved for — explicit closed list (do not extend):**
 
 1. The active **top-level `ViewToggle`** segment (shipped rule — `bg-accent-500 text-surface-900`).
    This now includes the two new `Storage` and `Network` segments by extension. No change to the rule.
 2. The **threshold flag marker**: flagged-row left rule + faint row tint + count badge
-   (`bg-accent-500/15` family). This is the *factual* use of gold per the `index.css` token comment
+   (`bg-accent-500/15` family). This is the _factual_ use of gold per the `index.css` token comment
    ("Gold accent (factual marker, never an editorial flourish)").
 3. The shipped single DR headline figure (P6) — out of Phase 9 scope, listed for completeness.
 
@@ -246,30 +247,30 @@ No pre-formatted numbers in strings (inject via `fmt*`). No editorial verbs (den
 recommend/should/poor/good/critical/warning + traffic-light language). Strings below are the EN
 contract; the executor authors the FR parity key-for-key.
 
-| Element | Copy (EN contract) |
-|---------|------|
-| Primary action — open Storage view | ViewToggle segment label `nav.storage` → `"Storage"` (FR `"Stockage"`) |
-| Primary action — open Network view | ViewToggle segment label `nav.network` → `"Network"` (FR `"Réseau"`) |
-| Primary action — drill to detail | Clickable row/card (no button label; the row IS the affordance). Back: `← {detail.back}` → `"Back"` (FR `"Retour"`) — shipped `ClusterDetail` key reused |
-| Storage-lens toggle labels | `storage:lens.consumption` → `"Consumption"` ; `storage:lens.capacity` → `"Capacity"` (FR `"Consommation"` / `"Capacité"`) — factual nouns, no verb |
+| Element                             | Copy (EN contract)                                                                                                                                                                                                                                               |
+| ----------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Primary action — open Storage view  | ViewToggle segment label `nav.storage` → `"Storage"` (FR `"Stockage"`)                                                                                                                                                                                           |
+| Primary action — open Network view  | ViewToggle segment label `nav.network` → `"Network"` (FR `"Réseau"`)                                                                                                                                                                                             |
+| Primary action — drill to detail    | Clickable row/card (no button label; the row IS the affordance). Back: `← {detail.back}` → `"Back"` (FR `"Retour"`) — shipped `ClusterDetail` key reused                                                                                                         |
+| Storage-lens toggle labels          | `storage:lens.consumption` → `"Consumption"` ; `storage:lens.capacity` → `"Capacity"` (FR `"Consommation"` / `"Capacité"`) — factual nouns, no verb                                                                                                              |
 | Empty state — network sheets absent | heading: none (single line). Body: `network:empty.unavailable` → `"Network inventory not available in this export."` (FR `"Inventaire réseau non disponible dans cet export."`) — factual, no next-step instruction (the data is the user's; no action to offer) |
-| Empty state — no dataset loaded | reuse the shipped app-level empty/upload state (out of Phase 9 scope; do not author a new one) |
-| Not-derivable value | em-dash sentinel `—` (shipped `na` idiom) for any metric not computable (e.g. unrelinkable blank-cluster datastore cluster identity); the shipped factual caption `t('na')`-class string where a sentence is needed |
-| Shared-LUN factual line | `storage:vsan.sharedAcross` → `"Shared across {count} clusters"` (FR `"Partagé entre {count} clusters"`) — excluded from single-cluster rollups, no allocation guess (D-10) |
-| Threshold flag count (filesystem) | `alerts:fs.count` → `"{count} partitions ≥ {pct}% used"` (FR `"{count} partitions ≥ {pct} % utilisés"`) |
-| Threshold flag count (datastore) | `alerts:ds.count` → `"{count} datastores > {pct}% used"` (FR `"{count} datastores > {pct} % utilisés"`) |
-| Threshold config heading | `alerts:config.heading` → `"Thresholds"` (FR `"Seuils"`) |
-| Threshold config echo line | `alerts:config.echo` → `"Filesystem ≥ {fs}% · Datastore > {ds}% · LU > {lu}%"` (FR parity, separators kept, numbers via `fmt*`) |
-| Error state | None. Phase 9 has no error surface: invalid threshold input silently falls back to last valid value (factual, `safeNum`); absent sheets degrade factually (above); a malformed workbook is caught by the shipped parser-error path (out of Phase 9 scope) |
-| Destructive confirmation | None — no destructive action in Phase 9 (in-memory config edits are non-destructive and reversible by refresh) |
+| Empty state — no dataset loaded     | reuse the shipped app-level empty/upload state (out of Phase 9 scope; do not author a new one)                                                                                                                                                                   |
+| Not-derivable value                 | em-dash sentinel `—` (shipped `na` idiom) for any metric not computable (e.g. unrelinkable blank-cluster datastore cluster identity); the shipped factual caption `t('na')`-class string where a sentence is needed                                              |
+| Shared-LUN factual line             | `storage:vsan.sharedAcross` → `"Shared across {count} clusters"` (FR `"Partagé entre {count} clusters"`) — excluded from single-cluster rollups, no allocation guess (D-10)                                                                                      |
+| Threshold flag count (filesystem)   | `alerts:fs.count` → `"{count} partitions ≥ {pct}% used"` (FR `"{count} partitions ≥ {pct} % utilisés"`)                                                                                                                                                          |
+| Threshold flag count (datastore)    | `alerts:ds.count` → `"{count} datastores > {pct}% used"` (FR `"{count} datastores > {pct} % utilisés"`)                                                                                                                                                          |
+| Threshold config heading            | `alerts:config.heading` → `"Thresholds"` (FR `"Seuils"`)                                                                                                                                                                                                         |
+| Threshold config echo line          | `alerts:config.echo` → `"Filesystem ≥ {fs}% · Datastore > {ds}% · LU > {lu}%"` (FR parity, separators kept, numbers via `fmt*`)                                                                                                                                  |
+| Error state                         | None. Phase 9 has no error surface: invalid threshold input silently falls back to last valid value (factual, `safeNum`); absent sheets degrade factually (above); a malformed workbook is caught by the shipped parser-error path (out of Phase 9 scope)        |
+| Destructive confirmation            | None — no destructive action in Phase 9 (in-memory config edits are non-destructive and reversible by refresh)                                                                                                                                                   |
 
 ---
 
 ## Registry Safety
 
-| Registry | Blocks Used | Safety Gate |
-|----------|-------------|-------------|
-| n/a (no shadcn, no component registry) | none | not applicable — no `components.json`, no third-party registry, zero new UI dependencies this phase (09-RESEARCH "zero new libraries and zero new architectural mechanisms"). Only ECharts registry change is `TreemapChart` added to the already-installed `echarts@^6.0.0` `echarts/charts` subpath in the single `<Chart>` site — first-party, no external fetch |
+| Registry                               | Blocks Used | Safety Gate                                                                                                                                                                                                                                                                                                                                                         |
+| -------------------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| n/a (no shadcn, no component registry) | none        | not applicable — no `components.json`, no third-party registry, zero new UI dependencies this phase (09-RESEARCH "zero new libraries and zero new architectural mechanisms"). Only ECharts registry change is `TreemapChart` added to the already-installed `echarts@^6.0.0` `echarts/charts` subpath in the single `<Chart>` site — first-party, no external fetch |
 
 ---
 

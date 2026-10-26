@@ -1,64 +1,68 @@
 ---
+
 phase: 02-aggregation-global-dashboard
 plan: 03
 subsystem: ui
 tags: [dashboard, echarts, svg-renderer, i18n, accounting-modes, cpu-ready, segmented-control, bundle-gate]
 
 # Dependency graph
+
 requires:
-  - phase: 02-aggregation-global-dashboard (02-01)
-    provides: "<Chart> wrapper (SVG + midnight-executive theme injected centrally, reference-equality memo); echartsTheme light/dark objects; check:bundle-size CI gate"
-  - phase: 02-aggregation-global-dashboard (02-02)
-    provides: "useEstateView(mode) single-useMemo bridge; EstateView/GlobalSummary/ClusterAggregate/OsBreakdown contract; utils/format.ts locale formatters; EMPTY_VIEW"
-  - phase: 01-foundation-invariants
-    provides: "App.tsx hero↔sidebar branch; ThemeToggle aria-pressed segmented idiom; FallbackError message-only privacy contract; i18n namespace registry; .panel/.label tokens"
-provides:
-  - "src/components/dashboard/* — the 8-component dashboard tree (GlobalDashboard root, GlobalSummaryCard, PerClusterColumns+ClusterColumn, OsBreakdownDonut, CpuReadyPanel, AccountingModeToggle, UtilizationGauge) + chartOptions pure selectors"
-  - "dashboard i18n namespace (en+fr, 37 keys, strict parity) registered in i18n/index.ts"
-  - "App.tsx wired: <GlobalDashboard /> replaces the Phase-1 <main> placeholder beside SnapshotListSidebar"
-  - "The LIVE check:bundle-size gate is now exercised (echarts chunk in production graph): 205.5 KiB gz ≤ 300 KiB"
-affects: [phase-03-inventory, phase-04-trends-multi-snapshot, phase-06-sparklines, phase-07-exports]
+- phase: 02-aggregation-global-dashboard (02-01)
+  provides: "<Chart> wrapper (SVG + midnight-executive theme injected centrally, reference-equality memo); echartsTheme light/dark objects; check:bundle-size CI gate"
+- phase: 02-aggregation-global-dashboard (02-02)
+  provides: "useEstateView(mode) single-useMemo bridge; EstateView/GlobalSummary/ClusterAggregate/OsBreakdown contract; utils/format.ts locale formatters; EMPTY_VIEW"
+- phase: 01-foundation-invariants
+  provides: "App.tsx hero↔sidebar branch; ThemeToggle aria-pressed segmented idiom; FallbackError message-only privacy contract; i18n namespace registry; .panel/.label tokens"
+  provides:
+- "src/components/dashboard/* — the 8-component dashboard tree (GlobalDashboard root, GlobalSummaryCard, PerClusterColumns+ClusterColumn, OsBreakdownDonut, CpuReadyPanel, AccountingModeToggle, UtilizationGauge) + chartOptions pure selectors"
+- "dashboard i18n namespace (en+fr, 37 keys, strict parity) registered in i18n/index.ts"
+- "App.tsx wired: <GlobalDashboard /> replaces the Phase-1 <main> placeholder beside SnapshotListSidebar"
+- "The LIVE check:bundle-size gate is now exercised (echarts chunk in production graph): 205.5 KiB gz ≤ 300 KiB"
+  affects: [phase-03-inventory, phase-04-trends-multi-snapshot, phase-06-sparklines, phase-07-exports]
 
 # Tech tracking
+
 tech-stack:
-  added: []
-  patterns:
-    - "Chart host = thin .panel/caption wrapper calling a pure chartOptions selector → <Chart option> (no inline option, no component memo hook)"
-    - "Controlled segmented aria-pressed role=group reusing the ThemeToggle idiom (value/onChange lifted to the dashboard root)"
-    - "Dashboard components are presentational prop-consumers — zero @/engines imports, zero memo hooks; useEstateView is the only data/memo site"
-    - "Region-scoped inline ErrorBoundary rendering error.message only (T-02-09 / Critical-2) — sidebar+header stay interactive"
-    - "Em-dash sentinel + sr-only localized aria-label for the A1 per-cluster datastore gap"
+added: []
+patterns:
+- "Chart host = thin .panel/caption wrapper calling a pure chartOptions selector → <Chart option> (no inline option, no component memo hook)"
+- "Controlled segmented aria-pressed role=group reusing the ThemeToggle idiom (value/onChange lifted to the dashboard root)"
+- "Dashboard components are presentational prop-consumers — zero @/engines imports, zero memo hooks; useEstateView is the only data/memo site"
+- "Region-scoped inline ErrorBoundary rendering error.message only (T-02-09 / Critical-2) — sidebar+header stay interactive"
+- "Em-dash sentinel + sr-only localized aria-label for the A1 per-cluster datastore gap"
 
 key-files:
-  created:
-    - src/components/dashboard/chartOptions.ts
-    - src/components/dashboard/OsBreakdownDonut.tsx
-    - src/components/dashboard/UtilizationGauge.tsx
-    - src/components/dashboard/AccountingModeToggle.tsx
-    - src/components/dashboard/AccountingModeToggle.test.tsx
-    - src/components/dashboard/GlobalSummaryCard.tsx
-    - src/components/dashboard/ClusterColumn.tsx
-    - src/components/dashboard/PerClusterColumns.tsx
-    - src/components/dashboard/CpuReadyPanel.tsx
-    - src/components/dashboard/GlobalDashboard.tsx
-    - src/i18n/locales/en/dashboard.json
-    - src/i18n/locales/fr/dashboard.json
-    - src/__tests__/dashboard-smoke.test.tsx
+created:
+- src/components/dashboard/chartOptions.ts
+- src/components/dashboard/OsBreakdownDonut.tsx
+- src/components/dashboard/UtilizationGauge.tsx
+- src/components/dashboard/AccountingModeToggle.tsx
+- src/components/dashboard/AccountingModeToggle.test.tsx
+- src/components/dashboard/GlobalSummaryCard.tsx
+- src/components/dashboard/ClusterColumn.tsx
+- src/components/dashboard/PerClusterColumns.tsx
+- src/components/dashboard/CpuReadyPanel.tsx
+- src/components/dashboard/GlobalDashboard.tsx
+- src/i18n/locales/en/dashboard.json
+- src/i18n/locales/fr/dashboard.json
+- src/**tests**/dashboard-smoke.test.tsx
   modified:
-    - src/i18n/index.ts
-    - src/App.tsx
-    - src/__tests__/e2e-smoke.test.tsx
+- src/i18n/index.ts
+- src/App.tsx
+- src/**tests**/e2e-smoke.test.tsx
 
 key-decisions:
-  - "Section title lives in the dashboard toolbar (one h2) + the AccountingModeToggle aligned right; GlobalSummaryCard drops its own h2 and keeps the mode-echo/capture-date subtitle (aria-label preserves the accessible section name) — avoids a duplicate 'Estate summary' heading"
-  - "Per-cluster W/L/O OS mini is a CSS flex bar in the donut token order (KISS — avoids a chart instance per column while keeping a consistent OS encoding)"
-  - "SVG-assertion path = the documented 02-01 fallback (mock echarts-for-react/lib/core, emit <svg> iff opts.renderer==='svg') — jsdom cannot mount real ReactEChartsCore (RESEARCH Open Question 2)"
-  - "Loading state intentionally omitted (KISS, plan-sanctioned): the upload-in-flight signal is not observable from the dashboard region without prop-drilling"
-  - "chartOptions reads the echartsTheme objects directly (light/dark via the live .dark class) because ECharts does not expose registered-theme custom fields (gaugeBands/allocationGaugeColor) back to option builders"
+- "Section title lives in the dashboard toolbar (one h2) + the AccountingModeToggle aligned right; GlobalSummaryCard drops its own h2 and keeps the mode-echo/capture-date subtitle (aria-label preserves the accessible section name) — avoids a duplicate 'Estate summary' heading"
+- "Per-cluster W/L/O OS mini is a CSS flex bar in the donut token order (KISS — avoids a chart instance per column while keeping a consistent OS encoding)"
+- "SVG-assertion path = the documented 02-01 fallback (mock echarts-for-react/lib/core, emit <svg> iff opts.renderer==='svg') — jsdom cannot mount real ReactEChartsCore (RESEARCH Open Question 2)"
+- "Loading state intentionally omitted (KISS, plan-sanctioned): the upload-in-flight signal is not observable from the dashboard region without prop-drilling"
+- "chartOptions reads the echartsTheme objects directly (light/dark via the live .dark class) because ECharts does not expose registered-theme custom fields (gaugeBands/allocationGaugeColor) back to option builders"
 
 requirements-completed: [DSH-01, DSH-02, DSH-03, DSH-04, DSH-05, DSH-06, VIZ-01, VIZ-02, VIZ-03]
 
 # Metrics
+
 duration: 24min
 completed: 2026-05-16
 ---
@@ -166,5 +170,6 @@ None. The A1 per-cluster datastore em-dash is the contract-correct rendering of 
 - Commit `92ac1c7` (Task 3) — FOUND
 
 ---
-*Phase: 02-aggregation-global-dashboard*
-*Completed: 2026-05-16*
+
+_Phase: 02-aggregation-global-dashboard_
+_Completed: 2026-05-16_

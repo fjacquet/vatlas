@@ -17,7 +17,7 @@
 - **RVTools source columns** (`vHost` sheet): `Serial number` (RVTools ≥ 3.11) and `Service tag (serial #)` (all versions). Precedence: prefer `Serial number`, fall back to `Service tag`, `''` if neither present.
 - **The codebase convention is "required string, `''` when absent, never `undefined`."** All `VHostRow` / `EsxAggregate` string fields follow this (`faultDomain`, `model`, `vendor`, `esxVersion`). `serialNumber` follows the same rule — it is a **required** field, NOT optional. Adding a required field breaks every fixture's typecheck; Task 3 fixes them all.
 - **Two-path display vs CSV** (`esxColumns.ts` doc): a column's `cell` renderer is the **display** path; the CSV export bypasses `cell` and reads the **raw** accessor (`row.getValue`). So a `cell` returning `value || '—'` shows `—` on screen but exports the raw `''` to CSV — exactly what we want.
-- **`npm run typecheck` vs vitest:** vitest (esbuild) strips types and does NOT typecheck, so a test file with a missing field still *runs*. The full typecheck only happens under `npm run typecheck` (app + `tsconfig.test.json`). Per CLAUDE.md, `rtk tsc` only checks the app project — use `npm run typecheck` for the gate.
+- **`npm run typecheck` vs vitest:** vitest (esbuild) strips types and does NOT typecheck, so a test file with a missing field still _runs_. The full typecheck only happens under `npm run typecheck` (app + `tsconfig.test.json`). Per CLAUDE.md, `rtk tsc` only checks the app project — use `npm run typecheck` for the gate.
 - **Lint:** run `npx @biomejs/biome check .` directly — `npm run lint` is intercepted by RTK and prints a bogus parse error.
 - **Bundle-size gate reads `dist/` without building** — run `npm run build` first.
 - **i18n parity gate** (`src/i18n/keyParity.test.ts`): every key added to `en/<ns>.json` MUST exist in `fr/`, `de/`, `it/` for the same namespace, or the test fails the build.
@@ -71,7 +71,16 @@ describe('adaptRvtoolsVHost — serial / service tag', () => {
 
   it('prefers Serial number over Service tag', () => {
     const rows = adaptRvtoolsVHost({
-      headers: ['Host', 'Cluster', '# CPU', '# Cores', 'Speed', '# Memory', 'Serial number', 'Service tag (serial #)'],
+      headers: [
+        'Host',
+        'Cluster',
+        '# CPU',
+        '# Cores',
+        'Speed',
+        '# Memory',
+        'Serial number',
+        'Service tag (serial #)',
+      ],
       rows: [{ ...base, 'Serial number': 'SN-AAA', 'Service tag (serial #)': 'ST-BBB' }],
     })
     expect(rows[0]?.serialNumber).toBe('SN-AAA')
@@ -79,7 +88,16 @@ describe('adaptRvtoolsVHost — serial / service tag', () => {
 
   it('falls back to Service tag when Serial number is blank', () => {
     const rows = adaptRvtoolsVHost({
-      headers: ['Host', 'Cluster', '# CPU', '# Cores', 'Speed', '# Memory', 'Serial number', 'Service tag (serial #)'],
+      headers: [
+        'Host',
+        'Cluster',
+        '# CPU',
+        '# Cores',
+        'Speed',
+        '# Memory',
+        'Serial number',
+        'Service tag (serial #)',
+      ],
       rows: [{ ...base, 'Serial number': '   ', 'Service tag (serial #)': 'ST-BBB' }],
     })
     expect(rows[0]?.serialNumber).toBe('ST-BBB')
@@ -87,7 +105,15 @@ describe('adaptRvtoolsVHost — serial / service tag', () => {
 
   it('falls back to Service tag on a pre-3.11 export (no Serial number column)', () => {
     const rows = adaptRvtoolsVHost({
-      headers: ['Host', 'Cluster', '# CPU', '# Cores', 'Speed', '# Memory', 'Service tag (serial #)'],
+      headers: [
+        'Host',
+        'Cluster',
+        '# CPU',
+        '# Cores',
+        'Speed',
+        '# Memory',
+        'Service tag (serial #)',
+      ],
       rows: [{ ...base, 'Service tag (serial #)': 'ST-CCC' }],
     })
     expect(rows[0]?.serialNumber).toBe('ST-CCC')
@@ -113,10 +139,10 @@ Expected: FAIL — `serialNumber` does not exist on the returned row (TS may als
 In `src/types/vhost.ts`, add this field immediately after the `vendor` field (line 38) and before `esxVersion`:
 
 ```ts
-  /** RVTools `vHost.Serial number` (≥3.11) with fallback to
-   *  `Service tag (serial #)` — the chassis serial a technician reads to
-   *  physically locate the box. '' when absent. Plain text, no verdict. */
-  serialNumber: string
+/** RVTools `vHost.Serial number` (≥3.11) with fallback to
+ *  `Service tag (serial #)` — the chassis serial a technician reads to
+ *  physically locate the box. '' when absent. Plain text, no verdict. */
+serialNumber: string
 ```
 
 - [ ] **Step 4: Add `serialNumber` to the Zod schema**
@@ -189,14 +215,18 @@ In `src/engines/aggregation/perEsx.test.ts`, add `serialNumber: ''` to the `host
 Then add this test inside the `describe('perEsx', …)` block:
 
 ```ts
-  it('carries serialNumber / model / vendor through verbatim', () => {
-    const d = first(
-      perEsx([host({ serialNumber: 'SN-123', model: 'PowerEdge R640', vendor: 'Dell Inc.' })], [], 'configured'),
-    )
-    expect(d.serialNumber).toBe('SN-123')
-    expect(d.model).toBe('PowerEdge R640')
-    expect(d.vendor).toBe('Dell Inc.')
-  })
+it('carries serialNumber / model / vendor through verbatim', () => {
+  const d = first(
+    perEsx(
+      [host({ serialNumber: 'SN-123', model: 'PowerEdge R640', vendor: 'Dell Inc.' })],
+      [],
+      'configured',
+    ),
+  )
+  expect(d.serialNumber).toBe('SN-123')
+  expect(d.model).toBe('PowerEdge R640')
+  expect(d.vendor).toBe('Dell Inc.')
+})
 ```
 
 - [ ] **Step 2: Run the test to verify it fails**
@@ -209,9 +239,9 @@ Expected: FAIL — `d.serialNumber` is `undefined` (the field is not yet copied)
 In `src/types/estate.ts`, inside `interface EsxAggregate`, add this field immediately after `vendor: string` and before `esxVersion: string`:
 
 ```ts
-  /** RVTools chassis serial / service tag (P-HWID; '' when absent). Factual
-   *  physical-identity field for move/replacement prep — NO verdict. */
-  serialNumber: string
+/** RVTools chassis serial / service tag (P-HWID; '' when absent). Factual
+ *  physical-identity field for move/replacement prep — NO verdict. */
+serialNumber: string
 ```
 
 - [ ] **Step 4: Copy it in `perEsx`**
@@ -465,22 +495,22 @@ In `src/engines/export/pptx/builder.test.ts`, add `serialNumber: ''` to the `hos
 Then add this test inside the `describe('buildPptx — golden structural snapshot', …)` block:
 
 ```ts
-  it('P-HWID: a view with host serials adds exactly one physical-inventory slide', async () => {
-    const a = snap('a', 6, new Date('2026-01-01'))
-    const withSerials: Snapshot = {
-      ...a,
-      vhost: a.vhost.map((h, i) => ({ ...h, serialNumber: `SN-${i}` })),
-    }
-    const ex = buildExportView(withSerials, [withSerials], MODE, TODAY)
-    expect(ex.view.hosts.some((h) => h.serialNumber !== '')).toBe(true)
-    const ab = await buildPptx(ex.view, ex.trends, strings, 'en')
-    expect(slideCount(ab)).toBe(15) // 14 baseline + 1 physical inventory
+it('P-HWID: a view with host serials adds exactly one physical-inventory slide', async () => {
+  const a = snap('a', 6, new Date('2026-01-01'))
+  const withSerials: Snapshot = {
+    ...a,
+    vhost: a.vhost.map((h, i) => ({ ...h, serialNumber: `SN-${i}` })),
+  }
+  const ex = buildExportView(withSerials, [withSerials], MODE, TODAY)
+  expect(ex.view.hosts.some((h) => h.serialNumber !== '')).toBe(true)
+  const ab = await buildPptx(ex.view, ex.trends, strings, 'en')
+  expect(slideCount(ab)).toBe(15) // 14 baseline + 1 physical inventory
 
-    // No serials anywhere ⇒ slide omitted (baseline).
-    const exNone = buildExportView(a, [a], MODE, TODAY)
-    expect(exNone.view.hosts.every((h) => h.serialNumber === '')).toBe(true)
-    expect(slideCount(await buildPptx(exNone.view, exNone.trends, strings, 'en'))).toBe(14)
-  })
+  // No serials anywhere ⇒ slide omitted (baseline).
+  const exNone = buildExportView(a, [a], MODE, TODAY)
+  expect(exNone.view.hosts.every((h) => h.serialNumber === '')).toBe(true)
+  expect(slideCount(await buildPptx(exNone.view, exNone.trends, strings, 'en'))).toBe(14)
+})
 ```
 
 - [ ] **Step 2: Run the test to verify it fails**
@@ -555,13 +585,7 @@ export function addPhysicalInventorySlide(
     x: M,
     y: y2 + 0.1,
     w: CONTENT_W,
-    colW: [
-      CONTENT_W * 0.26,
-      CONTENT_W * 0.2,
-      CONTENT_W * 0.24,
-      CONTENT_W * 0.18,
-      CONTENT_W * 0.12,
-    ],
+    colW: [CONTENT_W * 0.26, CONTENT_W * 0.2, CONTENT_W * 0.24, CONTENT_W * 0.18, CONTENT_W * 0.12],
     rowH: 0.28,
     valign: 'middle',
     border: { type: 'solid', pt: 0.5, color: PPTX_COLORS.hairline },
@@ -601,12 +625,12 @@ import { addPhysicalInventorySlide } from './slides/physicalInventorySlide'
 Then, immediately after the `addInventorySlide(pptx, view, png('osDonut'), strings, locale)` call (line 124) and before `return pptx.write(…)`, add:
 
 ```ts
-  // P-HWID: physical inventory (serial / service tag) — conditional: only
-  // when at least one host reports a serial; otherwise omitted (no empty
-  // page). Auto-paginates across slides for large estates.
-  if (view.hosts.some((h) => h.serialNumber !== '')) {
-    addPhysicalInventorySlide(pptx, view.hosts, strings, locale)
-  }
+// P-HWID: physical inventory (serial / service tag) — conditional: only
+// when at least one host reports a serial; otherwise omitted (no empty
+// page). Auto-paginates across slides for large estates.
+if (view.hosts.some((h) => h.serialNumber !== '')) {
+  addPhysicalInventorySlide(pptx, view.hosts, strings, locale)
+}
 ```
 
 - [ ] **Step 5: Run the builder test to verify it passes**

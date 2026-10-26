@@ -49,20 +49,20 @@ environment file to provision.
 
 All scripts are defined in `package.json`.
 
-| Command | Description |
-|---|---|
-| `npm run dev` | Start the Vite dev server with HMR at `http://localhost:5173/vatlas/`. |
-| `npm run build` | Production build: `tsc -b && vite build`. The `prebuild` hook runs the supply-chain gate first. |
-| `npm run preview` | Serve the production build locally for a final smoke check. |
-| `npm run typecheck` | Type-check the app (`tsc --noEmit`) and the test project (`tsc --noEmit -p tsconfig.test.json`). No emit. |
-| `npm run lint` | Runs `biome check .`. **Do not invoke this via npm — see Gotchas below.** |
-| `npm run lint:fix` | `biome check --write .` — apply safe lint fixes. |
-| `npm run format` | `biome format --write .` — reformat all files. |
-| `npm run test` | `vitest` in watch mode. See [TESTING.md](./TESTING.md). |
-| `npm run test:run` | `vitest run` — single CI-style pass. |
-| `npm run test:coverage` | `vitest run --coverage` — `engines/` gated ≥75%. See [TESTING.md](./TESTING.md). |
-| `npm run check:supply-chain` | Fails on telemetry packages or `xlsx` pin drift. Runs automatically as the `prebuild` hook. |
-| `npm run check:bundle-size` | Fails if the ECharts chunk exceeds 300 KB gzipped. |
+| Command                      | Description                                                                                               |
+| ---------------------------- | --------------------------------------------------------------------------------------------------------- |
+| `npm run dev`                | Start the Vite dev server with HMR at `http://localhost:5173/vatlas/`.                                    |
+| `npm run build`              | Production build: `tsc -b && vite build`. The `prebuild` hook runs the supply-chain gate first.           |
+| `npm run preview`            | Serve the production build locally for a final smoke check.                                               |
+| `npm run typecheck`          | Type-check the app (`tsc --noEmit`) and the test project (`tsc --noEmit -p tsconfig.test.json`). No emit. |
+| `npm run lint`               | Runs `biome check .`.**Do not invoke this via npm — see Gotchas below.**                                  |
+| `npm run lint:fix`           | `biome check --write .` — apply safe lint fixes.                                                          |
+| `npm run format`             | `biome format --write .` — reformat all files.                                                            |
+| `npm run test`               | `vitest` in watch mode. See [TESTING.md](./TESTING.md).                                                   |
+| `npm run test:run`           | `vitest run` — single CI-style pass.                                                                      |
+| `npm run test:coverage`      | `vitest run --coverage` — `engines/` gated ≥75%. See [TESTING.md](./TESTING.md).                          |
+| `npm run check:supply-chain` | Fails on telemetry packages or `xlsx` pin drift. Runs automatically as the `prebuild` hook.               |
+| `npm run check:bundle-size`  | Fails if the ECharts chunk exceeds 300 KB gzipped.                                                        |
 
 A typical inner loop is: `npm run dev` running in one terminal, with
 `npm run typecheck`, the Biome check, and `npm run test:run` run before every commit.
@@ -102,7 +102,7 @@ These are non-negotiable for new code:
   hierarchies for domain logic, no copy-paste between phases. If two phases would
   compute the same thing, the second imports from the first.
 - **`src/engines/**` are pure functions** — no React, no DOM, no Zustand, no Zod.
-  Zod is allowed *only* at the parser boundary. Engines are Vitest-gated ≥75%.
+  Zod is allowed _only_ at the parser boundary. Engines are Vitest-gated ≥75%.
 - **The Zustand store holds inputs only.** `src/store/snapshotStore.ts` keeps an
   immutable `Map<id, Snapshot>` and no cached aggregates (a deliberate deviation
   from the sibling vsizer project).

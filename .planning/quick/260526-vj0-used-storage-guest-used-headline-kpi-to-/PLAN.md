@@ -1,4 +1,5 @@
 ---
+
 quick_id: 260526-vj0
 slug: used-storage-guest-used-headline-kpi-to-
 date: 2026-05-26
@@ -7,6 +8,7 @@ date: 2026-05-26
 # Quick task — "Used storage" headline KPI → guest-used (LiveOptics parity) + fallback
 
 ## Why
+
 vatlas headlines `vInfo "In Use MiB"` as used storage (613.9 TiB on the VS2 file =
 storage **committed** on datastores, incl. .vswp + snapshots). LiveOptics reports
 **in-guest used** (≈ vPartition Consumed = 522 TiB → 527.96 after backfill). The 16 %
@@ -17,10 +19,12 @@ when the optional `vPartition` sheet is absent so it never goes blank. Keep `inU
 treemap / per-datastore analytics (committed is correct there — do NOT change those).
 
 ## Design
+
 New derived engine field, pure, in the single `buildEstateView` pass:
 `usedStorageMib = guestUsedMib ?? inUseMib`.
 
 ## Tasks
+
 1. **Type** `src/types/estate.ts` — add `usedStorageMib: MiB` to `OperationalInsights`
    with a doc comment (guest-used when available, else committed fallback; the
    LiveOptics-comparable figure).
@@ -41,14 +45,16 @@ New derived engine field, pure, in the single `buildEstateView` pass:
      (keep `guestData` — ClusterDetail uses it).
    - `pptx.json` overview: +`usedStorage`, **remove** `overview.inUse` (overview-only).
    - `report.json` storage: +`usedStorage`, relabel `inUse`→"Committed" (keep `colInUse`).
-   No editorial verbs, no pre-formatted numbers. (DE/IT terms ride the pending-native-review flag.)
+     No editorial verbs, no pre-formatted numbers. (DE/IT terms ride the pending-native-review flag.)
 7. **Tests** — extend `estateView.test.ts`: usedStorageMib === guestUsedMib when vPartition
    present; === inUseMib when absent. Keep engines coverage ≥75 %.
 
 ## Verify
+
 `npm run typecheck` (app + test) · `npx @biomejs/biome check .` · `npm run test:run` ·
 `src/i18n/keyParity.test.ts` green · `npm run test:coverage` engines ≥75 %.
 
 ## Out of scope
+
 storageByX treemap / per-datastore rollups / DR sims (stay on committed `inUseMib`).
 ClusterDetail keeps its own committed + guestData rows (detail screen, not a headline).

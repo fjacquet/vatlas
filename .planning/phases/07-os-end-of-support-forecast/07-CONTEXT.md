@@ -17,7 +17,7 @@ Deliver the OS/ESXi lifecycle-forecast capability: a **bundled, Zod-validated** 
 - The HTML/PPTX export of the EOS view (→ P10; P7 makes the view, not the export).
 - Trends/multi-snapshot evolution of EOS (→ P8).
 - Regressing P5's plain-text ESXi/host presentation.
-</domain>
+  </domain>
 
 <decisions>
 ## Implementation Decisions
@@ -37,7 +37,7 @@ Deliver the OS/ESXi lifecycle-forecast capability: a **bundled, Zod-validated** 
 
 - **D-05:** View placement (new 5th ViewToggle segment vs Dashboard section vs drill) is **Claude's discretion** — if a segment, reuse the shipped `fieldset`+`aria-pressed` `ViewToggle` idiom (precedent: P5 added Hosts, P6 added Planning); do NOT build a new nav component.
 - **D-06:** Bucket definition (discrete non-overlapping windows vs cumulative ≤+N thresholds) is **Claude's discretion**, within these hard constraints: must include an explicit **overdue** bucket and a **first-class unknown-OS** bucket (D-09); counts must **reconcile to the entity total** (nothing silently dropped); whichever scheme maps cleanest to the drill + the Phase-2 ECharts chart (calendar/heatmap available). Factual labels only.
-- **D-07:** **Reference date for bucketing = TODAY (the date the user loads the workbook), not the snapshot capture date.** "Overdue" = EOL strictly before today. Surface, factually, that the forecast is computed "as of {today}". *User-chosen tradeoff explicitly accepted:* the same workbook yields different buckets on different days (non-reproducible, wall-clock-coupled) — this is the user's deliberate decision; do not silently substitute capture-date. (Catalogue `lastVerified` from D-03 is a separate date and is also surfaced.)
+- **D-07:** **Reference date for bucketing = TODAY (the date the user loads the workbook), not the snapshot capture date.** "Overdue" = EOL strictly before today. Surface, factually, that the forecast is computed "as of {today}". _User-chosen tradeoff explicitly accepted:_ the same workbook yields different buckets on different days (non-reproducible, wall-clock-coupled) — this is the user's deliberate decision; do not silently substitute capture-date. (Catalogue `lastVerified` from D-03 is a separate date and is also surfaced.)
 - **D-08:** Drill = **reuse the shipped P3 inventory `DataTable` + drill idiom** (sortable/filterable, same component family) for bucket→affected-entity list — no new table component (DRY). Exact wiring is planner/UI-spec's call within "one click, reuse existing table".
 
 ### ESXi host EOS scope (Area 3)
@@ -78,7 +78,7 @@ Bundling mechanism (D-01); exact build-failure semantics within outage-never-blo
 ### External data source (BUILD-TIME ONLY — never runtime)
 
 - `endoflife.date` (<https://endoflife.date> — public lifecycle catalogue). Bundled & Zod-validated at build time. Researcher must confirm: v1 API/JSON schema stability, RHEL/Oracle-Linux/Windows/ESXi product coverage, whether ESXi patch-level EOL is exposed (D-09c), and the OS-naming-variant matrix (harvest 50+ real OS strings from existing RVTools fixtures; target <5% unknown-OS rate per EOS success criterion 5).
-</canonical_refs>
+  </canonical_refs>
 
 <code_context>
 
@@ -105,7 +105,7 @@ Bundling mechanism (D-01); exact build-failure semantics within outage-never-blo
 - `EstateView` gains an `eos` projection (per-bucket counts + affected-entity lists + unknown-raw-strings + `lastVerified`), produced in aggregation, consumed via the single memo.
 - If a 5th ViewToggle segment: new `AppView` union member + App/shell view-state branch (same pattern as P6's 'planning').
 - Catalogue freshness line/caption (D-03) reads the bundled catalogue's `lastVerified` (a build-time constant), not a runtime value.
-</code_context>
+  </code_context>
 
 <specifics>
 ## Specific Ideas
@@ -114,7 +114,7 @@ Bundling mechanism (D-01); exact build-failure semantics within outage-never-blo
 - Forecast computed "as of {today}" (D-07, user-chosen) — surface the reference date so the as-of semantics are explicit.
 - Unknown-OS bucket is a peer of overdue/+3/+6/+9/+12; its drill exposes raw unrecognized strings + counts (maintainer signal).
 - Reference depth target overall: legacy RVTools Analyser EOS function (#5) — illustrative, not pixel-match.
-</specifics>
+  </specifics>
 
 <deferred>
 ## Deferred Ideas
@@ -129,5 +129,5 @@ None of the above are acted on in P7.
 
 ---
 
-*Phase: 07-os-end-of-support-forecast*
-*Context gathered: 2026-05-17*
+_Phase: 07-os-end-of-support-forecast_
+_Context gathered: 2026-05-17_

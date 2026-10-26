@@ -1,11 +1,13 @@
 ---
+
 status: complete
 phase: 05-rich-cluster-host-esx-intelligence
 source:
-  - 05-01-SUMMARY.md
-  - 05-02-SUMMARY.md
-started: 2026-05-17T00:00:00Z
-updated: 2026-05-18T00:00:00Z
+- 05-01-SUMMARY.md
+- 05-02-SUMMARY.md
+  started: 2026-05-17T00:00:00Z
+  updated: 2026-05-18T00:00:00Z
+
 ---
 
 ## Current Test

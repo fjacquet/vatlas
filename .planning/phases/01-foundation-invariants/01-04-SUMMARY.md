@@ -1,78 +1,79 @@
 ---
+
 phase: 01-foundation-invariants
 plan: 04
 subsystem: parser
 tags: [parser, web-worker, sheetjs, xlsx, zod, branded-types, rvtools, tdd, vitest, privacy]
 
 requires:
-  - phase: 01-foundation-invariants
-    plan: 02
-    provides: "src/privacy/fetchGuard.ts side-effect guard; parser.worker.ts FIRST-import contract; check-supply-chain SheetJS pin"
-  - phase: 01-foundation-invariants
-    plan: 03
-    provides: "@engines/units branded MiB/MHz/Cores/Sockets + converters; src/__fixtures__/rvtools-mib-canary.xlsx; xlsx 0.20.3 pin"
-provides:
-  - "src/engines/parser/parseInWorker.ts — main-thread `parseInWorker(file)` → { snapshot: Omit<Snapshot,'id'|'parsedAt'>, warnings }"
-  - "src/engines/parser/parser.worker.ts — Web Worker boundary; privacy guard FIRST import; WorkBook never posted back"
-  - "src/engines/parser/{parseXlsx,normalizeColumns,synthesizeOrphanClusters,schemas,captureDate}.ts + adapters/{columnMap,rvtools}.ts"
-  - "src/types/{snapshot,vinfo,vhost,index}.ts — Snapshot/ParseError/VDatastoreRow/VPartitionRow/VMetaDataRow + extended VInfoRow/VHostRow"
-  - "scripts/seed-fixtures.mjs + tests/fixtures/ (gitignored real-workbook harvest)"
-  - "tsconfig.test.json — test-file typecheck project (node + vitest globals)"
-affects: [01-05-snapshot-store]
+- phase: 01-foundation-invariants
+  plan: 02
+  provides: "src/privacy/fetchGuard.ts side-effect guard; parser.worker.ts FIRST-import contract; check-supply-chain SheetJS pin"
+- phase: 01-foundation-invariants
+  plan: 03
+  provides: "@engines/units branded MiB/MHz/Cores/Sockets + converters; src/**fixtures**/rvtools-mib-canary.xlsx; xlsx 0.20.3 pin"
+  provides:
+- "src/engines/parser/parseInWorker.ts — main-thread `parseInWorker(file)` → { snapshot: Omit<Snapshot,'id'|'parsedAt'>, warnings }"
+- "src/engines/parser/parser.worker.ts — Web Worker boundary; privacy guard FIRST import; WorkBook never posted back"
+- "src/engines/parser/{parseXlsx,normalizeColumns,synthesizeOrphanClusters,schemas,captureDate}.ts + adapters/{columnMap,rvtools}.ts"
+- "src/types/{snapshot,vinfo,vhost,index}.ts — Snapshot/ParseError/VDatastoreRow/VPartitionRow/VMetaDataRow + extended VInfoRow/VHostRow"
+- "scripts/seed-fixtures.mjs + tests/fixtures/ (gitignored real-workbook harvest)"
+- "tsconfig.test.json — test-file typecheck project (node + vitest globals)"
+  affects: [01-05-snapshot-store]
 
 tech-stack:
-  added: []
-  patterns:
-    - "Web Worker I/O boundary: discriminated postMessage union; transferable ArrayBuffer in; canonical typed rows out (SheetJS WorkBook GC'd inside the handler — Critical-5 / STRIDE T-04-07)"
-    - "SheetJS imported ONLY in parser.worker.ts/parseXlsx.ts — Vite emits a separate worker chunk; main bundle stays SheetJS-free (STRIDE T-04-08, verified by build probe)"
-    - "Hand-rolled Zod brand transforms `.transform((n) => n as MiB)` at the parser boundary (engines stay Zod-free — 01-RESEARCH A8); dedicated Positive* schemas, never `.pipe()` over a branded schema"
-    - "Structured fatal ParseError (name='ParseError' + sheet/column/kind own props, NO cause — STRIDE T-04-04); recoverable problems collected as ParseError[]"
-    - "RVTools-only: no source-detection / alternate-vendor branch (vsizer's Live Optics path dropped); lexical drop-gate kept clean by rephrasing documentary mentions"
-    - "Test files excluded from the app tsc -b build; typechecked via standalone tsconfig.test.json"
+added: []
+patterns:
+- "Web Worker I/O boundary: discriminated postMessage union; transferable ArrayBuffer in; canonical typed rows out (SheetJS WorkBook GC'd inside the handler — Critical-5 / STRIDE T-04-07)"
+- "SheetJS imported ONLY in parser.worker.ts/parseXlsx.ts — Vite emits a separate worker chunk; main bundle stays SheetJS-free (STRIDE T-04-08, verified by build probe)"
+- "Hand-rolled Zod brand transforms `.transform((n) => n as MiB)` at the parser boundary (engines stay Zod-free — 01-RESEARCH A8); dedicated Positive* schemas, never `.pipe()` over a branded schema"
+- "Structured fatal ParseError (name='ParseError' + sheet/column/kind own props, NO cause — STRIDE T-04-04); recoverable problems collected as ParseError[]"
+- "RVTools-only: no source-detection / alternate-vendor branch (vsizer's Live Optics path dropped); lexical drop-gate kept clean by rephrasing documentary mentions"
+- "Test files excluded from the app tsc -b build; typechecked via standalone tsconfig.test.json"
 
 key-files:
-  created:
-    - "src/types/snapshot.ts"
-    - "src/types/vinfo.ts"
-    - "src/types/vhost.ts"
-    - "src/types/index.ts"
-    - "src/engines/parser/parseXlsx.ts"
-    - "src/engines/parser/adapters/columnMap.ts"
-    - "src/engines/parser/adapters/rvtools.ts"
-    - "src/engines/parser/synthesizeOrphanClusters.ts"
-    - "src/engines/parser/schemas.ts"
-    - "src/engines/parser/normalizeColumns.ts"
-    - "src/engines/parser/captureDate.ts"
-    - "src/engines/parser/parser.worker.ts"
-    - "src/engines/parser/parseInWorker.ts"
-    - "src/engines/parser/index.ts"
-    - "src/engines/parser/adapters/rvtools.test.ts"
-    - "src/engines/parser/normalizeColumns.test.ts"
-    - "src/engines/parser/captureDate.test.ts"
-    - "src/engines/parser/canary.test.ts"
-    - "src/engines/parser/parseInWorker.test.ts"
-    - "src/engines/parser/parserEdges.test.ts"
-    - "scripts/seed-fixtures.mjs"
-    - "tests/fixtures/.gitignore"
-    - "tests/fixtures/.gitkeep"
-    - "tests/fixtures/README.md"
-    - "tsconfig.test.json"
+created:
+- "src/types/snapshot.ts"
+- "src/types/vinfo.ts"
+- "src/types/vhost.ts"
+- "src/types/index.ts"
+- "src/engines/parser/parseXlsx.ts"
+- "src/engines/parser/adapters/columnMap.ts"
+- "src/engines/parser/adapters/rvtools.ts"
+- "src/engines/parser/synthesizeOrphanClusters.ts"
+- "src/engines/parser/schemas.ts"
+- "src/engines/parser/normalizeColumns.ts"
+- "src/engines/parser/captureDate.ts"
+- "src/engines/parser/parser.worker.ts"
+- "src/engines/parser/parseInWorker.ts"
+- "src/engines/parser/index.ts"
+- "src/engines/parser/adapters/rvtools.test.ts"
+- "src/engines/parser/normalizeColumns.test.ts"
+- "src/engines/parser/captureDate.test.ts"
+- "src/engines/parser/canary.test.ts"
+- "src/engines/parser/parseInWorker.test.ts"
+- "src/engines/parser/parserEdges.test.ts"
+- "scripts/seed-fixtures.mjs"
+- "tests/fixtures/.gitignore"
+- "tests/fixtures/.gitkeep"
+- "tests/fixtures/README.md"
+- "tsconfig.test.json"
   modified:
-    - "package.json (typecheck now also runs tsconfig.test.json)"
-    - "tsconfig.app.json (exclude *.test.ts/*.spec.ts/src/test from app build)"
+- "package.json (typecheck now also runs tsconfig.test.json)"
+- "tsconfig.app.json (exclude _.test.ts/_.spec.ts/src/test from app build)"
 
 decisions:
-  - "VHostRow keeps `hostName` (not renamed to `host`) so the verbatim synthesizeOrphanClusters port matches on it unchanged — KISS over the plan's interface sketch which said `host` but also `...other fields verbatim`."
-  - "Adapters construct branded values via the units constructors (mib/cores/...) so adapter output is genuinely VInfoRow[]/VHostRow[]; the Zod schema re-validates + re-brands. Avoids a parallel bare-number adapter type (DRY)."
-  - "canary.test.ts bypasses the Worker boundary (parseSnapshot(parseXlsx(buf)) directly) — jsdom cannot drive a real module Worker; per the plan."
-  - "Test files excluded from app tsc -b (they import node:fs/__dirname); a dedicated tsconfig.test.json keeps test type-safety, wired into `npm run typecheck`. Standalone (not a project reference) to avoid forcing `composite:true` across Plans 01-03's tsconfigs (lower blast radius)."
+- "VHostRow keeps `hostName` (not renamed to `host`) so the verbatim synthesizeOrphanClusters port matches on it unchanged — KISS over the plan's interface sketch which said `host` but also `...other fields verbatim`."
+- "Adapters construct branded values via the units constructors (mib/cores/...) so adapter output is genuinely VInfoRow[]/VHostRow[]; the Zod schema re-validates + re-brands. Avoids a parallel bare-number adapter type (DRY)."
+- "canary.test.ts bypasses the Worker boundary (parseSnapshot(parseXlsx(buf)) directly) — jsdom cannot drive a real module Worker; per the plan."
+- "Test files excluded from app tsc -b (they import node:fs/__dirname); a dedicated tsconfig.test.json keeps test type-safety, wired into `npm run typecheck`. Standalone (not a project reference) to avoid forcing `composite:true` across Plans 01-03's tsconfigs (lower blast radius)."
 
 metrics:
-  duration: 35min
-  tasks: 3
-  files_created: 25
-  files_modified: 2
-  completed: 2026-05-15
+duration: 35min
+tasks: 3
+files_created: 25
+files_modified: 2
+completed: 2026-05-15
 ---
 
 # Phase 01 Plan 04: RVTools Parser Engine in a Web Worker Summary
@@ -115,12 +116,12 @@ metrics:
 
 `node scripts/seed-fixtures.mjs` harvested **4/4** sources. Each parsed cleanly through `parseSnapshot(parseXlsx(buf))`:
 
-| Fixture | Size | RVTools detected | vinfo / vhost / vdatastore / vpartition |
-|---|---|---|---|
-| `RVTools_export_all_2026-01-07_10.23.35.xlsx` | 915 KB | **3.11+** (marker-sniffed) | 576 / 20 / 21 / 1457 |
-| `RVTools_export_all_2026-01-14_17.23.32.xlsx` | 584 KB | **3.11+** (marker-sniffed) | 273 / 7 / 39 / 573 |
-| `RVTools_export_all_2026-04-17_..._MOM-vCenter.xlsx` | 944 KB | **3.11+** (marker-sniffed) | 249 / 84 / 102 / 1152 |
-| `vsizer/public/samples/rvtools-sample.xlsx` (synthetic) | 26 KB | **unknown** (no vMetaData) | 40 / 9 / 0 / 0 |
+| Fixture                                                 | Size   | RVTools detected           | vinfo / vhost / vdatastore / vpartition |
+| ------------------------------------------------------- | ------ | -------------------------- | --------------------------------------- |
+| `RVTools_export_all_2026-01-07_10.23.35.xlsx`           | 915 KB | **3.11+** (marker-sniffed) | 576 / 20 / 21 / 1457                    |
+| `RVTools_export_all_2026-01-14_17.23.32.xlsx`           | 584 KB | **3.11+** (marker-sniffed) | 273 / 7 / 39 / 573                      |
+| `RVTools_export_all_2026-04-17_..._MOM-vCenter.xlsx`    | 944 KB | **3.11+** (marker-sniffed) | 249 / 84 / 102 / 1152                   |
+| `vsizer/public/samples/rvtools-sample.xlsx` (synthetic) | 26 KB  | **unknown** (no vMetaData) | 40 / 9 / 0 / 0                          |
 
 ```
 Generations covered by real files (real-file-validated): { 3.11+ }
@@ -133,12 +134,12 @@ Generations missing real-file validation:               { 3.10, 4.0, 4.4 }
 
 Measured in node/Vitest (not in-browser — Plan 05's smoke test validates in-browser):
 
-| Fixture | Size | Parse wall-clock |
-|---|---|---|
-| `..._2026-04-17_..._MOM-vCenter.xlsx` (largest, 84 hosts / 1152 partitions) | 944 KB | **312 ms** |
-| `..._2026-01-07_10.23.35.xlsx` | 915 KB | 212 ms |
-| `..._2026-01-14_17.23.32.xlsx` | 584 KB | 204 ms |
-| `rvtools-sample.xlsx` | 26 KB | 3 ms |
+| Fixture                                                                     | Size   | Parse wall-clock |
+| --------------------------------------------------------------------------- | ------ | ---------------- |
+| `..._2026-04-17_..._MOM-vCenter.xlsx` (largest, 84 hosts / 1152 partitions) | 944 KB | **312 ms**       |
+| `..._2026-01-07_10.23.35.xlsx`                                              | 915 KB | 212 ms           |
+| `..._2026-01-14_17.23.32.xlsx`                                              | 584 KB | 204 ms           |
+| `rvtools-sample.xlsx`                                                       | 26 KB  | 3 ms             |
 
 No ≥30 MB workbook is available on disk (largest is 944 KB). Extrapolating ~0.33 ms/KB, a 30 MB workbook projects to **~10 s** — at the RESEARCH.md A9 threshold. **Not a Phase 6 backlog trigger yet** (no measured >10s), but flagged: the Worker boundary already keeps any such parse off the main thread (UI never freezes), so even a threshold-grazing 30 MB file degrades gracefully. Plan 05's in-browser smoke test should re-measure with a real large workbook if one becomes available.
 
@@ -253,5 +254,6 @@ Tasks 1 & 2 are `tdd="true"`. Gate sequence verified in git log: Task 1 `test(01
 ## Self-Check: PASSED
 
 ---
+
 _Phase: 01-foundation-invariants_
 _Completed: 2026-05-15_

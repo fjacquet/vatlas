@@ -10,7 +10,7 @@
 
 **Spec:** `docs/superpowers/specs/2026-05-25-vm-rightsizing-stress-and-de-it-i18n-design.md` (Workstream B).
 
-**Dependency on Plan 1:** Execute **after** Plan 1. Plan 1 creates the `rightsizing` namespace and the new `inventory:col.*` / `pptx` right-sizing keys in `en`+`fr`; this plan translates the *current* set of namespaces, which by then includes `rightsizing`. The namespace count below is **17** = the 16 existing + `rightsizing`.
+**Dependency on Plan 1:** Execute **after** Plan 1. Plan 1 creates the `rightsizing` namespace and the new `inventory:col.*` / `pptx` right-sizing keys in `en`+`fr`; this plan translates the _current_ set of namespaces, which by then includes `rightsizing`. The namespace count below is **17** = the 16 existing + `rightsizing`.
 
 **Conventions for every task:**
 - Lint/format with `npx @biomejs/biome check .` (NOT `npm run lint`). JSON files must be valid and Biome-formatted.
@@ -43,34 +43,34 @@
 
 Use these renderings consistently across all namespaces. **Flag the `de`/`it` columns for native/technical review before release** (tracked risk in the spec — UI terms only, not vendor CLI).
 
-| en | de | it |
-|---|---|---|
-| Cluster | Cluster | Cluster |
-| Host | Host | Host |
-| Datastore | Datastore | Datastore |
-| Snapshot | Snapshot | Snapshot |
-| VM / Virtual machine | VM / Virtuelle Maschine | VM / Macchina virtuale |
-| Allocation | Zuweisung | Allocazione |
-| Threshold | Schwellenwert | Soglia |
-| Overcommit | Überbelegung | Sovrallocazione |
-| Powered on / off | Eingeschaltet / Ausgeschaltet | Acceso / Spento |
-| Stretched cluster | Stretched-Cluster | Cluster stretched |
-| CPU Ready | CPU Ready | CPU Ready |
-| Ballooning | Ballooning | Ballooning |
-| Swapped | Ausgelagert | Swap |
-| Right-sizing | Dimensionierung | Dimensionamento |
-| Oversized (alloc ≫ usage) | Zuweisung ≫ Nutzung | Allocazione ≫ utilizzo |
-| Undersized | Nutzung nahe Zuweisung | Utilizzo prossimo all'allocazione |
-| Storage | Speicher | Storage |
-| Disaster Recovery | Disaster Recovery | Disaster Recovery |
-| End of Support | Support-Ende | Fine supporto |
-| Upload | Hochladen | Caricamento |
-| Export | Export | Esportazione |
-| Report | Bericht | Report |
-| Trend | Trend | Andamento |
-| Capacity | Kapazität | Capacità |
-| Utilization | Auslastung | Utilizzo |
-| Provisioned | Bereitgestellt | Provisionato |
+| en                        | de                            | it                                |
+| ------------------------- | ----------------------------- | --------------------------------- |
+| Cluster                   | Cluster                       | Cluster                           |
+| Host                      | Host                          | Host                              |
+| Datastore                 | Datastore                     | Datastore                         |
+| Snapshot                  | Snapshot                      | Snapshot                          |
+| VM / Virtual machine      | VM / Virtuelle Maschine       | VM / Macchina virtuale            |
+| Allocation                | Zuweisung                     | Allocazione                       |
+| Threshold                 | Schwellenwert                 | Soglia                            |
+| Overcommit                | Überbelegung                  | Sovrallocazione                   |
+| Powered on / off          | Eingeschaltet / Ausgeschaltet | Acceso / Spento                   |
+| Stretched cluster         | Stretched-Cluster             | Cluster stretched                 |
+| CPU Ready                 | CPU Ready                     | CPU Ready                         |
+| Ballooning                | Ballooning                    | Ballooning                        |
+| Swapped                   | Ausgelagert                   | Swap                              |
+| Right-sizing              | Dimensionierung               | Dimensionamento                   |
+| Oversized (alloc ≫ usage) | Zuweisung ≫ Nutzung           | Allocazione ≫ utilizzo            |
+| Undersized                | Nutzung nahe Zuweisung        | Utilizzo prossimo all'allocazione |
+| Storage                   | Speicher                      | Storage                           |
+| Disaster Recovery         | Disaster Recovery             | Disaster Recovery                 |
+| End of Support            | Support-Ende                  | Fine supporto                     |
+| Upload                    | Hochladen                     | Caricamento                       |
+| Export                    | Export                        | Esportazione                      |
+| Report                    | Bericht                       | Report                            |
+| Trend                     | Trend                         | Andamento                         |
+| Capacity                  | Kapazität                     | Capacità                          |
+| Utilization               | Auslastung                    | Utilizzo                          |
+| Provisioned               | Bereitgestellt                | Provisionato                      |
 
 > Keep product nouns that are conventionally left in English in VMware contexts (Cluster, Host, Datastore, Snapshot, CPU Ready, Ballooning, Disaster Recovery) untranslated, as above.
 
@@ -92,8 +92,22 @@ import { describe, expect, it } from 'vitest'
 
 const LOCALES = ['en', 'fr', 'de', 'it'] as const
 const NAMESPACES = [
-  'common', 'upload', 'dashboard', 'inventory', 'mvc', 'str', 'alloc', 'dr',
-  'rci', 'eos', 'trends', 'storage', 'alerts', 'network', 'report', 'pptx',
+  'common',
+  'upload',
+  'dashboard',
+  'inventory',
+  'mvc',
+  'str',
+  'alloc',
+  'dr',
+  'rci',
+  'eos',
+  'trends',
+  'storage',
+  'alerts',
+  'network',
+  'report',
+  'pptx',
   'rightsizing',
 ] as const
 
@@ -104,9 +118,7 @@ const flatten = (obj: unknown, prefix = ''): string[] => {
   )
 }
 const load = (locale: string, ns: string): unknown =>
-  JSON.parse(
-    readFileSync(resolve(process.cwd(), `src/i18n/locales/${locale}/${ns}.json`), 'utf8'),
-  )
+  JSON.parse(readFileSync(resolve(process.cwd(), `src/i18n/locales/${locale}/${ns}.json`), 'utf8'))
 
 describe('i18n key parity across locales', () => {
   for (const ns of NAMESPACES) {
@@ -163,7 +175,7 @@ git commit -m "feat(i18n-01): add cross-locale key-parity test"
 ```
 (Match the existing style of `lang.fr`/`lang.en` — they appear to be short codes; keep whatever convention those use. If they spell the language out, spell `de`/`it` out too: en → "German"/"Italian", fr → "Allemand"/"Italien".)
 
-- [x] **Step 3: Create `de/common.json` and `it/common.json`** mirroring the full `en/common.json` structure (translated), including the `lang` block. The `lang.*` values are the *display labels* shown in the switcher — they should read the same in every locale (e.g. `lang.de` = "DE"/"Deutsch", `lang.it` = "IT"/"Italiano"), not be re-translated per current language.
+- [x] **Step 3: Create `de/common.json` and `it/common.json`** mirroring the full `en/common.json` structure (translated), including the `lang` block. The `lang.*` values are the _display labels_ shown in the switcher — they should read the same in every locale (e.g. `lang.de` = "DE"/"Deutsch", `lang.it` = "IT"/"Italiano"), not be re-translated per current language.
 
 - [x] **Step 4: Validate + parity (common only)**
 
@@ -391,4 +403,5 @@ git commit -m "docs(i18n-10): record de/it localization (4 locales) + review fol
 - **Ordering:** parity test first (drives completeness) → translate → wire `index.ts` (imports require files to exist) → smoke test → gate. ✓
 - **No placeholders:** every task has the file set, the method, exact run commands, and expected results. Per-key translated strings are produced at execution from the known `en` source under the glossary — the test gate guarantees completeness. The one fully-modeled file is `common` (the switcher labels), shown concretely. ✓
 - **Risk:** `de`/`it` technical-term quality needs native review — explicitly carried, not silently assumed correct.
+```
 ```

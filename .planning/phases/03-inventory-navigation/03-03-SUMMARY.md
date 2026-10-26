@@ -1,56 +1,58 @@
 ---
+
 phase: 03-inventory-navigation
 plan: 03
 subsystem: inventory
 tags: [inventory-tree, react-virtual, flatten-visible, lazy-children, inventory-shell, view-toggle, i18n-inventory, 10k-stress, tanstack-bundle-gate, inv-01, inv-02, inv-03, inv-04, inv-05, inv-06]
 requires:
-  - VmDisplayRow + EstateView.vmRows pure projection (03-01)
-  - EstateView.hosts (EsxAggregate) / EstateView.datastores (DatastoreAggregate) verbatim Phase-2 output
-  - DataTable<T> / ColumnPicker generic primitives + Vm/Esx/DatastoreTable thin wrappers (03-01/03-02)
-  - ViewToggle controlled segmented control (03-01)
-  - inventory i18n namespace EN+FR + 10k fixture generator (03-03 Task 1, prior commit 3708d81)
-  - AccountingModeToggle aria-pressed segmented idiom + component-test idiom (Phase 2)
-provides:
-  - "InventoryTree (INV-01) — flatten-visible + @tanstack/react-virtual + lazy children; no getExpandedRowModel; bounded DOM window at 10k"
-  - "InventoryView — single useEstateView caller; tree pane + tabbed VM/ESX/Datastore tables; tree-selection scopes the active table"
-  - "App.tsx ViewToggle wiring — Dashboard↔Inventory switch; Phase-1 sidebar + Phase-2 dashboard untouched"
-  - "LIVE @tanstack ≤60 KiB gz bundle gate (measured 17.0 KiB gz) — vendor-tanstack chunk + filename-based marker"
-  - "10k-VM stress proof: sort <200ms (#2), bounded virtualised tree window (#1 proxy), filtered-CSV newline-preserved light+dark (#4)"
-affects:
-  - "Phase 4+ (multi-vCenter / analytics) consume the inventory shell as the established browsable surface; no new engines added"
-tech-stack:
+- VmDisplayRow + EstateView.vmRows pure projection (03-01)
+- EstateView.hosts (EsxAggregate) / EstateView.datastores (DatastoreAggregate) verbatim Phase-2 output
+- DataTable<T> / ColumnPicker generic primitives + Vm/Esx/DatastoreTable thin wrappers (03-01/03-02)
+- ViewToggle controlled segmented control (03-01)
+- inventory i18n namespace EN+FR + 10k fixture generator (03-03 Task 1, prior commit 3708d81)
+- AccountingModeToggle aria-pressed segmented idiom + component-test idiom (Phase 2)
+  provides:
+- "InventoryTree (INV-01) — flatten-visible + @tanstack/react-virtual + lazy children; no getExpandedRowModel; bounded DOM window at 10k"
+- "InventoryView — single useEstateView caller; tree pane + tabbed VM/ESX/Datastore tables; tree-selection scopes the active table"
+- "App.tsx ViewToggle wiring — Dashboard↔Inventory switch; Phase-1 sidebar + Phase-2 dashboard untouched"
+- "LIVE @tanstack ≤60 KiB gz bundle gate (measured 17.0 KiB gz) — vendor-tanstack chunk + filename-based marker"
+- "10k-VM stress proof: sort <200ms (#2), bounded virtualised tree window (#1 proxy), filtered-CSV newline-preserved light+dark (#4)"
+  affects:
+- "Phase 4+ (multi-vCenter / analytics) consume the inventory shell as the established browsable surface; no new engines added"
+  tech-stack:
   added: []
   patterns:
-    - "Flatten-VISIBLE-rows recipe: children materialised ONLY when parent id ∈ expanded Set; flat array derived on demand, no parallel tree-of-objects (Critical-5 / T-03-10)"
-    - "Tree/shell state is component useState only — expansion/selection/tab/mode never browser-persisted (T-03-11)"
-    - "Single useEstateView caller (InventoryView) → InventoryTree/tables receive plain props (GlobalDashboard lift discipline; project's only useMemo stays useEstateView)"
-    - "Plain index helpers (indexHostsByCluster/indexVmsByHost/orderClusters) are render-derived shaping, NOT aggregation — no new useMemo"
-    - "vendor-tanstack manualChunks + filename-based bundle marker so the LIVE gate can MEASURE the chunk (minification strips the literal pkg string)"
-    - "jsdom virtualiser test infra: offsetHeight/offsetWidth/getBoundingClientRect/ResizeObserver stubbed to a deterministic non-zero viewport in src/test/setup.ts"
-key-files:
-  created:
-    - src/components/inventory/InventoryTree.tsx
-    - src/components/inventory/InventoryView.tsx
-    - src/components/inventory/InventoryTree.test.tsx
-    - src/__tests__/inventory-stress.test.tsx
-  modified:
-    - src/App.tsx
-    - src/__tests__/e2e-smoke.test.tsx
-    - src/components/inventory/DataTable.csv.test.tsx
-    - src/test/setup.ts
-    - vite.config.ts
-    - scripts/check-bundle-size.mjs
-decisions:
-  - "Tree hierarchy = synthetic vCenter root → Cluster → ESX → VM (NO Datacenter level — 03-RESEARCH A1 / UI-SPEC §Inventory layout); ROADMAP Phase-3 detail text still names a Datacenter level but the approved design (UI-SPEC + PLAN) drops it — implemented per the approved design"
-  - "buildVisibleRows is a plain call (no useMemo) — render-derived presentation shaping, not aggregation; window cost is bounded (03-RESEARCH line 199)"
-  - "[Rule 3] vendor-tanstack manualChunks split + filename-based bundle marker added so the LIVE @tanstack gate the plan mandates can actually MEASURE (minification strips '@tanstack' from the merged index chunk → content-scan was a permanent no-op); gate NOT widened — measured 17.0 KiB gz ≪ 60 KiB"
-  - "[Rule 3] jsdom layout stubs (offsetHeight/getBoundingClientRect/ResizeObserver) added to src/test/setup.ts — @tanstack/virtual-core measures via element.offsetHeight which jsdom hard-codes to 0, collapsing every virtualised window to zero rendered rows"
-  - "[Rule 1] DataTable.csv.test.tsx toolbar queries updated key→EN copy — Task 1 (committed 3708d81) registered the inventory i18n namespace, so t('export.csv') now resolves to 'Export CSV' not the raw key the 03-01-era test matched"
-metrics:
+  - "Flatten-VISIBLE-rows recipe: children materialised ONLY when parent id ∈ expanded Set; flat array derived on demand, no parallel tree-of-objects (Critical-5 / T-03-10)"
+  - "Tree/shell state is component useState only — expansion/selection/tab/mode never browser-persisted (T-03-11)"
+  - "Single useEstateView caller (InventoryView) → InventoryTree/tables receive plain props (GlobalDashboard lift discipline; project's only useMemo stays useEstateView)"
+  - "Plain index helpers (indexHostsByCluster/indexVmsByHost/orderClusters) are render-derived shaping, NOT aggregation — no new useMemo"
+  - "vendor-tanstack manualChunks + filename-based bundle marker so the LIVE gate can MEASURE the chunk (minification strips the literal pkg string)"
+  - "jsdom virtualiser test infra: offsetHeight/offsetWidth/getBoundingClientRect/ResizeObserver stubbed to a deterministic non-zero viewport in src/test/setup.ts"
+    key-files:
+    created:
+  - src/components/inventory/InventoryTree.tsx
+  - src/components/inventory/InventoryView.tsx
+  - src/components/inventory/InventoryTree.test.tsx
+  - src/**tests**/inventory-stress.test.tsx
+    modified:
+  - src/App.tsx
+  - src/**tests**/e2e-smoke.test.tsx
+  - src/components/inventory/DataTable.csv.test.tsx
+  - src/test/setup.ts
+  - vite.config.ts
+  - scripts/check-bundle-size.mjs
+    decisions:
+- "Tree hierarchy = synthetic vCenter root → Cluster → ESX → VM (NO Datacenter level — 03-RESEARCH A1 / UI-SPEC §Inventory layout); ROADMAP Phase-3 detail text still names a Datacenter level but the approved design (UI-SPEC + PLAN) drops it — implemented per the approved design"
+- "buildVisibleRows is a plain call (no useMemo) — render-derived presentation shaping, not aggregation; window cost is bounded (03-RESEARCH line 199)"
+- "[Rule 3] vendor-tanstack manualChunks split + filename-based bundle marker added so the LIVE @tanstack gate the plan mandates can actually MEASURE (minification strips '@tanstack' from the merged index chunk → content-scan was a permanent no-op); gate NOT widened — measured 17.0 KiB gz ≪ 60 KiB"
+- "[Rule 3] jsdom layout stubs (offsetHeight/getBoundingClientRect/ResizeObserver) added to src/test/setup.ts — @tanstack/virtual-core measures via element.offsetHeight which jsdom hard-codes to 0, collapsing every virtualised window to zero rendered rows"
+- "[Rule 1] DataTable.csv.test.tsx toolbar queries updated key→EN copy — Task 1 (committed 3708d81) registered the inventory i18n namespace, so t('export.csv') now resolves to 'Export CSV' not the raw key the 03-01-era test matched"
+  metrics:
   duration: "~50min (continuation: Tasks 2-3 + closeout this session; Task 1 prior commit 3708d81)"
   completed: 2026-05-16
   tasks: 3
   files: 10
+
 ---
 
 # Phase 3 Plan 3: Inventory Tree + Shell Summary
@@ -102,21 +104,21 @@ The ROADMAP Phase-3 prose still names a `vCenter → Datacenter → Cluster → 
 
 ## Gate Results
 
-| Gate | Result |
-|------|--------|
-| `npm run typecheck` | PASS |
-| `npx @biomejs/biome check .` | PASS (134 files, 0 errors) |
-| `npm run test:run` | PASS (37 files, 236 tests) |
-| Task-3 named files (`InventoryTree` / `inventory-stress` / `e2e-smoke`) | PASS (3 files, 14 tests) |
-| `npm run build` | PASS |
-| `npm run check:supply-chain` | PASS |
-| `node scripts/check-bundle-size.mjs` | PASS — **LIVE @tanstack chunk = 17,414 bytes gz (17.0 KiB) ≤ 60 KiB**; echarts/index chunk 207.7 KiB gz ≤ 300 KiB |
-| grep: no `getExpandedRowModel` in `src/components/inventory/` | PASS |
-| grep: no `localStorage` in `InventoryTree.tsx`/`InventoryView.tsx` | PASS |
-| grep: no `@/engines/aggregation` in non-test component src | PASS |
-| grep: exactly one `useEstateView(` caller in `src/components/inventory/` | PASS (1 — InventoryView) |
-| grep: zero new `useMemo` in non-test src (only useEstateView + doc-comment mentions) | PASS |
-| semgrep (CLI fallback `--config=auto --error`, 3 new files) | PASS — 0 findings, 378 rules |
+| Gate                                                                                 | Result                                                                                                            |
+| ------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------- |
+| `npm run typecheck`                                                                  | PASS                                                                                                              |
+| `npx @biomejs/biome check .`                                                         | PASS (134 files, 0 errors)                                                                                        |
+| `npm run test:run`                                                                   | PASS (37 files, 236 tests)                                                                                        |
+| Task-3 named files (`InventoryTree` / `inventory-stress` / `e2e-smoke`)              | PASS (3 files, 14 tests)                                                                                          |
+| `npm run build`                                                                      | PASS                                                                                                              |
+| `npm run check:supply-chain`                                                         | PASS                                                                                                              |
+| `node scripts/check-bundle-size.mjs`                                                 | PASS — **LIVE @tanstack chunk = 17,414 bytes gz (17.0 KiB) ≤ 60 KiB**; echarts/index chunk 207.7 KiB gz ≤ 300 KiB |
+| grep: no `getExpandedRowModel` in `src/components/inventory/`                        | PASS                                                                                                              |
+| grep: no `localStorage` in `InventoryTree.tsx`/`InventoryView.tsx`                   | PASS                                                                                                              |
+| grep: no `@/engines/aggregation` in non-test component src                           | PASS                                                                                                              |
+| grep: exactly one `useEstateView(` caller in `src/components/inventory/`             | PASS (1 — InventoryView)                                                                                          |
+| grep: zero new `useMemo` in non-test src (only useEstateView + doc-comment mentions) | PASS                                                                                                              |
+| semgrep (CLI fallback `--config=auto --error`, 3 new files)                          | PASS — 0 findings, 378 rules                                                                                      |
 
 > Semgrep MCP tool unavailable in this environment; used the documented CLI fallback `semgrep --config=auto --error` (acceptable per prior plans). 0 findings on the 3 new files.
 

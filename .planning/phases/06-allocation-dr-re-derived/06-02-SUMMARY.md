@@ -1,45 +1,47 @@
 ---
+
 phase: 06-allocation-dr-re-derived
 plan: 02
 subsystem: planning-surface (ViewToggle 4th segment + planned-ratios control)
 tags: [view-toggle, planned-ratios, zustand-slice, no-url-hash, single-memo, i18n-parity, d-03-separation]
 requires:
-  - "06-01 plannedRatios Zustand slice + selectPlannedRatios/selectSetPlannedRatios"
-  - "06-01 buildEstateView plannedView/plannedDrSim composition + DR two-mode contract"
-  - "shipped P3/P5 ViewToggle fieldset/aria-pressed idiom + P5 hosts-segment precedent"
-provides:
-  - "AppView union + VIEWS array 4th 'planning' segment (App-routed, accent-gold active)"
-  - "PlanningView shell — useEstateView consumed once, planned block + 2xl break + DR slot for Plan 03"
-  - "PlannedRatiosControl — preset buttons fill editable numeric field, Zustand-backed, zero URL-hash/localStorage"
-  - "alloc.json planned.* i18n group (EN+FR parity); inventory.json nav.planning (EN+FR parity)"
-  - "applyPlannedToDr flag lifted as PlanningView component state (default false) for Plan 03 (D-11)"
-affects:
-  - "Plan 06-03 (DrSimPanel full rework lands in the PlanningView DR slot; consumes applyPlannedToDr)"
-tech-stack:
+- "06-01 plannedRatios Zustand slice + selectPlannedRatios/selectSetPlannedRatios"
+- "06-01 buildEstateView plannedView/plannedDrSim composition + DR two-mode contract"
+- "shipped P3/P5 ViewToggle fieldset/aria-pressed idiom + P5 hosts-segment precedent"
+  provides:
+- "AppView union + VIEWS array 4th 'planning' segment (App-routed, accent-gold active)"
+- "PlanningView shell — useEstateView consumed once, planned block + 2xl break + DR slot for Plan 03"
+- "PlannedRatiosControl — preset buttons fill editable numeric field, Zustand-backed, zero URL-hash/localStorage"
+- "alloc.json planned.* i18n group (EN+FR parity); inventory.json nav.planning (EN+FR parity)"
+- "applyPlannedToDr flag lifted as PlanningView component state (default false) for Plan 03 (D-11)"
+  affects:
+- "Plan 06-03 (DrSimPanel full rework lands in the PlanningView DR slot; consumes applyPlannedToDr)"
+  tech-stack:
   added: []
   patterns:
-    - "preset-fills-editable-numeric (no slider widget) — D-05"
-    - "in-memory Zustand slice only, killed URL-hash codec structurally excluded — D-06"
-    - "structurally-separate labelled surfaces for planned vs measured (D-03), not just wording"
-key-files:
-  created:
-    - src/components/planning/PlannedRatiosControl.tsx
-    - src/components/planning/PlanningView.tsx
-  modified:
-    - src/components/ViewToggle.tsx
-    - src/App.tsx
-    - src/components/dashboard/GlobalDashboard.tsx
-    - src/i18n/locales/en/inventory.json
-    - src/i18n/locales/fr/inventory.json
-    - src/i18n/locales/en/alloc.json
-    - src/i18n/locales/fr/alloc.json
-decisions:
-  - "Task ordering: committed Task 2 (self-contained new components) before Task 1 (App import wiring) so each commit compiles standalone — App.tsx imports PlanningView, so the component must exist first"
-  - "Open Item 1/2 (Site-loss disabled-state, Verdict word) are DrSimPanel concerns deferred to Plan 03 — this plan only builds the shell + DR slot placeholder, no DR rework"
-  - "applyPlannedToDr held with `void` to satisfy strict no-unused-locals until Plan 03 wires the DR slot"
-metrics:
+  - "preset-fills-editable-numeric (no slider widget) — D-05"
+  - "in-memory Zustand slice only, killed URL-hash codec structurally excluded — D-06"
+  - "structurally-separate labelled surfaces for planned vs measured (D-03), not just wording"
+    key-files:
+    created:
+  - src/components/planning/PlannedRatiosControl.tsx
+  - src/components/planning/PlanningView.tsx
+    modified:
+  - src/components/ViewToggle.tsx
+  - src/App.tsx
+  - src/components/dashboard/GlobalDashboard.tsx
+  - src/i18n/locales/en/inventory.json
+  - src/i18n/locales/fr/inventory.json
+  - src/i18n/locales/en/alloc.json
+  - src/i18n/locales/fr/alloc.json
+    decisions:
+- "Task ordering: committed Task 2 (self-contained new components) before Task 1 (App import wiring) so each commit compiles standalone — App.tsx imports PlanningView, so the component must exist first"
+- "Open Item 1/2 (Site-loss disabled-state, Verdict word) are DrSimPanel concerns deferred to Plan 03 — this plan only builds the shell + DR slot placeholder, no DR rework"
+- "applyPlannedToDr held with `void` to satisfy strict no-unused-locals until Plan 03 wires the DR slot"
+  metrics:
   duration: ~14min
   completed: 2026-05-17
+
 ---
 
 # Phase 6 Plan 02: Planning Surface (ViewToggle 4th segment + planned-ratios control) Summary
@@ -103,8 +105,8 @@ all on the 06-01 spine with zero greenfield rewrites.
 - **Issue:** The url-hash gate (`grep -v '^#' … | grep -c 'useAllocationHash\|…\|localStorage'` == 0)
   and the planning-dir memo gate (`grep -rc 'useMemo' src/components/planning/` == 0) are
   literal token counts. `grep -v '^#'` only strips lines starting with a literal `#`, so
-  explanatory JSDoc that *names the anti-pattern to forbid it* (`NO \`useAllocationHash\`,
-  NO localStorage` in `PlannedRatiosControl`;`no second \`useMemo\`` in `PlanningView`)
+  explanatory JSDoc that _names the anti-pattern to forbid it_ (`NO \`useAllocationHash\`,
+  NO localStorage`in`PlannedRatiosControl`;`no second \`useMemo\``in`PlanningView`)
   counted against the gate even though no such call/import exists. Same class as 06-01
   deviation #3 (JSDoc tripping a structural grep gate).
 - **Fix:** Reworded both JSDoc blocks to preserve the privacy/single-memo rationale
@@ -129,7 +131,7 @@ all on the 06-01 spine with zero greenfield rewrites.
 The Planning DR slot is an intentional labelled placeholder (`planned.drSlotHeading` /
 `planned.drSlotPending`), explicitly scoped to Plan 06-03 per the plan's Task 2 action
 ("a slot below for the reworked DrSimPanel (Plan 03 fills this … render a placeholder
-section")  and 06-CONTEXT D-04/D-07. `applyPlannedToDr` is intentionally held as unused
+section") and 06-CONTEXT D-04/D-07. `applyPlannedToDr` is intentionally held as unused
 component state (D-11) for Plan 03 to consume. These are documented forward-references,
 not goal-blocking stubs — the Plan 02 goal (4th segment + planned-ratios control +
 Dashboard cleanup) is fully achieved.

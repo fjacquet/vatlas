@@ -1,55 +1,56 @@
 ---
+
 phase: 04-multi-vcenter-stretched-allocation-dr
 plan: 01
 subsystem: aggregation
 tags: [multi-vcenter, snapshot-merge, zustand, react-i18next, useMemo, rvtools]
 
 requires:
-  - phase: 01-foundation
-    provides: parser worker, branded units, Snapshot type, snapshotStore, useEstateView single-memo invariant
-  - phase: 02-aggregation
-    provides: buildEstateView / aggregateClusters / perDatastore engine spine
-provides:
-  - "engines/snapshotMerge: row-keyed (viSdkUuid) N-snapshot merge with cluster-collision suffix + vMotion VM dedupe"
-  - "buildEstateView now consumes the MERGED bundle (MergedEstate), not a raw Snapshot"
-  - "inputs-only selectedSnapshotIds store slice (default=all, replace-never-mutate, no persist)"
-  - "merge runs INSIDE the single useEstateView useMemo (single-memo invariant preserved)"
-  - "SnapshotCard MVC-04 meta line: N vCenters + per-vCenter Server labels + correct RVTools version"
-  - "mvc i18n namespace (EN/FR parity)"
-affects: [04-02-stretched, 04-03-allocation, 04-04-dr, 05-eos, 06-trends, 07-exports]
+- phase: 01-foundation
+  provides: parser worker, branded units, Snapshot type, snapshotStore, useEstateView single-memo invariant
+- phase: 02-aggregation
+  provides: buildEstateView / aggregateClusters / perDatastore engine spine
+  provides:
+- "engines/snapshotMerge: row-keyed (viSdkUuid) N-snapshot merge with cluster-collision suffix + vMotion VM dedupe"
+- "buildEstateView now consumes the MERGED bundle (MergedEstate), not a raw Snapshot"
+- "inputs-only selectedSnapshotIds store slice (default=all, replace-never-mutate, no persist)"
+- "merge runs INSIDE the single useEstateView useMemo (single-memo invariant preserved)"
+- "SnapshotCard MVC-04 meta line: N vCenters + per-vCenter Server labels + correct RVTools version"
+- "mvc i18n namespace (EN/FR parity)"
+  affects: [04-02-stretched, 04-03-allocation, 04-04-dr, 05-eos, 06-trends, 07-exports]
 
 tech-stack:
-  added: []
-  patterns:
-    - "Pure snapshotMerge engine (no React/Zustand/Zod); input never mutated; non-colliding rows pass through by reference"
-    - "Two referentially-stable store reads (snapshots Map + selectedSnapshotIds Set); Snapshot[] derived inside the one memo, never in a selector"
+added: []
+patterns:
+- "Pure snapshotMerge engine (no React/Zustand/Zod); input never mutated; non-colliding rows pass through by reference"
+- "Two referentially-stable store reads (snapshots Map + selectedSnapshotIds Set); Snapshot[] derived inside the one memo, never in a selector"
 
 key-files:
-  created:
-    - src/engines/snapshotMerge/vCenterIndex.ts
-    - src/engines/snapshotMerge/mergeSnapshotsToEstate.ts
-    - src/engines/snapshotMerge/index.ts
-    - src/engines/snapshotMerge/vCenterIndex.test.ts
-    - src/engines/snapshotMerge/mergeSnapshotsToEstate.test.ts
-    - src/i18n/locales/en/mvc.json
-    - src/i18n/locales/fr/mvc.json
+created:
+- src/engines/snapshotMerge/vCenterIndex.ts
+- src/engines/snapshotMerge/mergeSnapshotsToEstate.ts
+- src/engines/snapshotMerge/index.ts
+- src/engines/snapshotMerge/vCenterIndex.test.ts
+- src/engines/snapshotMerge/mergeSnapshotsToEstate.test.ts
+- src/i18n/locales/en/mvc.json
+- src/i18n/locales/fr/mvc.json
   modified:
-    - src/engines/parser/adapters/rvtools.ts (Task 1 — columnar vMetaData + faultDomain/Hosts aliases)
-    - src/engines/parser/captureDate.ts (Task 1)
-    - src/types/snapshot.ts (Task 1 — vMetaData as per-vCenter list)
-    - src/engines/aggregation/estateView.ts (buildEstateView signature → MergedEstate)
-    - src/hooks/useEstateView.ts (merge inside the single memo)
-    - src/store/snapshotStore.ts (selectedSnapshotIds slice + selectors)
-    - src/components/SnapshotCard.tsx (MVC-04 meta line; removed redundant version span)
-    - src/i18n/index.ts (mvc namespace)
+- src/engines/parser/adapters/rvtools.ts (Task 1 — columnar vMetaData + faultDomain/Hosts aliases)
+- src/engines/parser/captureDate.ts (Task 1)
+- src/types/snapshot.ts (Task 1 — vMetaData as per-vCenter list)
+- src/engines/aggregation/estateView.ts (buildEstateView signature → MergedEstate)
+- src/hooks/useEstateView.ts (merge inside the single memo)
+- src/store/snapshotStore.ts (selectedSnapshotIds slice + selectors)
+- src/components/SnapshotCard.tsx (MVC-04 meta line; removed redundant version span)
+- src/i18n/index.ts (mvc namespace)
 
 key-decisions:
-  - "Resumed partial execution rather than re-running: Task 1 was pre-committed (50d7bd5); Task 2 code was written-but-uncommitted and verified-correct (14/14, tsc clean) before committing"
-  - "buildEstateView authority for RVTools version moved to the MVC-04 line (correct per-vCenter value from Task 1); the old snapshot-level version span removed (was duplicated + potentially stale '3.11+')"
+- "Resumed partial execution rather than re-running: Task 1 was pre-committed (50d7bd5); Task 2 code was written-but-uncommitted and verified-correct (14/14, tsc clean) before committing"
+- "buildEstateView authority for RVTools version moved to the MVC-04 line (correct per-vCenter value from Task 1); the old snapshot-level version span removed (was duplicated + potentially stale '3.11+')"
 
 patterns-established:
-  - "snapshotMerge: collision keyed on viSdkUuid not filename — N files and one N-vCenter workbook take the identical path"
-  - "Store exposes raw stable inputs; all derivation lives inside useEstateView's single useMemo"
+- "snapshotMerge: collision keyed on viSdkUuid not filename — N files and one N-vCenter workbook take the identical path"
+- "Store exposes raw stable inputs; all derivation lives inside useEstateView's single useMemo"
 
 requirements-completed: [MVC-01, MVC-02, MVC-03, MVC-04]
 
@@ -78,7 +79,7 @@ completed: 2026-05-16
 
 ## Task Commits
 
-1. **Task 1: Parser prerequisites (columnar vMetaData + faultDomain/Hosts + types)** — `50d7bd5` (feat) — *pre-committed before this resume session*
+1. **Task 1: Parser prerequisites (columnar vMetaData + faultDomain/Hosts + types)** — `50d7bd5` (feat) — _pre-committed before this resume session_
 2. **Task 2: snapshotMerge engine + tests** — `4e8b917` (feat); biome-format fixup `a9a1841` (style)
 3. **Task 3: single-useMemo contract + selectedSnapshotIds slice + MVC-04 card + mvc i18n** — `da8d14f` (feat)
 

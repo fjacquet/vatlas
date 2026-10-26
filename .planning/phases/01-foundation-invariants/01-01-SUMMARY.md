@@ -1,83 +1,84 @@
 ---
+
 phase: 01-foundation-invariants
 plan: 01
 subsystem: infra
 tags: [vite, tailwindcss, react, typescript, i18next, biome, vitest, gh-pages]
 
 requires:
-  - phase: 00-bootstrap
-    provides: ".planning/ tree, PROJECT.md, ROADMAP.md, STATE.md"
-provides:
-  - "deployable empty vatlas shell at fjacquet.github.io/vatlas/"
-  - "Tailwind v4 Midnight Executive palette + class-strategy dark variant"
-  - "i18next FR/EN with `vatlas-lang` localStorage detection"
-  - "useTheme hook with `vatlas-theme` localStorage persistence"
-  - "FallbackError component with NO `error.cause`/`error.stack` access"
-  - "UploadZone native HTML5 drag-and-drop (.xlsx only, multi-file)"
-  - "vitest+jsdom test rig that survives Node 26's bare-`localStorage` global"
-  - "GitHub Pages CI workflow: typecheck → lint → test → build → deploy"
-affects: [01-02-privacy-guard, 01-03-units, 01-04-parser, 01-05-snapshot-store]
+- phase: 00-bootstrap
+  provides: ".planning/ tree, PROJECT.md, ROADMAP.md, STATE.md"
+  provides:
+- "deployable empty vatlas shell at fjacquet.github.io/vatlas/"
+- "Tailwind v4 Midnight Executive palette + class-strategy dark variant"
+- "i18next FR/EN with `vatlas-lang` localStorage detection"
+- "useTheme hook with `vatlas-theme` localStorage persistence"
+- "FallbackError component with NO `error.cause`/`error.stack` access"
+- "UploadZone native HTML5 drag-and-drop (.xlsx only, multi-file)"
+- "vitest+jsdom test rig that survives Node 26's bare-`localStorage` global"
+- "GitHub Pages CI workflow: typecheck → lint → test → build → deploy"
+  affects: [01-02-privacy-guard, 01-03-units, 01-04-parser, 01-05-snapshot-store]
 
 tech-stack:
-  added:
-    - "React 19.2.6 + react-dom"
-    - "Vite 8.0.13 + @vitejs/plugin-react 6 + @tailwindcss/vite 4.3"
-    - "TypeScript 5.9.3 (strict, noUncheckedIndexedAccess, verbatimModuleSyntax)"
-    - "Tailwind v4 (CSS-first @theme tokens, @custom-variant dark)"
-    - "Zustand 5.0.13, Zod 4.4.3 (declared; first use in plan 01-05)"
-    - "i18next 26.2.0 + react-i18next 17.0.8 + i18next-browser-languagedetector"
-    - "react-error-boundary 6.1.1, sonner 2.0.7"
-    - "Biome 2.4.15 (lint + format)"
-    - "Vitest 4.1.6 + jsdom 29 + Testing Library"
+added:
+- "React 19.2.6 + react-dom"
+- "Vite 8.0.13 + @vitejs/plugin-react 6 + @tailwindcss/vite 4.3"
+- "TypeScript 5.9.3 (strict, noUncheckedIndexedAccess, verbatimModuleSyntax)"
+- "Tailwind v4 (CSS-first @theme tokens, @custom-variant dark)"
+- "Zustand 5.0.13, Zod 4.4.3 (declared; first use in plan 01-05)"
+- "i18next 26.2.0 + react-i18next 17.0.8 + i18next-browser-languagedetector"
+- "react-error-boundary 6.1.1, sonner 2.0.7"
+- "Biome 2.4.15 (lint + format)"
+- "Vitest 4.1.6 + jsdom 29 + Testing Library"
   patterns:
-    - "Class-strategy dark mode via `@custom-variant dark (&:where(.dark, .dark *))`"
-    - "Locale detection: querystring → localStorage 'vatlas-lang' → navigator → 'fr' fallback"
-    - "FOUC theme-init: external `public/theme-init.js` reads localStorage and sets <html class='dark'> before paint"
-    - "ErrorBoundary fallback reads ONLY `error.message`/`error.name` (never `cause`/`stack`/`String(error)`)"
-    - "Native HTML5 drag-drop (no react-dropzone); RVTools-only `.xlsx` accept regex"
-    - "Function-form Rollup manualChunks (keeps Rollup discriminated union happy under tsc -b)"
-    - "Plan 02 privacy-guard import slot reserved as first non-trivial line in `src/main.tsx`"
+- "Class-strategy dark mode via `@custom-variant dark (&:where(.dark, .dark *))`"
+- "Locale detection: querystring → localStorage 'vatlas-lang' → navigator → 'fr' fallback"
+- "FOUC theme-init: external `public/theme-init.js` reads localStorage and sets <html class='dark'> before paint"
+- "ErrorBoundary fallback reads ONLY `error.message`/`error.name` (never `cause`/`stack`/`String(error)`)"
+- "Native HTML5 drag-drop (no react-dropzone); RVTools-only `.xlsx` accept regex"
+- "Function-form Rollup manualChunks (keeps Rollup discriminated union happy under tsc -b)"
+- "Plan 02 privacy-guard import slot reserved as first non-trivial line in `src/main.tsx`"
 
 key-files:
-  created:
-    - "package.json (dependencies pinned, scripts: dev/build/preview/typecheck/lint/test/test:run/test:coverage)"
-    - "vite.config.ts (base: '/vatlas/', path aliases @, @engines, @components, @store, @types, @utils, @hooks)"
-    - "vitest.config.ts (jsdom env, url: 'http://localhost/', coverage @ 75% on engines/utils/units/privacy)"
-    - "tsconfig.app.json (strict + WebWorker lib)"
-    - "tsconfig.node.json, tsconfig.json"
-    - "biome.json (noConsole=error, allow=['warn','error']; turned off for tests + scripts)"
-    - ".gitignore, .dockerignore, osv-scanner.toml"
-    - "index.html (vatlas title, FOUC theme-init script)"
-    - "public/theme-init.js (vatlas-theme localStorage key)"
-    - "public/favicon.svg"
-    - ".github/workflows/static.yml (Node 24, npm audit, OSV-Scanner, typecheck/lint/test/build, SBOM, deploy)"
-    - "src/main.tsx (StrictMode + createRoot; comment slot for Plan 02 fetch guard)"
-    - "src/App.tsx (Header + UploadZone + Toaster + ErrorBoundary)"
-    - "src/index.css (Tailwind v4, Midnight Executive @theme)"
-    - "src/i18n/index.ts (common + upload namespaces, vatlas-lang)"
-    - "src/i18n/locales/{en,fr}/common.json (vatlas branding, tagline)"
-    - "src/i18n/locales/{en,fr}/upload.json (RVTools-only copy, snapshots group for Plan 05)"
-    - "src/hooks/useTheme.ts (3-state, vatlas-theme key, matchMedia subscription)"
-    - "src/hooks/useTheme.test.ts (6 unit tests)"
-    - "src/components/ThemeToggle.tsx, LanguageToggle.tsx, UploadZone.tsx, FallbackError.tsx"
-    - "src/test/setup.ts (jest-dom, i18n init, matchMedia stub, localStorage forwarding)"
+created:
+- "package.json (dependencies pinned, scripts: dev/build/preview/typecheck/lint/test/test:run/test:coverage)"
+- "vite.config.ts (base: '/vatlas/', path aliases @, @engines, @components, @store, @types, @utils, @hooks)"
+- "vitest.config.ts (jsdom env, url: 'http://localhost/', coverage @ 75% on engines/utils/units/privacy)"
+- "tsconfig.app.json (strict + WebWorker lib)"
+- "tsconfig.node.json, tsconfig.json"
+- "biome.json (noConsole=error, allow=['warn','error']; turned off for tests + scripts)"
+- ".gitignore, .dockerignore, osv-scanner.toml"
+- "index.html (vatlas title, FOUC theme-init script)"
+- "public/theme-init.js (vatlas-theme localStorage key)"
+- "public/favicon.svg"
+- ".github/workflows/static.yml (Node 24, npm audit, OSV-Scanner, typecheck/lint/test/build, SBOM, deploy)"
+- "src/main.tsx (StrictMode + createRoot; comment slot for Plan 02 fetch guard)"
+- "src/App.tsx (Header + UploadZone + Toaster + ErrorBoundary)"
+- "src/index.css (Tailwind v4, Midnight Executive @theme)"
+- "src/i18n/index.ts (common + upload namespaces, vatlas-lang)"
+- "src/i18n/locales/{en,fr}/common.json (vatlas branding, tagline)"
+- "src/i18n/locales/{en,fr}/upload.json (RVTools-only copy, snapshots group for Plan 05)"
+- "src/hooks/useTheme.ts (3-state, vatlas-theme key, matchMedia subscription)"
+- "src/hooks/useTheme.test.ts (6 unit tests)"
+- "src/components/ThemeToggle.tsx, LanguageToggle.tsx, UploadZone.tsx, FallbackError.tsx"
+- "src/test/setup.ts (jest-dom, i18n init, matchMedia stub, localStorage forwarding)"
   modified: []
 
 key-decisions:
-  - "react-i18next 17.0.8 — Q1 fallback to 16 NOT needed; TS 5.9 strict accepted v17 cleanly on first install."
-  - "i18next 26.2.0 (RESEARCH suggested 26.1.0; bumped to 26.2.0 to match react-i18next 17 peer range)."
-  - "tsconfig.app.json adds 'WebWorker' to `lib` so Plan 04's parser.worker.ts typechecks without per-file `/// <reference>` pragmas."
-  - "Tailwind 4.3.0 + @tailwindcss/vite 4.3.0 in lockstep; @theme block in src/index.css ported verbatim from vsizer."
-  - "Vitest config sets `environmentOptions.jsdom.url = 'http://localhost/'` — without this jsdom withholds localStorage from opaque origins."
-  - "src/test/setup.ts forwards `globalThis.localStorage` to `globalThis.jsdom.window.localStorage` because Vitest 4's `populateGlobal` key list excludes localStorage/sessionStorage, and Node 26's bare `localStorage` global is unset."
-  - "vsizer's `manualChunks` `vendor-pptx` entry dropped (pptxgenjs not in Phase 1)."
-  - "FallbackError hardened beyond vsizer's original: reads `error.name` + `error.message` only; vsizer used `String(error)` which can leak `error.cause`."
+- "react-i18next 17.0.8 — Q1 fallback to 16 NOT needed; TS 5.9 strict accepted v17 cleanly on first install."
+- "i18next 26.2.0 (RESEARCH suggested 26.1.0; bumped to 26.2.0 to match react-i18next 17 peer range)."
+- "tsconfig.app.json adds 'WebWorker' to `lib` so Plan 04's parser.worker.ts typechecks without per-file `/// <reference>` pragmas."
+- "Tailwind 4.3.0 + @tailwindcss/vite 4.3.0 in lockstep; @theme block in src/index.css ported verbatim from vsizer."
+- "Vitest config sets `environmentOptions.jsdom.url = 'http://localhost/'` — without this jsdom withholds localStorage from opaque origins."
+- "src/test/setup.ts forwards `globalThis.localStorage` to `globalThis.jsdom.window.localStorage` because Vitest 4's `populateGlobal` key list excludes localStorage/sessionStorage, and Node 26's bare `localStorage` global is unset."
+- "vsizer's `manualChunks` `vendor-pptx` entry dropped (pptxgenjs not in Phase 1)."
+- "FallbackError hardened beyond vsizer's original: reads `error.name` + `error.message` only; vsizer used `String(error)` which can leak `error.cause`."
 
 patterns-established:
-  - "Per-plan scope discipline: 01-01 ships only the deployable shell; xlsx pin lands in 01-04, privacy guard in 01-02, units module in 01-03."
-  - "Class-strategy dark mode (NOT data-theme) chosen up-front — switching strategies later would mean rewriting every component."
-  - "Locale + theme persistence keys (`vatlas-lang`, `vatlas-theme`) are the ONLY allowed localStorage writes in Phase 1; dataset rows live in memory only."
-  - "Stub callbacks for cross-plan handoffs are `console.warn`s with descriptive prefixes (grep-friendly when Plan 05 wires them up)."
+- "Per-plan scope discipline: 01-01 ships only the deployable shell; xlsx pin lands in 01-04, privacy guard in 01-02, units module in 01-03."
+- "Class-strategy dark mode (NOT data-theme) chosen up-front — switching strategies later would mean rewriting every component."
+- "Locale + theme persistence keys (`vatlas-lang`, `vatlas-theme`) are the ONLY allowed localStorage writes in Phase 1; dataset rows live in memory only."
+- "Stub callbacks for cross-plan handoffs are `console.warn`s with descriptive prefixes (grep-friendly when Plan 05 wires them up)."
 
 requirements-completed: [FND-01, FND-02, FND-03, FND-04]
 
@@ -108,7 +109,7 @@ completed: 2026-05-15
 ## Task Commits
 
 1. **Task 1: Project root configs + dependencies** — `510948c` (chore) — `package.json`, `vite.config.ts`, `vitest.config.ts`, `tsconfig.{json,app.json,node.json}`, `biome.json`, `.gitignore`, `.dockerignore`, `osv-scanner.toml`, `index.html`, `public/theme-init.js`, `public/favicon.svg`. Verification: `npm install` succeeded, no forbidden deps, `npm run typecheck` clean.
-2. **Task 2: i18n + theme + entry-point shell** — `9fb12cf` (feat) — `src/index.css`, `src/i18n/`, `src/hooks/useTheme.{ts,test.ts}`, `src/components/{ThemeToggle,LanguageToggle,FallbackError,UploadZone}.tsx`, `src/test/setup.ts`, `src/main.tsx`, `src/App.tsx`, `vitest.config.ts` (Rule 3 fix). Verification: 6/6 useTheme tests pass, typecheck + lint exit 0. *(UploadZone.tsx — nominally Task 3 — was committed here under the broader `git add src/`; the per-task boundary is recorded in this Summary instead.)*
+2. **Task 2: i18n + theme + entry-point shell** — `9fb12cf` (feat) — `src/index.css`, `src/i18n/`, `src/hooks/useTheme.{ts,test.ts}`, `src/components/{ThemeToggle,LanguageToggle,FallbackError,UploadZone}.tsx`, `src/test/setup.ts`, `src/main.tsx`, `src/App.tsx`, `vitest.config.ts` (Rule 3 fix). Verification: 6/6 useTheme tests pass, typecheck + lint exit 0. _(UploadZone.tsx — nominally Task 3 — was committed here under the broader `git add src/`; the per-task boundary is recorded in this Summary instead.)_
 3. **Task 3: CI workflow** — `3a559b3` (ci) — `.github/workflows/static.yml` only (UploadZone.tsx already landed in 9fb12cf). Verification: `npm run build` produces `/vatlas/`-prefixed assets in `dist/index.html`.
 
 ## Files Created/Modified
@@ -234,5 +235,6 @@ These are intentional cross-plan handoffs, not regressions.
 No blockers carried forward.
 
 ---
-*Phase: 01-foundation-invariants*
-*Completed: 2026-05-15*
+
+_Phase: 01-foundation-invariants_
+_Completed: 2026-05-15_
