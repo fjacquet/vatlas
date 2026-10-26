@@ -1,4 +1,5 @@
 ---
+
 phase: 3
 slug: inventory-navigation
 status: approved
@@ -18,13 +19,13 @@ created: 2026-05-16
 
 ## Design System
 
-| Property | Value |
-|----------|-------|
-| Tool | none |
-| Preset | not applicable |
-| Component library | none (manual design system, Tailwind v4 `@theme`) |
-| Icon library | inherited from Phase 1/2 (lucide, chevron + table affordances only) |
-| Font | inherited from Phase 2 (system UI stack) |
+| Property          | Value                                                               |
+| ----------------- | ------------------------------------------------------------------- |
+| Tool              | none                                                                |
+| Preset            | not applicable                                                      |
+| Component library | none (manual design system, Tailwind v4 `@theme`)                   |
+| Icon library      | inherited from Phase 1/2 (lucide, chevron + table affordances only) |
+| Font              | inherited from Phase 2 (system UI stack)                            |
 
 Manual design system: Tailwind v4 `@theme` tokens. TanStack Table and TanStack Virtual are npm libraries — they are NOT a component registry and require no registry safety gate.
 
@@ -34,15 +35,15 @@ Manual design system: Tailwind v4 `@theme` tokens. TanStack Table and TanStack V
 
 Declared values (must be multiples of 4):
 
-| Token | Value | Usage |
-|-------|-------|-------|
-| xs | 4px | Icon gaps, chevron-to-label gap, count-badge padding |
-| sm | 8px | Tree row vertical padding, per-level indentation step, cell padding |
-| md | 16px | Default element spacing, toolbar gaps, pane padding |
-| lg | 24px | Section padding, header padding |
-| xl | 32px | Layout gaps (tree pane ↔ table pane) |
-| 2xl | 48px | Major section breaks |
-| 3xl | 64px | Page-level spacing |
+| Token | Value | Usage                                                               |
+| ----- | ----- | ------------------------------------------------------------------- |
+| xs    | 4px   | Icon gaps, chevron-to-label gap, count-badge padding                |
+| sm    | 8px   | Tree row vertical padding, per-level indentation step, cell padding |
+| md    | 16px  | Default element spacing, toolbar gaps, pane padding                 |
+| lg    | 24px  | Section padding, header padding                                     |
+| xl    | 32px  | Layout gaps (tree pane ↔ table pane)                                |
+| 2xl   | 48px  | Major section breaks                                                |
+| 3xl   | 64px  | Page-level spacing                                                  |
 
 Tree indentation = 16px (md) per depth level. Exceptions: none.
 
@@ -52,12 +53,12 @@ Tree indentation = 16px (md) per depth level. Exceptions: none.
 
 EXACTLY 4 sizes, EXACTLY 2 weights. (Supersedes the rejected 02-UI-SPEC block of 5 sizes / 3 weights — that block must NOT recur.)
 
-| Role | Size | Weight | Line Height |
-|------|------|--------|-------------|
-| Caption | 12px | 400 | 1.5 |
-| Body | 14px | 400 | 1.5 |
-| Label | 16px | 600 | 1.5 |
-| Heading | 20px | 600 | 1.2 |
+| Role    | Size | Weight | Line Height |
+| ------- | ---- | ------ | ----------- |
+| Caption | 12px | 400    | 1.5         |
+| Body    | 14px | 400    | 1.5         |
+| Label   | 16px | 600    | 1.5         |
+| Heading | 20px | 600    | 1.2         |
 
 Label role stays at weight 600 (`.label` utility). Table cells use Body (14/400); table headers and tree node labels use Label (16/600 via `.label`); the toolbar object-type/section title uses Heading.
 
@@ -67,12 +68,12 @@ Label role stays at weight 600 (`.label` utility). Table cells use Body (14/400)
 
 60/30/10 split, stated explicitly:
 
-| Role | Value | Usage |
-|------|-------|-------|
-| Dominant (60%) | Midnight Executive base surface (inherited Phase-2 token) | App background, table body, tree pane background |
-| Secondary (30%) | Midnight Executive panel (inherited `.panel`) | Toolbar, tree pane container, sticky table header, sticky first column, column-picker popover |
-| Accent (10%) | Midnight Executive gold (inherited) | See reserved list below |
-| Destructive | Midnight Executive destructive (inherited) | Listed for token completeness — **unused in Phase 3** |
+| Role            | Value                                                     | Usage                                                                                         |
+| --------------- | --------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| Dominant (60%)  | Midnight Executive base surface (inherited Phase-2 token) | App background, table body, tree pane background                                              |
+| Secondary (30%) | Midnight Executive panel (inherited `.panel`)             | Toolbar, tree pane container, sticky table header, sticky first column, column-picker popover |
+| Accent (10%)    | Midnight Executive gold (inherited)                       | See reserved list below                                                                       |
+| Destructive     | Midnight Executive destructive (inherited)                | Listed for token completeness — **unused in Phase 3**                                         |
 
 Accent reserved for (closed list, nothing else):
 
@@ -87,13 +88,13 @@ Destructive note: Phase 3 tree and tables are strictly read-only. There are no d
 
 ## Copywriting Contract
 
-| Element | Copy |
-|---------|------|
-| Primary CTA | "Export CSV" (toolbar button; i18n key `inventory.export.csv`) |
-| Empty state heading | No snapshot loaded |
-| Empty state body | Load a vCenter snapshot from the sidebar to browse the inventory. |
-| Error state | Snapshot could not be parsed. Reload the snapshot or pick another one from the sidebar. |
-| Destructive confirmation | not applicable — no destructive actions in Phase 3 |
+| Element                  | Copy                                                                                    |
+| ------------------------ | --------------------------------------------------------------------------------------- |
+| Primary CTA              | "Export CSV" (toolbar button; i18n key `inventory.export.csv`)                          |
+| Empty state heading      | No snapshot loaded                                                                      |
+| Empty state body         | Load a vCenter snapshot from the sidebar to browse the inventory.                       |
+| Error state              | Snapshot could not be parsed. Reload the snapshot or pick another one from the sidebar. |
+| Destructive confirmation | not applicable — no destructive actions in Phase 3                                      |
 
 State copy detail (all FR+EN, no editorial verbs, no pre-formatted numbers):
 
@@ -176,11 +177,11 @@ inventory.col.<field>            (per-column header labels, VM/ESX/Datastore)
 
 ## Registry Safety
 
-| Registry | Blocks Used | Safety Gate |
-|----------|-------------|-------------|
-| none (manual Tailwind v4 `@theme` design system) | none | not applicable |
-| shadcn official | none — shadcn not initialized | not applicable |
-| third-party | none | not applicable |
+| Registry                                         | Blocks Used                   | Safety Gate    |
+| ------------------------------------------------ | ----------------------------- | -------------- |
+| none (manual Tailwind v4 `@theme` design system) | none                          | not applicable |
+| shadcn official                                  | none — shadcn not initialized | not applicable |
+| third-party                                      | none                          | not applicable |
 
 TanStack Table / TanStack Virtual are npm dependencies, not component-registry blocks; no `shadcn view` vetting applies.
 

@@ -39,16 +39,16 @@ The defining product invariant — enforced in code, not just promised: a runtim
 
 ## Documentation
 
-| Doc | What it covers |
-|-----|----------------|
-| [docs/PRD.md](docs/PRD.md) | Product requirements and scope |
-| [docs/USER-GUIDE.md](docs/USER-GUIDE.md) | How to use vatlas as an end user |
-| [docs/GETTING-STARTED.md](docs/GETTING-STARTED.md) | Prerequisites, install, first run |
-| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Engine spine, store, hook, module map |
-| [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) | Build scripts, code style, conventions |
-| [docs/TESTING.md](docs/TESTING.md) | Test framework, running tests, coverage |
-| [docs/CONFIGURATION.md](docs/CONFIGURATION.md) | Configuration and supply-chain gates |
-| [docs/adr/](docs/adr/) | Architecture decision records |
+| Doc                                                | What it covers                          |
+| -------------------------------------------------- | --------------------------------------- |
+| [docs/PRD.md](docs/PRD.md)                         | Product requirements and scope          |
+| [docs/USER-GUIDE.md](docs/USER-GUIDE.md)           | How to use vatlas as an end user        |
+| [docs/GETTING-STARTED.md](docs/GETTING-STARTED.md) | Prerequisites, install, first run       |
+| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)       | Engine spine, store, hook, module map   |
+| [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md)         | Build scripts, code style, conventions  |
+| [docs/TESTING.md](docs/TESTING.md)                 | Test framework, running tests, coverage |
+| [docs/CONFIGURATION.md](docs/CONFIGURATION.md)     | Configuration and supply-chain gates    |
+| [docs/adr/](docs/adr/)                             | Architecture decision records           |
 
 ## Status
 

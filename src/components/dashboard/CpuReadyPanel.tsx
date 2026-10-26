@@ -39,7 +39,7 @@ export function CpuReadyPanel({ globals, clusters }: CpuReadyPanelProps) {
     .filter((v): v is number => v !== null)
 
   const meanVal = means.length > 0 ? means.reduce((a, b) => a + b, 0) / means.length : null
-  const maxVal = maxes.length > 0 ? maxes.reduce((a, b) => (b > a ? b : a), -Infinity) : null
+  const maxVal = maxes.length > 0 ? Math.max(...maxes) : null
 
   const notReported = (
     <span className="text-xs text-slate-500 dark:text-slate-400">{t('cpuReadyNotReported')}</span>

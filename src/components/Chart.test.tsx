@@ -47,6 +47,7 @@ describe('<Chart>', () => {
 
   it('memo comparator skips re-render when option ref + props are unchanged', () => {
     const renderSpy = vi.fn()
+    // biome-ignore lint/correctness/noComponentHookFactories: Probe counts renders of its own parent in this test
     function Probe({ option }: { option: typeof someBarOption }) {
       renderSpy()
       return <Chart option={option} />

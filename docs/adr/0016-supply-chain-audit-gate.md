@@ -20,7 +20,7 @@ build-failing gates rather than convention.
 
 1. **Supply-chain gate** — `node scripts/check-supply-chain.mjs`
    (`npm run check:supply-chain`, also the `prebuild` hook and a CI step that
-   runs *before* `npm ci`) fails the build on any forbidden telemetry package
+   runs _before_ `npm ci`) fails the build on any forbidden telemetry package
    in `dependencies` or `devDependencies` (`@sentry/*`, `posthog*`,
    `@amplitude/*`, `mixpanel*`, `@datadog/*`, `logrocket*`, `@bugsnag/*`,
    `@segment/*`, `fullstory*`, `@hotjar/*`, service-worker libraries, and
@@ -59,14 +59,14 @@ build-failing gates rather than convention.
 
 The OSV LOW+ gate is waived in exactly two situations: the OSV.dev record
 over-matches a version we are demonstrably not running, or no patched version
-exists anywhere on the registry *and* the vector is unreachable in this app.
+exists anywhere on the registry _and_ the vector is unreachable in this app.
 Each waiver lives in `osv-scanner.toml` and MUST mirror an entry here (same
 `ignoreUntil`); drift is a process bug. Current waivers:
 
-| Advisory | Package | Expires | Why waived |
-|----------|---------|---------|-----------|
-| GHSA-4r6h-8v6p-xvw6 | xlsx | 2026-11-13 | SheetJS prototype pollution, fixed < 0.19.3; we ship 0.20.3 (CDN tarball, ADR-0002). OSV range `introduced:0`/no-fixed over-matches all versions. |
-| GHSA-5pgg-2g8v-p4x9 | xlsx | 2026-11-13 | SheetJS ReDoS, fixed < 0.20.2; we ship 0.20.3. Same OSV no-fixed-event over-match. |
+| Advisory            | Package | Expires    | Why waived                                                                                                                                        |
+| ------------------- | ------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GHSA-4r6h-8v6p-xvw6 | xlsx    | 2026-11-13 | SheetJS prototype pollution, fixed < 0.19.3; we ship 0.20.3 (CDN tarball, ADR-0002). OSV range `introduced:0`/no-fixed over-matches all versions. |
+| GHSA-5pgg-2g8v-p4x9 | xlsx    | 2026-11-13 | SheetJS ReDoS, fixed < 0.20.2; we ship 0.20.3. Same OSV no-fixed-event over-match.                                                                |
 
 MAL-2026-4153 (size-sensor) was withdrawn on 2026-07-26: OSV replaced the
 `introduced: 0`/no-fixed range with an explicit versions list
@@ -84,7 +84,7 @@ executes them, so an advisory against one does not describe exposure in the
 delivered artifact.
 
 The exemption is open-ended by design and carries no `ignoreUntil`. It
-supersedes the per-advisory rule above *for this class of finding only*.
+supersedes the per-advisory rule above _for this class of finding only_.
 Rationale: that rule meant tracking patch bumps on transitive tooling outside
 our control (`brace-expansion`, `fast-uri`, `postcss`), which held the required
 `security / osv-scan` check red across the fleet and blocked unrelated work —

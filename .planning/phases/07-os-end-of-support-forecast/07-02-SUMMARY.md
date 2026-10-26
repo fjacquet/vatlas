@@ -1,47 +1,48 @@
 ---
+
 phase: 07-os-end-of-support-forecast
 plan: 02
 subsystem: testing
 tags: [eos, normalizer, esxi, lifecycle-bucketing, tdd, pure-engine]
 
 requires:
-  - phase: 07-01
-    provides: EosCatalogue type + parse-once boundary (passed as a parameter)
-provides:
-  - normalizeOs — pure RVTools-OS → {slug,version}|null regex bank (composes classifyOsFamily)
-  - classifyEsxi — pure vhost.esxVersion → major EOL; patch always null sentinel
-  - buildEosProjection — pure disjoint partition + reconciliation + rawUnknown + esxi split
-  - REAL_OS_STRINGS / REAL_ESX_VERSIONS harvested fixture (66 distinct strings)
-  - EosProjection / EosRow / EsxiHostRow / EosBucketKey types
-affects: [07-03 wires buildEosProjection into buildEstateView + the EosView presenter]
+- phase: 07-01
+  provides: EosCatalogue type + parse-once boundary (passed as a parameter)
+  provides:
+- normalizeOs — pure RVTools-OS → {slug,version}|null regex bank (composes classifyOsFamily)
+- classifyEsxi — pure vhost.esxVersion → major EOL; patch always null sentinel
+- buildEosProjection — pure disjoint partition + reconciliation + rawUnknown + esxi split
+- REAL_OS_STRINGS / REAL_ESX_VERSIONS harvested fixture (66 distinct strings)
+- EosProjection / EosRow / EsxiHostRow / EosBucketKey types
+  affects: [07-03 wires buildEosProjection into buildEstateView + the EosView presenter]
 
 tech-stack:
-  added: []
-  patterns:
-    - "Pure Zod-free engines receive the typed catalogue + injected today as parameters"
-    - "Disjoint partition is the reconciliation source; cumulative is a derived display overlay"
+added: []
+patterns:
+- "Pure Zod-free engines receive the typed catalogue + injected today as parameters"
+- "Disjoint partition is the reconciliation source; cumulative is a derived display overlay"
 
 key-files:
-  created:
-    - src/engines/eos/fixtures/real-os-strings.ts
-    - src/engines/eos/normalizeOs.ts
-    - src/engines/eos/normalizeOs.test.ts
-    - src/engines/eos/classifyEsxi.ts
-    - src/engines/eos/classifyEsxi.test.ts
-    - src/engines/eos/bucketEos.ts
-    - src/engines/eos/bucketEos.test.ts
+created:
+- src/engines/eos/fixtures/real-os-strings.ts
+- src/engines/eos/normalizeOs.ts
+- src/engines/eos/normalizeOs.test.ts
+- src/engines/eos/classifyEsxi.ts
+- src/engines/eos/classifyEsxi.test.ts
+- src/engines/eos/bucketEos.ts
+- src/engines/eos/bucketEos.test.ts
   modified: []
 
 key-decisions:
-  - "D-06/D-10: disjoint 7-way partition reconciles exactly to vinfo.length; unknown is a first-class peer"
-  - "D-07: today is an injected Date param; bucketer is clock-free (Date.UTC/Date.parse only)"
-  - "D-12: normalizeOs whitespace-normalizes for matching only; raw string preserved verbatim by the caller"
-  - "D-09b: ESXi hosts classified into a separate esxi sub-structure; host counts never summed into the VM partition"
-  - "EOS-05/A4: <5% unknown is occurrence-weighted (user-confirmed); per-distinct fixture asserts the honest unknown long-tail partition"
-  - "Multi-version (CentOS 4/5/6/7) + versionless + nested-ESXi-guest strings → first-class unknown, never force-fit (Pitfall 3/6, D-00)"
+- "D-06/D-10: disjoint 7-way partition reconciles exactly to vinfo.length; unknown is a first-class peer"
+- "D-07: today is an injected Date param; bucketer is clock-free (Date.UTC/Date.parse only)"
+- "D-12: normalizeOs whitespace-normalizes for matching only; raw string preserved verbatim by the caller"
+- "D-09b: ESXi hosts classified into a separate esxi sub-structure; host counts never summed into the VM partition"
+- "EOS-05/A4: <5% unknown is occurrence-weighted (user-confirmed); per-distinct fixture asserts the honest unknown long-tail partition"
+- "Multi-version (CentOS 4/5/6/7) + versionless + nested-ESXi-guest strings → first-class unknown, never force-fit (Pitfall 3/6, D-00)"
 
 patterns-established:
-  - "Pattern: EOS engines compose osFamily.ts (DRY) and stay pure/Zod-free, catalogue passed in"
+- "Pattern: EOS engines compose osFamily.ts (DRY) and stay pure/Zod-free, catalogue passed in"
 
 requirements-completed: [EOS-01, EOS-02, EOS-04, EOS-05]
 

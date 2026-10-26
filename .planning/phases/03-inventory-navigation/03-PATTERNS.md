@@ -10,26 +10,26 @@
 
 ## File Classification
 
-| New/Modified File | Role | Data Flow | Closest Analog | Match Quality |
-|-------------------|------|-----------|----------------|---------------|
-| `src/hooks/useEstateView.ts` (MODIFY) | hook | transform | itself (line 17-20) | exact (extend, don't add memo) |
-| `src/engines/aggregation/estateView.ts` (MODIFY) | engine/util | transform (projection) | itself (line 29-68) | exact |
-| `src/types/estate.ts` (MODIFY) | type | — | `EsxAggregate` (line 237-254) | exact |
-| `src/utils/csv.ts` (NEW) | util | transform | `src/utils/format.ts` (pure-fn idiom) | role-match (logic = RESEARCH §Pattern 3) |
-| `src/utils/oneLine.ts` (NEW) | util | transform | `src/utils/format.ts` | role-match |
-| `src/components/inventory/DataTable.tsx` (NEW) | component | request-response (UI state) | RESEARCH §Pattern 1 + §virtualised-rows | NO in-repo analog |
-| `src/components/inventory/InventoryTree.tsx` (NEW) | component | event-driven (expand) | RESEARCH §Pattern 2 | NO in-repo analog |
-| `src/components/inventory/columns/{vm,esx,datastore}Columns.ts` (NEW) | util/config | — | `src/types/estate.ts` field lists | role-match (shape only) |
-| `src/components/inventory/{Vm,Esx,Datastore}Table.tsx` (NEW) | component | CRUD-read | `GlobalDashboard.tsx` (props-from-view) | role-match |
-| `src/components/inventory/ColumnPicker.tsx` (NEW) | component | event-driven | `ThemeToggle.tsx` (a11y/button idiom) | partial |
-| `src/components/inventory/InventoryView.tsx` (NEW) | component | request-response | `GlobalDashboard.tsx` (line 48-87) | exact (shell pattern) |
-| `src/components/ViewToggle.tsx` (NEW) | component | event-driven | `AccountingModeToggle.tsx` (line 32-83) | **exact** |
-| `src/App.tsx` (MODIFY) | component | — | itself (line 28-37) | exact |
-| `src/i18n/index.ts` (MODIFY) | i18n | — | itself (line 24-38) | exact |
-| `src/i18n/locales/{en,fr}/inventory.json` (NEW) | i18n | — | `locales/en/dashboard.json` | exact |
-| `scripts/generate-inventory-10k.mjs` (NEW) | script | — | `scripts/generate-mib-canary.mjs` | exact |
-| `scripts/check-bundle-size.mjs` (MODIFY) | infra | — | itself (line 47-85) | exact |
-| `*.test.tsx` / `*.test.ts` (NEW) | test | — | `AccountingModeToggle.test.tsx`, `estateView.test.ts` | exact |
+| New/Modified File                                                     | Role        | Data Flow                   | Closest Analog                                        | Match Quality                            |
+| --------------------------------------------------------------------- | ----------- | --------------------------- | ----------------------------------------------------- | ---------------------------------------- |
+| `src/hooks/useEstateView.ts` (MODIFY)                                 | hook        | transform                   | itself (line 17-20)                                   | exact (extend, don't add memo)           |
+| `src/engines/aggregation/estateView.ts` (MODIFY)                      | engine/util | transform (projection)      | itself (line 29-68)                                   | exact                                    |
+| `src/types/estate.ts` (MODIFY)                                        | type        | —                           | `EsxAggregate` (line 237-254)                         | exact                                    |
+| `src/utils/csv.ts` (NEW)                                              | util        | transform                   | `src/utils/format.ts` (pure-fn idiom)                 | role-match (logic = RESEARCH §Pattern 3) |
+| `src/utils/oneLine.ts` (NEW)                                          | util        | transform                   | `src/utils/format.ts`                                 | role-match                               |
+| `src/components/inventory/DataTable.tsx` (NEW)                        | component   | request-response (UI state) | RESEARCH §Pattern 1 + §virtualised-rows               | NO in-repo analog                        |
+| `src/components/inventory/InventoryTree.tsx` (NEW)                    | component   | event-driven (expand)       | RESEARCH §Pattern 2                                   | NO in-repo analog                        |
+| `src/components/inventory/columns/{vm,esx,datastore}Columns.ts` (NEW) | util/config | —                           | `src/types/estate.ts` field lists                     | role-match (shape only)                  |
+| `src/components/inventory/{Vm,Esx,Datastore}Table.tsx` (NEW)          | component   | CRUD-read                   | `GlobalDashboard.tsx` (props-from-view)               | role-match                               |
+| `src/components/inventory/ColumnPicker.tsx` (NEW)                     | component   | event-driven                | `ThemeToggle.tsx` (a11y/button idiom)                 | partial                                  |
+| `src/components/inventory/InventoryView.tsx` (NEW)                    | component   | request-response            | `GlobalDashboard.tsx` (line 48-87)                    | exact (shell pattern)                    |
+| `src/components/ViewToggle.tsx` (NEW)                                 | component   | event-driven                | `AccountingModeToggle.tsx` (line 32-83)               | **exact**                                |
+| `src/App.tsx` (MODIFY)                                                | component   | —                           | itself (line 28-37)                                   | exact                                    |
+| `src/i18n/index.ts` (MODIFY)                                          | i18n        | —                           | itself (line 24-38)                                   | exact                                    |
+| `src/i18n/locales/{en,fr}/inventory.json` (NEW)                       | i18n        | —                           | `locales/en/dashboard.json`                           | exact                                    |
+| `scripts/generate-inventory-10k.mjs` (NEW)                            | script      | —                           | `scripts/generate-mib-canary.mjs`                     | exact                                    |
+| `scripts/check-bundle-size.mjs` (MODIFY)                              | infra       | —                           | itself (line 47-85)                                   | exact                                    |
+| `*.test.tsx` / `*.test.ts` (NEW)                                      | test        | —                           | `AccountingModeToggle.test.tsx`, `estateView.test.ts` | exact                                    |
 
 ---
 
@@ -108,8 +108,8 @@ export interface EsxAggregate {
 
 ```typescript
 function csvCell(v: unknown): string {
-  let s = v == null ? '' : String(v)            // raw value, NO locale formatting
-  if (/^[=+\-@]/.test(s)) s = `'${s}`            // CSV-injection guard (RESEARCH Security)
+  let s = v == null ? '' : String(v) // raw value, NO locale formatting
+  if (/^[=+\-@]/.test(s)) s = `'${s}` // CSV-injection guard (RESEARCH Security)
   return /[",\n\r]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s
 }
 export function toCsv(headers: string[], rows: string[][]): string {
@@ -143,7 +143,8 @@ export const oneLine = (s: string): string => s.replace(/\s+/g, ' ').trim()
 
 ```typescript
 const table = useReactTable({
-  data, columns,
+  data,
+  columns,
   state: { sorting, columnFilters, globalFilter, columnVisibility },
   onSortingChange: setSorting,
   onColumnVisibilityChange: setColumnVisibility,
@@ -154,8 +155,10 @@ const table = useReactTable({
 })
 const { rows } = table.getRowModel()
 const rowVirtualizer = useVirtualizer({
-  count: rows.length, getScrollElement: () => scrollRef.current,
-  estimateSize: () => 36, overscan: 12,
+  count: rows.length,
+  getScrollElement: () => scrollRef.current,
+  estimateSize: () => 36,
+  overscan: 12,
 })
 ```
 
@@ -187,7 +190,7 @@ const rowVirtualizer = useVirtualizer({
 
 - Tree hierarchy = synthetic vCenter root (`Snapshot.vCenterLabel`) → Cluster → ESX → VM. NO Datacenter level (RESEARCH A1 / Open Q2; UI-SPEC §Inventory layout). Root label key `inventory.tree.root`.
 - DO NOT use TanStack `getExpandedRowModel()` — it materializes the full subtree (RESEARCH Anti-Pattern, line 234; verified TanStack-docs claim line 201).
-- `buildVisibleRows` is render-derived presentation state, NOT aggregation — a local `useMemo` keyed on `expanded` is acceptable render-memoization (RESEARCH line 199) OR a plain call; it does NOT violate the one-useMemo rule (that rule is about *aggregation*).
+- `buildVisibleRows` is render-derived presentation state, NOT aggregation — a local `useMemo` keyed on `expanded` is acceptable render-memoization (RESEARCH line 199) OR a plain call; it does NOT violate the one-useMemo rule (that rule is about _aggregation_).
 - Chevron rotates 90°, `aria-expanded`; count badge Caption size on secondary surface, never em-dash (count always known, 0 shows `0`) — UI-SPEC §Virtualised tree.
 - Selecting a node scopes the active table (root = unscoped); selected row uses accent indicator (UI-SPEC §Inventory layout).
 - Never hold a parallel tree-of-objects; flat array derived on demand (RESEARCH Critical-5 memory budget, line 207).
@@ -275,7 +278,7 @@ const view = useEstateView(mode)
 
 Also keep the keyboard `move(delta)` + `onKeyDown` Arrow-Left/Right/Up/Down wrap-around handler (`AccountingModeToggle.tsx:36-50`) and the `biome-ignore lint/a11y/noRedundantRoles` comment on `role="group"` (line 54 — a CI grep gate asserts its literal presence).
 
-**Required deviations:** 2 segments (`dashboard` | `inventory`) instead of 3 modes; default segment `dashboard`; i18n keys `inventory.nav.dashboard` / `inventory.nav.inventory` via `useTranslation('inventory')`; controlled `value`/`onChange` (lift state to `App.tsx`). Active segment = accent gold (UI-SPEC §Color reserved list — confirm token vs. `bg-primary-600`; UI-SPEC says "accent gold", AccountingModeToggle uses `bg-primary-600` — follow the UI-SPEC accent for the active *view* segment).
+**Required deviations:** 2 segments (`dashboard` | `inventory`) instead of 3 modes; default segment `dashboard`; i18n keys `inventory.nav.dashboard` / `inventory.nav.inventory` via `useTranslation('inventory')`; controlled `value`/`onChange` (lift state to `App.tsx`). Active segment = accent gold (UI-SPEC §Color reserved list — confirm token vs. `bg-primary-600`; UI-SPEC says "accent gold", AccountingModeToggle uses `bg-primary-600` — follow the UI-SPEC accent for the active _view_ segment).
 
 ---
 
@@ -389,11 +392,11 @@ Reads ONLY `error.message`/`error.name` — never `error`, `cause`, `stack` (lea
 
 ## No Analog Found
 
-| File | Role | Data Flow | Reason | Anchor instead |
-|------|------|-----------|--------|----------------|
-| `src/components/inventory/DataTable.tsx` | component | UI-state | Zero TanStack usage anywhere in repo (RESEARCH Pitfall 2) | RESEARCH §Pattern 1 + §virtualised-rows (lines 172-195, 323-331) |
-| `src/components/inventory/InventoryTree.tsx` | component | event-driven | No tree/virtualisation prior art | RESEARCH §Pattern 2 flatten-visible recipe (lines 197-207) |
-| `src/utils/csv.ts` | util | transform | vsizer port void; no csv anywhere | RESEARCH §Pattern 3 (lines 213-224) — but copy `format.ts` *module idiom* |
+| File                                         | Role      | Data Flow    | Reason                                                    | Anchor instead                                                            |
+| -------------------------------------------- | --------- | ------------ | --------------------------------------------------------- | ------------------------------------------------------------------------- |
+| `src/components/inventory/DataTable.tsx`     | component | UI-state     | Zero TanStack usage anywhere in repo (RESEARCH Pitfall 2) | RESEARCH §Pattern 1 + §virtualised-rows (lines 172-195, 323-331)          |
+| `src/components/inventory/InventoryTree.tsx` | component | event-driven | No tree/virtualisation prior art                          | RESEARCH §Pattern 2 flatten-visible recipe (lines 197-207)                |
+| `src/utils/csv.ts`                           | util      | transform    | vsizer port void; no csv anywhere                         | RESEARCH §Pattern 3 (lines 213-224) — but copy `format.ts` _module idiom_ |
 
 ---
 

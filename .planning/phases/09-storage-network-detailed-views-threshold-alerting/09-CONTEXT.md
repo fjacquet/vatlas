@@ -19,14 +19,14 @@ OPEN-2 and OPEN-3 (the two roadmap-bounded open decisions for this phase) are RE
 ### Threshold alerting & config surface (OPEN-3 — RESOLVED)
 
 - **D-01:** Threshold alerting **IS in this milestone** (not deferred).
-- **D-02:** Config is held **in-memory only** — a Zustand *inputs* slice (same class as `plannedRatios` from P6). **NO new `localStorage` key**, NO `vatlas-thresholds`, no URL-hash. Refresh ⇒ defaults restored. This is the strictest privacy reading and adds zero new persistence surface.
+- **D-02:** Config is held **in-memory only** — a Zustand _inputs_ slice (same class as `plannedRatios` from P6). **NO new `localStorage` key**, NO `vatlas-thresholds`, no URL-hash. Refresh ⇒ defaults restored. This is the strictest privacy reading and adds zero new persistence surface.
 - **D-03:** Default thresholds mirror **RVTools-Analyser defaults**: guest filesystem alert at **< 10 % free (≥ 90 % used)**, datastore alert at **> 85 % used**. LU/logical-unit threshold default chosen by Claude during planning on the same factual basis (documented in PLAN). All user-editable at runtime.
 - **D-04:** Alert presentation is **factual only** — counts and flagged rows (e.g. "N partitions ≥ 90 % used", row highlight / badge), **no verdict, no editorial verb, no traffic-light color**. Reuse the established factual-caption + em-dash-sentinel idioms.
 
 ### Navigation taxonomy (OPEN-2 — RESOLVED)
 
 - **D-05:** Add **two new top-level ViewToggle segments: "Storage" and "Network"**. ViewToggle becomes 8 segments (Dashboard · Inventory · Hosts · Planning · EOS · Trends · Storage · Network). **Extend the shipped `fieldset`+`aria-pressed` ViewToggle** (P3/P5/P8 idiom) — do NOT build a new nav component.
-- **D-06:** Detail screens are **click-drill in-app view-state branches** (the P5 pattern — lifted component state, NOT URL routing, NOT a 2nd `useMemo`). New detail drills this phase: **Datastore detail**, **VM detail**, and an **ESX storage+network detail** that *augments* the shipped P5 Hosts view (does NOT duplicate the P5 cluster-detail drill or Hosts rollup).
+- **D-06:** Detail screens are **click-drill in-app view-state branches** (the P5 pattern — lifted component state, NOT URL routing, NOT a 2nd `useMemo`). New detail drills this phase: **Datastore detail**, **VM detail**, and an **ESX storage+network detail** that _augments_ the shipped P5 Hosts view (does NOT duplicate the P5 cluster-detail drill or Hosts rollup).
   - **Datastore detail:** capacity / provisioned / in-use / free, VMs on it, host count, threshold flags.
   - **VM detail:** vCPU/vRAM, disks, partitions (with threshold flags), portgroups/switches, datastores — the per-VM surface that ties storage + network + alerting together.
   - **ESX detail:** datastores mounted + vSwitch/dvSwitch/uplinks per host, attached to the existing Hosts view (not a new top-level screen).
@@ -38,7 +38,7 @@ OPEN-2 and OPEN-3 (the two roadmap-bounded open decisions for this phase) are RE
 
 ### vSAN / blank-`Cluster name` datastore attribution
 
-- **D-09:** **Implement the vInfo VM→datastore→cluster relink** (the relink P5 explicitly deferred to P9). Closes the STR-04 / Pitfall-6 vSAN storage under-count. The relink is the ONLY valid cluster-identity path for blank-`Cluster name` rows (`vDatastore.Hosts` is a host *count*, never a name list — see memory ref). MUST be real-file-validated against `~/Library/CloudStorage/OneDrive-Home/20260430_1400_allvCenters.xlsx` (75 blank-cluster datastores) — unit tests are insufficient (the lesson from the original STR-04 surfacing).
+- **D-09:** **Implement the vInfo VM→datastore→cluster relink** (the relink P5 explicitly deferred to P9). Closes the STR-04 / Pitfall-6 vSAN storage under-count. The relink is the ONLY valid cluster-identity path for blank-`Cluster name` rows (`vDatastore.Hosts` is a host _count_, never a name list — see memory ref). MUST be real-file-validated against `~/Library/CloudStorage/OneDrive-Home/20260430_1400_allvCenters.xlsx` (75 blank-cluster datastores) — unit tests are insufficient (the lesson from the original STR-04 surfacing).
 - **D-10:** **Shared-LUN edge case (datastore whose VMs span multiple clusters) — Claude's discretion** during planning: pick the **minimal-inference, factual** approach (proportional-by-VM-provisioned split that preserves the estate total with no double-count, OR an explicit "shared across N clusters" factual line excluded from single-cluster rollups), decide in PLAN, document the choice + rationale, and validate against a real multi-cluster file. No silent allocation guesses (no-domain-guesses principle).
 
 ### Network inventory (RVTools-Analyser #12)
@@ -48,7 +48,7 @@ OPEN-2 and OPEN-3 (the two roadmap-bounded open decisions for this phase) are RE
 ### Claude's Discretion
 
 - LU/logical-unit default threshold value (D-03), exact tile/column ordering and EN/FR factual label strings (no editorial verbs, parity required), the screen-fit layout grids for the three new detail drills, the treemap/stacked-bar option configs, the shared-LUN attribution approach (D-10), the minimal-blast-radius parser-extension shape (new optional sheets + types without regressing existing consumers), and the plan/wave breakdown (this is a large phase — likely a parser-extension plan, a storage+vSAN-relink engine plan, a threshold-engine + in-memory config-slice plan, and the two view-shell + detail-drill plans; planner decides waves/dependencies).
-</decisions>
+  </decisions>
 
 <canonical_refs>
 
@@ -76,7 +76,7 @@ OPEN-2 and OPEN-3 (the two roadmap-bounded open decisions for this phase) are RE
 
 - `.planning/PROJECT.md` — privacy/in-memory invariant, single-`useMemo`, branded units, EN/FR parity, no-editorial-verbs denylist, "the report is the product".
 - `CLAUDE.md` §Gotchas — `DataTable` `inventory:col.<id>` header-key requirement; Biome-not-ESLint lint command; privacy guard throws (no network calls); doc-comment/grep-gate token-absence gotcha.
-</canonical_refs>
+  </canonical_refs>
 
 <code_context>
 
@@ -105,7 +105,7 @@ OPEN-2 and OPEN-3 (the two roadmap-bounded open decisions for this phase) are RE
 - `EstateView` gains storage-by-X projections, relinked-datastore attribution, and a threshold-flag projection driven by the in-memory thresholds slice.
 - D-11 parser change ripples to snapshot/types and any sheet-count assertions — enumerate and extend without regressing existing consumers.
 - D-09 vSAN relink interacts with `perDatastore` (NAA dedupe) and `perCluster` storage rollups — must not double-count shared LUNs (the P2/P3 NAA-keyed invariant).
-</code_context>
+  </code_context>
 
 <specifics>
 ## Specific Ideas
@@ -113,7 +113,7 @@ OPEN-2 and OPEN-3 (the two roadmap-bounded open decisions for this phase) are RE
 - Reference: `azure.github.io/RVToolsAnalyzer` storage/network/detailed-view depth + #14 personal-config (thresholds) framing — illustrative target, not pixel-match.
 - Real-file validation target for the vSAN relink (D-09): `~/Library/CloudStorage/OneDrive-Home/20260430_1400_allvCenters.xlsx` (75 blank-`Cluster name` datastores) — unit tests alone are insufficient; the relink + shared-LUN choice must be checked on this file (and a real multi-cluster file) before the phase is declared done.
 - The three new detail screens should stay screen-fit / export-ready so Phase 10 can snapshot them (the P5 "one screen fit = one slide" constraint extended to datastore/VM/ESX detail).
-</specifics>
+  </specifics>
 
 <deferred>
 ## Deferred Ideas
@@ -122,10 +122,10 @@ OPEN-2 and OPEN-3 (the two roadmap-bounded open decisions for this phase) are RE
 - **Conservative/earlier-warning default threshold preset** — not the chosen default (D-03 uses RVTools-Analyser defaults); could become a selectable preset in a later phase if requested.
 - **Storage/network analytics beyond inventory + thresholds** (e.g. IOPS/latency trends, capacity-forecast projections) — not in RVTools exports / out of scope; potential v2.
 
-None deferred to a *specific* later phase — discussion stayed within the P9 storage/network/detailed/alerting domain.
+None deferred to a _specific_ later phase — discussion stayed within the P9 storage/network/detailed/alerting domain.
 </deferred>
 
 ---
 
-*Phase: 09-storage-network-detailed-views-threshold-alerting*
-*Context gathered: 2026-05-17*
+_Phase: 09-storage-network-detailed-views-threshold-alerting_
+_Context gathered: 2026-05-17_

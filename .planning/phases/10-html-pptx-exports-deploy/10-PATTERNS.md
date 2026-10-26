@@ -4,33 +4,33 @@
 **Files analyzed:** 22 new / 3 modified
 **Analogs found:** 22 / 25 (3 = vsizer EXTERNAL ports, no in-repo path — closest in-repo analog cited per file)
 
-> **Binding upstream constraint (carried into every assignment):** architecture is LOCKED in CLAUDE.md + 10-RESEARCH.md. This phase is *assembly of already-shipped pure outputs*, not new analytics. The single genuine unknown (SVG→PNG without DOM for PPTX charts) is a Wave-0 spike — no later file may assume the mechanism.
+> **Binding upstream constraint (carried into every assignment):** architecture is LOCKED in CLAUDE.md + 10-RESEARCH.md. This phase is _assembly of already-shipped pure outputs_, not new analytics. The single genuine unknown (SVG→PNG without DOM for PPTX charts) is a Wave-0 spike — no later file may assume the mechanism.
 >
 > **vsizer is EXTERNAL.** `src/engines/export/` does not exist in this repo (verified: `ls src/engines/` has no `export/`). Every "PORT from vsizer" file below is a **port target with NO in-repo analog** — the planner MUST create it fresh against the cited in-repo pattern, not copy from a vsizer path that does not exist here.
 
 ## File Classification
 
-| New/Modified File | Role | Data Flow | Closest In-Repo Analog | Match Quality |
-|-------------------|------|-----------|------------------------|---------------|
-| `src/engines/export/export.worker.ts` | worker | event-driven / transform | `src/engines/parser/parser.worker.ts` | exact (role+flow) |
-| `src/hooks/useExport.ts` | hook | request-response | `src/engines/parser/parseInWorker.ts` | exact (worker-driver shape) |
-| `src/engines/export/html/renderCharts.ts` | engine (transform) | transform | `src/components/Chart.tsx` (ECharts registry) | role-match (SSR variant of same registry) |
-| `src/engines/export/html/renderReport.tsx` | engine (React SSR boundary) | transform | `src/components/storage/DatastoreDetail.tsx` (screen-fit presenter) | role-match |
-| `src/engines/export/html/inlineAssets.ts` | engine (utility) | transform | `scripts/check-bundle-size.mjs` (size accounting) | partial (size-budget logic) |
-| `src/engines/export/html/assembleHtml.ts` | engine (utility) | transform | — (no in-repo analog; string assembly per RESEARCH Pattern 3) | research-only |
-| `src/engines/export/pptx/builder.ts` | engine (assembler) | transform | `src/engines/aggregation/estateView.ts` (pure composition root) | role-match — **vsizer PORT, no in-repo path** |
-| `src/engines/export/pptx/theme.ts` | config | — | `src/theme/echartsTheme.ts` | role-match — **vsizer PORT** |
-| `src/engines/export/pptx/format.ts` | engine (utility) | transform | `src/utils/format.ts` (locale-param) | exact — **vsizer PORT, locale-parameterize** |
-| `src/engines/export/pptx/primitives/{colors,kpiCard,progressBar}.ts` | engine (utility) | transform | `src/theme/echartsTheme.ts` (palette consts) | partial — **vsizer PORT verbatim** |
-| `src/engines/export/pptx/primitives/chartSvg.ts` | engine (transform) | transform | `src/components/Chart.tsx` registry + Wave-0 raster | **NEW — no analog (Open Q1)** |
-| `src/engines/export/pptx/slides/{title,overview,cluster,contentionAnnex}.ts` | engine (presenter) | transform | `src/components/storage/DatastoreDetail.tsx` | role-match — **vsizer PORT** |
-| `src/engines/export/pptx/slides/{eos,drSim,trends,inventory}Slide.ts` | engine (presenter) | transform | `src/components/storage/DatastoreDetail.tsx` | role-match — **NEW** |
-| `src/components/ExportButtons.tsx` (the two header buttons) | component | request-response | `src/components/ThemeToggle.tsx` / `LanguageToggle.tsx` | exact (header-control idiom) |
-| `src/App.tsx` (modified) | component | request-response | self (header cluster lines 33-37) | exact (in-place) |
-| `src/i18n/index.ts` (modified) | config | — | self (NAMESPACES/resources lines 46-97) | exact (in-place) |
-| `src/i18n/locales/{en,fr}/report.json` + `…/pptx.json` | config | — | `src/i18n/locales/{en,fr}/storage.json` | exact (namespace JSON shape) |
-| `src/i18n/keyParity.test.ts` | test | — | RESEARCH §Code Examples (recursive key-diff) | research-provided |
-| `scripts/check-i18n-parity.mjs` (optional CLI mirror) | config (CI gate) | batch | `scripts/check-supply-chain.mjs` | role-match |
+| New/Modified File                                                            | Role                        | Data Flow                | Closest In-Repo Analog                                              | Match Quality                                 |
+| ---------------------------------------------------------------------------- | --------------------------- | ------------------------ | ------------------------------------------------------------------- | --------------------------------------------- |
+| `src/engines/export/export.worker.ts`                                        | worker                      | event-driven / transform | `src/engines/parser/parser.worker.ts`                               | exact (role+flow)                             |
+| `src/hooks/useExport.ts`                                                     | hook                        | request-response         | `src/engines/parser/parseInWorker.ts`                               | exact (worker-driver shape)                   |
+| `src/engines/export/html/renderCharts.ts`                                    | engine (transform)          | transform                | `src/components/Chart.tsx` (ECharts registry)                       | role-match (SSR variant of same registry)     |
+| `src/engines/export/html/renderReport.tsx`                                   | engine (React SSR boundary) | transform                | `src/components/storage/DatastoreDetail.tsx` (screen-fit presenter) | role-match                                    |
+| `src/engines/export/html/inlineAssets.ts`                                    | engine (utility)            | transform                | `scripts/check-bundle-size.mjs` (size accounting)                   | partial (size-budget logic)                   |
+| `src/engines/export/html/assembleHtml.ts`                                    | engine (utility)            | transform                | — (no in-repo analog; string assembly per RESEARCH Pattern 3)       | research-only                                 |
+| `src/engines/export/pptx/builder.ts`                                         | engine (assembler)          | transform                | `src/engines/aggregation/estateView.ts` (pure composition root)     | role-match — **vsizer PORT, no in-repo path** |
+| `src/engines/export/pptx/theme.ts`                                           | config                      | —                        | `src/theme/echartsTheme.ts`                                         | role-match — **vsizer PORT**                  |
+| `src/engines/export/pptx/format.ts`                                          | engine (utility)            | transform                | `src/utils/format.ts` (locale-param)                                | exact — **vsizer PORT, locale-parameterize**  |
+| `src/engines/export/pptx/primitives/{colors,kpiCard,progressBar}.ts`         | engine (utility)            | transform                | `src/theme/echartsTheme.ts` (palette consts)                        | partial — **vsizer PORT verbatim**            |
+| `src/engines/export/pptx/primitives/chartSvg.ts`                             | engine (transform)          | transform                | `src/components/Chart.tsx` registry + Wave-0 raster                 | **NEW — no analog (Open Q1)**                 |
+| `src/engines/export/pptx/slides/{title,overview,cluster,contentionAnnex}.ts` | engine (presenter)          | transform                | `src/components/storage/DatastoreDetail.tsx`                        | role-match — **vsizer PORT**                  |
+| `src/engines/export/pptx/slides/{eos,drSim,trends,inventory}Slide.ts`        | engine (presenter)          | transform                | `src/components/storage/DatastoreDetail.tsx`                        | role-match — **NEW**                          |
+| `src/components/ExportButtons.tsx` (the two header buttons)                  | component                   | request-response         | `src/components/ThemeToggle.tsx` / `LanguageToggle.tsx`             | exact (header-control idiom)                  |
+| `src/App.tsx` (modified)                                                     | component                   | request-response         | self (header cluster lines 33-37)                                   | exact (in-place)                              |
+| `src/i18n/index.ts` (modified)                                               | config                      | —                        | self (NAMESPACES/resources lines 46-97)                             | exact (in-place)                              |
+| `src/i18n/locales/{en,fr}/report.json` + `…/pptx.json`                       | config                      | —                        | `src/i18n/locales/{en,fr}/storage.json`                             | exact (namespace JSON shape)                  |
+| `src/i18n/keyParity.test.ts`                                                 | test                        | —                        | RESEARCH §Code Examples (recursive key-diff)                        | research-provided                             |
+| `scripts/check-i18n-parity.mjs` (optional CLI mirror)                        | config (CI gate)            | batch                    | `scripts/check-supply-chain.mjs`                                    | role-match                                    |
 
 ## Pattern Assignments
 
@@ -42,7 +42,7 @@
 ```typescript
 /// <reference lib="webworker" />
 import '../../privacy/fetchGuard' // Plan 02 contract — workers have their own global scope
-import { /* … */ } from './…'
+import {/* … */} from './…'
 
 interface ParseRequest {
   kind: 'parse'
@@ -59,11 +59,14 @@ self.onmessage = (e: MessageEvent<ParseRequest>) => {
   if (e.data.kind !== 'parse') return
   try {
     /* heavy pure work — for export: buildEstateView(...) + renderCharts + assembleHtml/buildPptx */
-    self.postMessage({ kind: 'ok', /* … */ })
+    self.postMessage({ kind: 'ok' /* … */ })
   } catch (err) {
     const e2 = err as { name?: string; message?: string /* … */ }
     // Explicit field list — NO `cause`, NO parsed VM data (STRIDE T-04-04).
-    self.postMessage({ kind: 'err', error: { name: e2.name ?? 'ExportError', message: e2.message ?? 'export failed' } })
+    self.postMessage({
+      kind: 'err',
+      error: { name: e2.name ?? 'ExportError', message: e2.message ?? 'export failed' },
+    })
   }
 }
 ```
@@ -117,15 +120,41 @@ return new Promise((resolve, reject) => {
 
 **The tree-shaken registry + theme registration to REPLICATE at module scope** (`Chart.tsx:1-55`):
 ```typescript
-import { BarChart, GaugeChart, HeatmapChart, LineChart, PieChart, TreemapChart } from 'echarts/charts'
-import { CalendarComponent, DatasetComponent, GridComponent, LegendComponent, TooltipComponent, VisualMapComponent } from 'echarts/components'
+import {
+  BarChart,
+  GaugeChart,
+  HeatmapChart,
+  LineChart,
+  PieChart,
+  TreemapChart,
+} from 'echarts/charts'
+import {
+  CalendarComponent,
+  DatasetComponent,
+  GridComponent,
+  LegendComponent,
+  TooltipComponent,
+  VisualMapComponent,
+} from 'echarts/components'
 import * as echarts from 'echarts/core'
 import { SVGRenderer } from 'echarts/renderers'
 import { MIDNIGHT_EXECUTIVE_DARK, MIDNIGHT_EXECUTIVE_LIGHT } from '@/theme/echartsTheme'
 
-echarts.use([ BarChart, PieChart, GaugeChart, HeatmapChart, LineChart, TreemapChart,
-  GridComponent, TooltipComponent, LegendComponent, DatasetComponent,
-  CalendarComponent, VisualMapComponent, SVGRenderer ]) // SVG ONLY — canvas intentionally excluded (VIZ-01)
+echarts.use([
+  BarChart,
+  PieChart,
+  GaugeChart,
+  HeatmapChart,
+  LineChart,
+  TreemapChart,
+  GridComponent,
+  TooltipComponent,
+  LegendComponent,
+  DatasetComponent,
+  CalendarComponent,
+  VisualMapComponent,
+  SVGRenderer,
+]) // SVG ONLY — canvas intentionally excluded (VIZ-01)
 echarts.registerTheme('midnight-executive', MIDNIGHT_EXECUTIVE_LIGHT)
 echarts.registerTheme('midnight-executive-dark', MIDNIGHT_EXECUTIVE_DARK)
 ```
@@ -134,7 +163,9 @@ echarts.registerTheme('midnight-executive-dark', MIDNIGHT_EXECUTIVE_DARK)
 **SSR call (NOT in Chart.tsx — Chart.tsx uses `<ReactEChartsCore … opts={{renderer:'svg'}}/>` at line 101-112; the worker has no DOM):** use RESEARCH Pattern 2:
 ```typescript
 const chart = echarts.init(null, null, { renderer: 'svg', ssr: true, width, height })
-chart.setOption(option); const svg = chart.renderToSVGString(); chart.dispose() // dispose() mandatory in a per-cluster loop
+chart.setOption(option)
+const svg = chart.renderToSVGString()
+chart.dispose() // dispose() mandatory in a per-cluster loop
 ```
 `width`/`height` MUST be explicit in SSR (no responsive container). This same SVG string feeds the PPTX raster step before rasterization.
 
@@ -179,17 +210,17 @@ Per RESEARCH Pattern 3 (CITED react.dev). Single `<!doctype html>` string: `<htm
 
 ### `src/engines/export/pptx/*` — vsizer PORT TARGETS (NO in-repo path; build fresh)
 
-> **`src/engines/export/` does not exist in this repo.** Do NOT instruct the planner to copy from a vsizer path. Each file is created fresh; the in-repo analog below is what its *shape/conventions* must match.
+> **`src/engines/export/` does not exist in this repo.** Do NOT instruct the planner to copy from a vsizer path. Each file is created fresh; the in-repo analog below is what its _shape/conventions_ must match.
 
-| Port file | Action | Closest in-repo analog & what to match |
-|-----------|--------|----------------------------------------|
-| `builder.ts` | PORT + add new-slide dispatch | `src/engines/aggregation/estateView.ts:64-95` — a pure composition root: typed params, no React/Zustand/Zod, JSDoc explaining the single-pass contract. Builder consumes `buildEstateView` output the same way `estateView.ts` consumes `MergedEstate`. |
-| `theme.ts` | PORT verbatim (Midnight Executive hex, NO `#` prefix) | `src/theme/echartsTheme.ts` — palette-constant module shape. Brand-free (PPT-02/D-03). |
-| `format.ts` | PORT but **locale-parameterize** (Pitfall 4 — vsizer was FR-only) | `src/utils/format.ts:1-20` — every formatter already takes `locale = 'fr-FR'` as a param and uses `toLocaleString(locale, …)`. Mirror this exactly: FR `,` decimal + thousands sep, EN `.` decimal + `,` thousands; em-dash sentinel on non-finite (mandatory, never `0`/`N/A`). The Moderate-8 FR U+202F→U+00A0 substitution is NOT yet present in `src/utils/format.ts` (verified: no `202f`/`00a0`/`replace` match) — it is a **net-new transform** the ported pptx `format.ts` must add for PPT-04. |
-| `primitives/{colors,kpiCard,progressBar}.ts` | PORT verbatim | `src/theme/echartsTheme.ts` — small pure const/helper modules; no React. |
-| `primitives/chartSvg.ts` | **NEW — Open Q1, Wave-0 spike gates this** | `src/components/Chart.tsx` registry (the SVG source) + the Wave-0-chosen rasterizer. PowerPoint cannot render SVG (Pitfall 1, verified) → rasterize each chart to PNG; `slide.addImage({data:'image/png;base64,…'})`, **never** `image/svg+xml`. No in-repo analog — do NOT add the rasterizer dep until Wave-0 picks it; any dep must clear `check-supply-chain.mjs` + `npm audit --audit-level=low` + OSV + `check-bundle-size.mjs`. |
-| `slides/{titleSlide,overviewSlide,clusterSlide,contentionAnnex}.ts` | PORT | `src/components/storage/DatastoreDetail.tsx` — screen-fit presenter contract = the slide contract (one screen-fit area = one slide). `titleSlide` adds D-03 estate identity/freshness; `clusterSlide` is one-per-cluster ALWAYS (D-01, no top-N cap). |
-| `slides/{eosSlide,drSimSlide,trendsSlide,inventorySlide}.ts` | **NEW** | Same `DatastoreDetail.tsx` presenter idiom. `trendsSlide` OMITTED entirely when < 2 snapshots (D-09). Sources: P7 `EosProjection`, P6 DR scenario, P8 `TrendSeries`, inventory summary — all already on the `EstateView` the worker computes. |
+| Port file                                                           | Action                                                            | Closest in-repo analog & what to match                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| ------------------------------------------------------------------- | ----------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `builder.ts`                                                        | PORT + add new-slide dispatch                                     | `src/engines/aggregation/estateView.ts:64-95` — a pure composition root: typed params, no React/Zustand/Zod, JSDoc explaining the single-pass contract. Builder consumes `buildEstateView` output the same way `estateView.ts` consumes `MergedEstate`.                                                                                                                                                                                                                                                 |
+| `theme.ts`                                                          | PORT verbatim (Midnight Executive hex, NO `#` prefix)             | `src/theme/echartsTheme.ts` — palette-constant module shape. Brand-free (PPT-02/D-03).                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `format.ts`                                                         | PORT but **locale-parameterize** (Pitfall 4 — vsizer was FR-only) | `src/utils/format.ts:1-20` — every formatter already takes `locale = 'fr-FR'` as a param and uses `toLocaleString(locale, …)`. Mirror this exactly: FR `,` decimal + thousands sep, EN `.` decimal + `,` thousands; em-dash sentinel on non-finite (mandatory, never `0`/`N/A`). The Moderate-8 FR U+202F→U+00A0 substitution is NOT yet present in `src/utils/format.ts` (verified: no `202f`/`00a0`/`replace` match) — it is a **net-new transform** the ported pptx `format.ts` must add for PPT-04. |
+| `primitives/{colors,kpiCard,progressBar}.ts`                        | PORT verbatim                                                     | `src/theme/echartsTheme.ts` — small pure const/helper modules; no React.                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `primitives/chartSvg.ts`                                            | **NEW — Open Q1, Wave-0 spike gates this**                        | `src/components/Chart.tsx` registry (the SVG source) + the Wave-0-chosen rasterizer. PowerPoint cannot render SVG (Pitfall 1, verified) → rasterize each chart to PNG; `slide.addImage({data:'image/png;base64,…'})`, **never** `image/svg+xml`. No in-repo analog — do NOT add the rasterizer dep until Wave-0 picks it; any dep must clear `check-supply-chain.mjs` + `npm audit --audit-level=low` + OSV + `check-bundle-size.mjs`.                                                                  |
+| `slides/{titleSlide,overviewSlide,clusterSlide,contentionAnnex}.ts` | PORT                                                              | `src/components/storage/DatastoreDetail.tsx` — screen-fit presenter contract = the slide contract (one screen-fit area = one slide). `titleSlide` adds D-03 estate identity/freshness; `clusterSlide` is one-per-cluster ALWAYS (D-01, no top-N cap).                                                                                                                                                                                                                                                   |
+| `slides/{eosSlide,drSimSlide,trendsSlide,inventorySlide}.ts`        | **NEW**                                                           | Same `DatastoreDetail.tsx` presenter idiom. `trendsSlide` OMITTED entirely when < 2 snapshots (D-09). Sources: P7 `EosProjection`, P6 DR scenario, P8 `TrendSeries`, inventory summary — all already on the `EstateView` the worker computes.                                                                                                                                                                                                                                                           |
 
 ---
 
@@ -250,16 +281,21 @@ Buttons render only when `hasSnapshots` — UI-SPEC says no dedicated empty stat
 ## Shared Patterns
 
 ### EstateView outside React (the keystone — D-08)
+
 **Source:** `src/hooks/useEstateView.ts:43-73` + `src/engines/aggregation/estateView.ts:64-95` + `src/engines/snapshotMerge/index.ts:6`
 **Apply to:** `export.worker.ts` (the worker computes the view; never imports the hook — Pitfall 2)
 The hook is a thin orchestrator. The exact pure call to clone in the worker:
 ```typescript
-import { buildEstateView } from '@/engines/aggregation'        // index.ts:8 barrel
+import { buildEstateView } from '@/engines/aggregation' // index.ts:8 barrel
 import { mergeSnapshotsToEstate } from '@/engines/snapshotMerge' // index.ts:6 barrel
 const today = new Date() // sampled in the worker at synthesis time (the hook's clock-injection equivalent)
 // D-08 BODY = active snapshot ONLY (NOT the merged multi-vCenter dashboard view):
-const view = buildEstateView(mergeSnapshotsToEstate([active]), [active], mode, today,
-  { stretchedClusters, scenario, plannedRatios: { cpuRatio, ramRatio }, thresholds })
+const view = buildEstateView(mergeSnapshotsToEstate([active]), [active], mode, today, {
+  stretchedClusters,
+  scenario,
+  plannedRatios: { cpuRatio, ramRatio },
+  thresholds,
+})
 // D-08/D-09 TRENDS = ALL loaded snapshots; view2.trends is null when < 2 → omit section/slide:
 const view2 = buildEstateView(mergeSnapshotsToEstate(all), all, mode, today, opts)
 const trends = view2.trends
@@ -267,36 +303,41 @@ const trends = view2.trends
 `buildEstateView` signature is fixed (`estateView.ts:64-95`): `(merged: MergedEstate, selected: Snapshot[], mode: AccountingMode, today: Date, opts?)`. Store inputs (`active`, `all`, `mode`, the opts slices) are resolved on the MAIN thread via `selectActiveSnapshot`/`selectSnapshots` (`snapshotStore.ts:216-242`) and posted in — never a second `useMemo` (grep-gated single-memo invariant; the worker is not a memo site).
 
 ### fetchGuard-first / privacy invariant
+
 **Source:** `src/engines/parser/parser.worker.ts:2`
 **Apply to:** `export.worker.ts` (line 2, before any other import)
 `import '../../privacy/fetchGuard'` MUST be the first executable import. It throws synchronously on any non-same-origin fetch (CLAUDE.md Gotchas — does not silently block). All report fonts/assets are base64-inlined or system-font (Pitfall 3); zero runtime fetch.
 
 ### Locale-parameterized formatting
+
 **Source:** `src/utils/format.ts:1-20` (every `fmt*` takes `locale = 'fr-FR'`, uses `toLocaleString(locale,…)`, em-dash on non-finite)
 **Apply to:** report tree, pptx `format.ts` port, all exported numbers
 Active locale resolved on main thread, posted into the worker (D-07 — one artifact = one language). Numbers never pre-formatted in i18n strings (Moderate-2). The FR U+202F→U+00A0 substitution (Moderate-8 / Pitfall 4) is **net-new** — not present in `src/utils/format.ts` today (verified); the pptx `format.ts` port adds it.
 
 ### Worker singleton + transferable
+
 **Source:** `src/engines/parser/parseInWorker.ts:18-53`
 **Apply to:** `useExport.ts`
 Module-scope `let worker`, `new Worker(new URL('./export.worker.ts', import.meta.url), {type:'module'})`, Promise-wrapped postMessage, `removeEventListener` on settle. Output bytes are the transferable on the return leg (inverse of the parser's input-`buf` transfer).
 
 ### Factual screen-fit presenter
+
 **Source:** `src/components/storage/DatastoreDetail.tsx:10-18,33-44`
 **Apply to:** `renderReport.tsx`, every pptx slide module
 One screen-fit area = one report section / one PPTX slide (the P9 components were built for exactly this — UI-SPEC, 09-CONTEXT canonical ref). Em-dash `'—'` sentinel; gold threshold marker `border-l-2 border-l-accent-500 bg-accent-500/15 pl-2` (no icon/verdict, P9 contract); `font-mono tabular-nums` for comparable numerics; factual-only strings.
 
 ### CI: no workflow change required
+
 **Source:** `.github/workflows/static.yml` (verified) — steps: supply-chain → npm audit → OSV → typecheck → lint → `npm run test:run` (L97-98) → `npm run build` → `check:bundle-size`, on push `main`/PR/tags/dispatch; `base:'/vatlas/'` already in `vite.config.ts`.
 **Apply to:** DEP-01/DEP-02 (verification only — RESEARCH §4), Minor-7 (key-parity test rides the existing Test step). The only net-new dep risk (Wave-0 rasterizer) is auto-gated by the existing supply-chain/audit/OSV/bundle-size steps.
 
 ## No Analog Found
 
-| File | Role | Data Flow | Reason |
-|------|------|-----------|--------|
-| `src/engines/export/html/assembleHtml.ts` | engine utility | transform | No in-repo HTML-document string assembler. Use RESEARCH Pattern 3 (CITED react.dev) — a `<!doctype>` template with inlined `<style>` + `renderToStaticMarkup` body. The only file where string concatenation is the chosen approach. |
-| `src/engines/export/pptx/primitives/chartSvg.ts` | engine transform | transform | SVG→PNG-without-DOM is the single genuine unknown (Open Q1 / Assumption A1). No in-repo precedent and no decided mechanism — **Wave-0 spike resolves it before any dependent task**. SVG source = `Chart.tsx` registry; raster = TBD (`@resvg/resvg-wasm` vs main-thread `OffscreenCanvas`). |
-| `src/engines/export/pptx/builder.ts` + slides + theme/format/primitives | engine | transform | **vsizer-EXTERNAL ports.** `src/engines/export/` does not exist here. Closest in-repo analogs cited per file above (`estateView.ts` for builder, `echartsTheme.ts` for theme/primitives, `utils/format.ts` for format, `DatastoreDetail.tsx` for slides). Create fresh against those — there is no vsizer path in this repo to copy from. |
+| File                                                                    | Role             | Data Flow | Reason                                                                                                                                                                                                                                                                                                                                    |
+| ----------------------------------------------------------------------- | ---------------- | --------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `src/engines/export/html/assembleHtml.ts`                               | engine utility   | transform | No in-repo HTML-document string assembler. Use RESEARCH Pattern 3 (CITED react.dev) — a `<!doctype>` template with inlined `<style>` + `renderToStaticMarkup` body. The only file where string concatenation is the chosen approach.                                                                                                      |
+| `src/engines/export/pptx/primitives/chartSvg.ts`                        | engine transform | transform | SVG→PNG-without-DOM is the single genuine unknown (Open Q1 / Assumption A1). No in-repo precedent and no decided mechanism — **Wave-0 spike resolves it before any dependent task**. SVG source = `Chart.tsx` registry; raster = TBD (`@resvg/resvg-wasm` vs main-thread `OffscreenCanvas`).                                              |
+| `src/engines/export/pptx/builder.ts` + slides + theme/format/primitives | engine           | transform | **vsizer-EXTERNAL ports.** `src/engines/export/` does not exist here. Closest in-repo analogs cited per file above (`estateView.ts` for builder, `echartsTheme.ts` for theme/primitives, `utils/format.ts` for format, `DatastoreDetail.tsx` for slides). Create fresh against those — there is no vsizer path in this repo to copy from. |
 
 ## Metadata
 

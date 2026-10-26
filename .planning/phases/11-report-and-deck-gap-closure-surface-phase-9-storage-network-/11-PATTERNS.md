@@ -8,20 +8,20 @@
 
 ## File Classification
 
-| New/Modified File | Role | Data Flow | Closest Analog | Match Quality |
-|-------------------|------|-----------|----------------|---------------|
-| `src/engines/export/pptx/slides/storageSlide.ts` (new) | pptx-slide | transform | `src/engines/export/pptx/slides/eosSlide.ts` | exact |
-| `src/engines/export/pptx/slides/networkSlide.ts` (new) | pptx-slide | transform | `src/engines/export/pptx/slides/inventorySlide.ts` (KPI-only, no chart) | exact |
-| `src/engines/export/pptx/slides/plannedSlide.ts` (new) | pptx-slide | transform | `src/engines/export/pptx/slides/eosSlide.ts` / `drSimSlide.ts` | exact |
-| `src/engines/export/pptx/builder.ts` (modify) | composition-root | request-response | self (existing slide call-sites) | exact |
-| `src/engines/export/chartBundle.ts` (modify) | engine (option builder) | transform | `eosBar`/`drBar`/`overviewCharts` in same file | exact |
-| `src/engines/export/html/renderReport.tsx` (modify) | engine (React-SSR tree) | transform | existing `Section` / `Metric` / `data-chart-slot` in same file | exact |
-| `src/engines/export/export.worker.ts` (modify, minimal) | worker | streaming | self (existing `optBundle.shared` raster loop) | exact |
-| `src/components/planning/PlanningView.tsx` (modify) | component | request-response | `src/components/dr/DrSimPanel.tsx` (thin `view`-prop presenter) | exact |
-| `src/i18n/locales/{en,fr}/report.json` (modify) | config (i18n) | — | existing `eos`/`dr` nested blocks | exact |
-| `src/i18n/locales/{en,fr}/pptx.json` (modify) | config (i18n) | — | existing `eos`/`dr` nested blocks | exact |
-| `src/engines/export/pptx/builder.test.ts` or new `chartBundle.test.ts` (new/extend) | test | — | `src/engines/export/buildExportView.test.ts` | exact |
-| `.planning/REQUIREMENTS.md` (modify) | doc (bookkeeping) | — | n/a (mechanical edit) | n/a |
+| New/Modified File                                                                   | Role                    | Data Flow        | Closest Analog                                                          | Match Quality |
+| ----------------------------------------------------------------------------------- | ----------------------- | ---------------- | ----------------------------------------------------------------------- | ------------- |
+| `src/engines/export/pptx/slides/storageSlide.ts` (new)                              | pptx-slide              | transform        | `src/engines/export/pptx/slides/eosSlide.ts`                            | exact         |
+| `src/engines/export/pptx/slides/networkSlide.ts` (new)                              | pptx-slide              | transform        | `src/engines/export/pptx/slides/inventorySlide.ts` (KPI-only, no chart) | exact         |
+| `src/engines/export/pptx/slides/plannedSlide.ts` (new)                              | pptx-slide              | transform        | `src/engines/export/pptx/slides/eosSlide.ts` / `drSimSlide.ts`          | exact         |
+| `src/engines/export/pptx/builder.ts` (modify)                                       | composition-root        | request-response | self (existing slide call-sites)                                        | exact         |
+| `src/engines/export/chartBundle.ts` (modify)                                        | engine (option builder) | transform        | `eosBar`/`drBar`/`overviewCharts` in same file                          | exact         |
+| `src/engines/export/html/renderReport.tsx` (modify)                                 | engine (React-SSR tree) | transform        | existing `Section` / `Metric` / `data-chart-slot` in same file          | exact         |
+| `src/engines/export/export.worker.ts` (modify, minimal)                             | worker                  | streaming        | self (existing `optBundle.shared` raster loop)                          | exact         |
+| `src/components/planning/PlanningView.tsx` (modify)                                 | component               | request-response | `src/components/dr/DrSimPanel.tsx` (thin `view`-prop presenter)         | exact         |
+| `src/i18n/locales/{en,fr}/report.json` (modify)                                     | config (i18n)           | —                | existing `eos`/`dr` nested blocks                                       | exact         |
+| `src/i18n/locales/{en,fr}/pptx.json` (modify)                                       | config (i18n)           | —                | existing `eos`/`dr` nested blocks                                       | exact         |
+| `src/engines/export/pptx/builder.test.ts` or new `chartBundle.test.ts` (new/extend) | test                    | —                | `src/engines/export/buildExportView.test.ts`                            | exact         |
+| `.planning/REQUIREMENTS.md` (modify)                                                | doc (bookkeeping)       | —                | n/a (mechanical edit)                                                   | n/a           |
 
 ## Pattern Assignments
 
@@ -33,7 +33,7 @@ The slide composes ONLY the `_layout.ts` primitives — never raw `s.addText`/`s
 
 ```typescript
 import type PptxGenJS from 'pptxgenjs'
-import type { EstateView } from '@/types/estate'   // pull view.storage + view.flags here
+import type { EstateView } from '@/types/estate' // pull view.storage + view.flags here
 import type { ExportStrings } from '../../types'
 import { type ExportLocale, pptxNumber } from '../format'
 import { addChartPanel, addHeader, addKpiRow, CONTENT_W, M } from './_layout'
@@ -41,14 +41,25 @@ import { addChartPanel, addHeader, addKpiRow, CONTENT_W, M } from './_layout'
 export function addStorageSlide(
   pptx: PptxGenJS,
   view: EstateView,
-  chartPng: Uint8Array | undefined,   // the new 'storageTreemap' shared PNG
+  chartPng: Uint8Array | undefined, // the new 'storageTreemap' shared PNG
   strings: ExportStrings,
   locale: ExportLocale,
 ): void {
   const s = pptx.addSlide()
   const y = addHeader(s, strings['storage.title'] ?? 'Storage')
-  const y2 = addKpiRow(s, [ /* estate provisioned/inUse/capacity from view.storage.estate (branded MiB → GiB via Math.round(... / 1024), see drSimSlide.ts:34) */ ], y)
-  addChartPanel(s, chartPng, { x: M, y: y2, w: CONTENT_W, h: 7.15 - y2 }, strings['storage.byCluster'] ?? 'Storage by cluster')
+  const y2 = addKpiRow(
+    s,
+    [
+      /* estate provisioned/inUse/capacity from view.storage.estate (branded MiB → GiB via Math.round(... / 1024), see drSimSlide.ts:34) */
+    ],
+    y,
+  )
+  addChartPanel(
+    s,
+    chartPng,
+    { x: M, y: y2, w: CONTENT_W, h: 7.15 - y2 },
+    strings['storage.byCluster'] ?? 'Storage by cluster',
+  )
 }
 ```
 
@@ -63,16 +74,32 @@ export function addStorageSlide(
 **Analog:** `src/engines/export/pptx/slides/inventorySlide.ts` (KPI-only, but it still calls `addChartPanel`). **D-08 says NO chart for network** — so this slide is `addHeader` + `addKpiRow` ONLY (omit `addChartPanel` entirely; do not pass a PNG). Closest no-chart prior art is the null-branch of `drSimSlide.ts:21-24` (`addNote` when nothing to show). Skeleton:
 
 ```typescript
-import { addHeader, addKpiRow } from './_layout'   // NO addChartPanel — D-08
+import { addHeader, addKpiRow } from './_layout' // NO addChartPanel — D-08
 export function addNetworkSlide(pptx, view, strings, locale): void {
   const s = pptx.addSlide()
   const y = addHeader(s, strings['network.title'] ?? 'Network')
-  addKpiRow(s, [
-    { label: strings['network.vswitches'] ?? 'vSwitches', value: pptxNumber(view.network.vswitches.length, locale) },
-    { label: strings['network.dvswitches'] ?? 'dvSwitches', value: pptxNumber(view.network.dvswitches.length, locale) },
-    { label: strings['network.portgroups'] ?? 'Portgroups', value: pptxNumber(view.network.portgroups.length, locale) },
-    { label: strings['network.vnetwork'] ?? 'VM adjacencies', value: pptxNumber(view.network.vmPortgroupCount, locale) },
-  ], y)
+  addKpiRow(
+    s,
+    [
+      {
+        label: strings['network.vswitches'] ?? 'vSwitches',
+        value: pptxNumber(view.network.vswitches.length, locale),
+      },
+      {
+        label: strings['network.dvswitches'] ?? 'dvSwitches',
+        value: pptxNumber(view.network.dvswitches.length, locale),
+      },
+      {
+        label: strings['network.portgroups'] ?? 'Portgroups',
+        value: pptxNumber(view.network.portgroups.length, locale),
+      },
+      {
+        label: strings['network.vnetwork'] ?? 'VM adjacencies',
+        value: pptxNumber(view.network.vmPortgroupCount, locale),
+      },
+    ],
+    y,
+  )
 }
 ```
 
@@ -106,7 +133,7 @@ addKpiRow(s, [
 ```typescript
 // after the `for (const cluster of view.clusters) { addClusterSlide(...) }` loop:
 addStorageSlide(pptx, view, png('storageTreemap'), strings, locale)
-addNetworkSlide(pptx, view, strings, locale)              // no png — D-08
+addNetworkSlide(pptx, view, strings, locale) // no png — D-08
 // plannedSlide placement: with the other re-aggregation slides; D-03 minimal — e.g. after drSim:
 addPlannedSlide(pptx, view, strings, locale)
 ```
@@ -125,11 +152,16 @@ addPlannedSlide(pptx, view, strings, locale)
 function storageTreemap(view: EstateView, _L: ChartLabels): EChartsOption {
   return {
     tooltip: {},
-    series: [{
-      type: 'treemap',
-      breadcrumb: { show: false },
-      data: view.storage.byCluster.map((g) => ({ name: g.key, value: g.provisionedMib as number })),
-    }],
+    series: [
+      {
+        type: 'treemap',
+        breadcrumb: { show: false },
+        data: view.storage.byCluster.map((g) => ({
+          name: g.key,
+          value: g.provisionedMib as number,
+        })),
+      },
+    ],
   }
 }
 ```
@@ -142,7 +174,7 @@ function storageTreemap(view: EstateView, _L: ChartLabels): EChartsOption {
 const shared: Record<string, EChartsOption> = {
   ...overviewCharts(view, L),
   eosBar: eosBar(view, L),
-  storageTreemap: storageTreemap(view, L),   // ← add this line
+  storageTreemap: storageTreemap(view, L), // ← add this line
 }
 ```
 
@@ -161,10 +193,17 @@ The `shared` record key (`storageTreemap`) is the SAME string the worker rasteri
 **Analog:** the existing `Section` + `Metric` components and `data-chart-slot` mechanism in the SAME file (`renderReport.tsx:50-70`, `123-148`, `237-242`). Add Storage + Network `<Section>`s and a plannedView subsection in the FIXED HTM-04 `data-section` order. Section + chart-slot idiom to replicate (`renderReport.tsx:123-148`):
 
 ```tsx
-<Section id="storage" title={strings['storage.title'] ?? 'Storage'}>
-  <Metric label={strings['storage.provisioned'] ?? 'Provisioned'} value={fmtInt(Number(view.storage.estate.provisionedMib), loc)} />
+;<Section id="storage" title={strings['storage.title'] ?? 'Storage'}>
+  <Metric
+    label={strings['storage.provisioned'] ?? 'Provisioned'}
+    value={fmtInt(Number(view.storage.estate.provisionedMib), loc)}
+  />
   {/* factual flagged count — Metric flag prop paints the gold .flagged style (D-06) */}
-  <Metric label={strings['storage.flagged'] ?? 'Flagged datastores'} value={fmtInt(view.flags.counts.ds + view.flags.counts.lu, loc)} flag={view.flags.counts.ds + view.flags.counts.lu > 0} />
+  <Metric
+    label={strings['storage.flagged'] ?? 'Flagged datastores'}
+    value={fmtInt(view.flags.counts.ds + view.flags.counts.lu, loc)}
+    flag={view.flags.counts.ds + view.flags.counts.lu > 0}
+  />
   {/* Chart slot — assembleHtml splices the trusted ECharts SSR SVG here. */}
   <div data-chart-slot="storage-treemap" className="chart-slot" />
 </Section>
@@ -172,7 +211,7 @@ The `shared` record key (`storageTreemap`) is the SAME string the worker rasteri
 
 **Chart-slot wiring (HTML path):** `renderReport.tsx`'s `exportChartSlots(view)` (`:237-242`) currently emits per-cluster ids only. For the single estate-level treemap, the cleanest mirror is to add a fixed slot id `"storage-treemap"` and have the worker's HTML branch (`export.worker.ts:67-71`) set `charts.set('storage-treemap', chartToSvg(optBundle.shared.storageTreemap, ...))` alongside the per-cluster loop. `assembleHtml`'s `SLOT_RE` splice matches ANY `data-chart-slot` id — no assembleHtml change needed (verify against `src/engines/export/html/assembleHtml.ts`).
 
-**Budget (Phase 10 D-02 carry-forward):** HTML carries the *exhaustive* P9 detail (per-cluster/per-datastore tables, threshold-flagged rows, vSAN shared-LUN "shared across N clusters", datastore/VM detail). Size against <5 MB typical / <15 MB hard ceiling using the SAME top-N-inline + remainder-folded lever already in this file (`TOP_N_CLUSTERS = 16`, `renderReport.tsx:29-33` + the annex `<table>` at `:193-216`). The annex `<table>` (`:193-211`) is the table pattern to mirror for per-datastore rows.
+**Budget (Phase 10 D-02 carry-forward):** HTML carries the _exhaustive_ P9 detail (per-cluster/per-datastore tables, threshold-flagged rows, vSAN shared-LUN "shared across N clusters", datastore/VM detail). Size against <5 MB typical / <15 MB hard ceiling using the SAME top-N-inline + remainder-folded lever already in this file (`TOP_N_CLUSTERS = 16`, `renderReport.tsx:29-33` + the annex `<table>` at `:193-216`). The annex `<table>` (`:193-211`) is the table pattern to mirror for per-datastore rows.
 
 **Security gotcha (in-file doc-comment, lines 9-16):** every user-derived value goes through a plain JSX text node (`renderToStaticMarkup` HTML-escapes). The React raw-markup escape-hatch prop is grep-gated as forbidden in this file. New cluster/datastore/VM names from `view.storage`/`view.datastoreDetail`/`view.vmDetail` must be plain `{text}` children — never the dangerous-HTML prop.
 
@@ -216,18 +255,22 @@ No code analog. Per CONTEXT bookkeeping decision + AUDIT `tech_debt`: flip stale
 ## Shared Patterns
 
 ### Slide design system (apply to all 3 new slides)
+
 **Source:** `src/engines/export/pptx/slides/_layout.ts` (`addHeader` :23, `addKpiRow` :75, `addChartPanel` :125, `addNote` :178; `CONTENT_W`/`M` exports :190)
 **Apply to:** storageSlide, networkSlide, plannedSlide — compose ONLY these. The gold factual rule is painted by `addHeader` (`_layout.ts:34-41`) — that IS the D-06 gold marker; never add a second colour or any verdict colour. Chart panel box convention is `{ x: M, y: y2, w: CONTENT_W, h: 7.15 - y2 }` (every existing slide).
 
 ### Branded-units conversion
+
 **Source:** `chartBundle.ts:128` / `drSimSlide.ts:34` — `Math.round(Number(xMib) / 1024)` for MiB→GiB.
 **Apply to:** storageSlide, plannedSlide, renderReport storage section. ADR-0010: RVTools "MB" is MiB; never raw `* 1.048576`, never `/1000`. Display via `fmtInt`/`pptxNumber` — never pre-format inside an i18n string.
 
 ### Factual-only invariant
+
 **Source:** project-wide lint + `renderReport.tsx:9-16` doc-comment, `drSimSlide.ts:2-4` ("No verdict language").
 **Apply to:** every new exported string + the D-06 flag KPI. No "recommend/should/poor/good/over/risk/warning". Flags are a count + the gold `.flagged` style only (`renderReport.tsx:63-70` `Metric` `flag` prop; `_layout.ts` gold rule). Mirrors the P9 on-screen gold-marker idiom.
 
 ### i18n EN↔FR parity
+
 **Source:** `src/i18n/keyParity.test.ts` (recursive deep key-diff, all namespaces).
 **Apply to:** every key in `report.json`/`pptx.json` — EN and FR identical paths or `npm run test:run` fails. Use the `strings['x'] ?? 'fallback'` resolution (every slide + `renderReport.tsx:91`).
 

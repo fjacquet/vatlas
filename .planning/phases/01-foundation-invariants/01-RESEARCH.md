@@ -6,7 +6,7 @@
 
 ## Summary
 
-Phase 1 is a port-with-extensions of vsizer's foundation, plus four engineering inventions that vatlas must own. The port: copy vsizer's `tsconfig.*.json`, `biome.json`, `vitest.config.ts`, `src/i18n/`, `src/test/setup.ts`, the GitHub Pages CI workflow, the `useTheme` hook + FOUC script, the SheetJS-CDN-tarball dependency pinning approach, and the `engines/parser/` directory minus `detectSource.ts` / `adapters/liveoptics.ts` / `extractWorkbook.ts`. The inventions: (1) a Web Worker boundary at the parser edge that returns canonical typed rows — never the SheetJS `WorkBook` object; (2) a runtime `fetch`/`XHR`/`WebSocket`/`sendBeacon` guard installed in `src/main.tsx` before any other import, throwing on any non-same-origin attempt; (3) a `engines/units/` module with branded TS types `MiB`/`GiB`/`MHz`/`GHz`/`Bytes`/`Cores` plus the `BYTES_PER_MIB = 1_048_576` constant and converter functions, making "MB-is-MiB" and "MHz-vs-GHz" bugs unrepresentable; (4) a multi-snapshot Zustand store shaped as `snapshots: Map<id, Snapshot>` (immutable, append-only) — deliberately *not* caching aggregates the way vsizer's `datasetStore.ts` does, because vatlas's DR sim and EOS asOf-dependent views make store-side aggregate cache invalidation a foot-cannon.
+Phase 1 is a port-with-extensions of vsizer's foundation, plus four engineering inventions that vatlas must own. The port: copy vsizer's `tsconfig.*.json`, `biome.json`, `vitest.config.ts`, `src/i18n/`, `src/test/setup.ts`, the GitHub Pages CI workflow, the `useTheme` hook + FOUC script, the SheetJS-CDN-tarball dependency pinning approach, and the `engines/parser/` directory minus `detectSource.ts` / `adapters/liveoptics.ts` / `extractWorkbook.ts`. The inventions: (1) a Web Worker boundary at the parser edge that returns canonical typed rows — never the SheetJS `WorkBook` object; (2) a runtime `fetch`/`XHR`/`WebSocket`/`sendBeacon` guard installed in `src/main.tsx` before any other import, throwing on any non-same-origin attempt; (3) a `engines/units/` module with branded TS types `MiB`/`GiB`/`MHz`/`GHz`/`Bytes`/`Cores` plus the `BYTES_PER_MIB = 1_048_576` constant and converter functions, making "MB-is-MiB" and "MHz-vs-GHz" bugs unrepresentable; (4) a multi-snapshot Zustand store shaped as `snapshots: Map<id, Snapshot>` (immutable, append-only) — deliberately _not_ caching aggregates the way vsizer's `datasetStore.ts` does, because vatlas's DR sim and EOS asOf-dependent views make store-side aggregate cache invalidation a foot-cannon.
 
 The five hard correctness invariants this phase locks in for every later phase: (1) RVTools "MB" is base-2 MiB — never multiply by 1.048576 (ADR-0010 inherited verbatim from store-predict ADR-017); (2) all dataset rows live in memory only — refresh wipes everything, no `localStorage` / `sessionStorage` / `IndexedDB` / `OPFS` of `vinfo`/`vhost`/`vdatastore`/`vpartition` rows ever, only the locale code and theme preference may use `localStorage`; (3) no non-same-origin network requests anywhere — the runtime guard throws synchronously on any attempt, with a belt-and-suspenders CSP meta tag `connect-src 'self'`; (4) parsing runs in a Web Worker so a 30 MB / 10 k VM workbook never freezes the UI, with `XLSX.read(buf, { dense: true })` and eager raw-cell drop on the worker side; (5) every column header lookup is alias-driven, never positional, so RVTools 3.10/3.11/4.0/4.4 drift is absorbed.
 
@@ -65,49 +65,49 @@ These are explicitly other phases' work — Phase 1 MUST NOT touch them. The pla
 - **Sentry / PostHog / Datadog / Amplitude / Mixpanel / LogRocket / any analytics SDK.** CI-denied (Critical-2 mitigation).
 - **Persistence of any kind for dataset rows.** Forbidden by privacy invariant.
 - **Editorial recommendations in any UI string.** Banned by PROJECT.md.
-</user_constraints>
+  </user_constraints>
 
 <phase_requirements>
 
 ## Phase Requirements
 
-The planner MUST address all thirteen IDs below. Each row maps a requirement to the research finding(s) that enable its implementation; each ID is also tagged with the *plan* it most naturally belongs to (the planner can override).
+The planner MUST address all thirteen IDs below. Each row maps a requirement to the research finding(s) that enable its implementation; each ID is also tagged with the _plan_ it most naturally belongs to (the planner can override).
 
-| ID | Description | Research Support | Suggested Plan |
-|----|-------------|------------------|----------------|
-| **FND-01** | App runs 100 % client-side at a public URL | Standard Stack §1 (Vite 8 GH Pages deploy, `base: '/vatlas/'`); CI workflow §4 (port `static.yml`); same shape as vsizer | Plan 1 (Bootstrap) |
-| **FND-02** | Drag-and-drop zone on first load | Pattern 2 (drag-and-drop shell); Code Example "Native HTML5 drop zone"; vsizer's `FileDropzone.tsx` is the visual reference; i18n keys `upload.dropzone.*` | Plan 5 (Snapshot store + sidebar) — but the drop zone shell can land in Plan 1 with a stub handler if the planner prefers to spread out |
-| **FND-03** | i18n FR + EN, auto-detect + toggle | Standard Stack §1 (i18next 26 + react-i18next 17 + browser-languagedetector 8); Pattern 5 (i18n bootstrap, ported from vsizer); only `common` + `upload` namespaces in Phase 1 | Plan 1 (Bootstrap) |
-| **FND-04** | Light/dark theme | Pattern 6 (Tailwind v4 `@theme` blocks + class-strategy dark variant + FOUC script + `useTheme` hook ported from vsizer); rename storage key `vsizer-theme` → `vatlas-theme` | Plan 1 (Bootstrap) |
-| **FND-05** | Workbook capture-date indicator visible | Snapshot model (§Data Model) carries `capturedAt: Date`; capture-date inference chain (Pattern 4); display in snapshot-list sidebar in Plan 5; full "header + footer of every export" lands in Phase 7 — Phase 1 just must surface it in the snapshot card | Plan 5 |
-| **PAR-01** | Parse without blocking UI (Web Worker) | Pattern 1 (Web Worker boundary, `new Worker(new URL('./parser.worker.ts', import.meta.url), { type: 'module' })`); Code Example "Worker message contract"; `XLSX.read(buf, { dense: true })`; **never** post the `WorkBook` object back — only canonical typed rows | Plan 4 (Parser worker) |
-| **PAR-02** | Clear error naming missing sheet/column | Pattern 4 (Zod schemas with structured error reporting); the `ParseError` type carries `{ sheet, column?, kind, message }`; toast with `t('upload:errors.parseFailed', { message })`; specifically: missing sheet → "missing sheet: vInfo (workbook contained: vMetaData, vHost, vDatastore)"; missing column → "missing required column `# CPUs` in vInfo (also acceptable aliases: `CPUs`, `vCPU`); did you export from RVTools 3.9 or older?" | Plan 4 (Parser worker) |
-| **PAR-03** | Column-name drift across RVTools 3.10/3.11/4.0/4.4 via alias dictionary | Pattern 3 (alias dictionary extends vsizer's `adapters/columnMap.ts`); table of known column changes (§Common Pitfalls Pitfall 5); RVTools version detection via `vMetaData` sheet presence + marker-column sniffing | Plan 4 (Parser worker) |
-| **PAR-04** | MB-as-MiB preserved (no `* 1.048576`) | Pattern 7 (Branded units module, `engines/units/`); ADR-0010 inheritance (Code Example "ADR-0010 verbatim"); MiB canary fixture (§Test Fixtures); Pitfall 1 (Critical-1) | Plan 3 (Units module + ADR) |
-| **PAR-05** | Refresh wipes everything (no localStorage/IndexedDB/OPFS of dataset rows) | Pattern 8 (Zustand store, memory-only); Code Example "Snapshot store shape"; only `vatlas-lang` (locale code) and `vatlas-theme` (preference) may use `localStorage`; CI grep for `localStorage.setItem` near `vinfo`/`vhost`/`vdatastore`/`Snapshot` should flag | Plan 5 (Snapshot store) |
-| **PRV-01** | Runtime fetch/XHR/WS/Beacon guard throws on non-same-origin | Pattern 9 (Privacy guard, `src/privacy/fetchGuard.ts` installed at top of `src/main.tsx`); Code Example "Privacy guard implementation"; Critical-2 mitigation table | Plan 2 (Privacy guard) |
-| **PRV-02** | CSP meta tag `connect-src 'self'` | Pattern 9 (CSP meta in `index.html`, full directive set); Code Example "CSP meta tag" | Plan 2 (Privacy guard) |
-| **PRV-03** | No telemetry SDKs, CI denylist | Pattern 9 (CI denylist via Biome `noRestrictedImports` + a `scripts/check-forbidden-deps.mjs` npm script + GH Actions step); Pitfall 2 (Critical-2 enumerated leak vectors); no source-map upload step; Biome `noConsole` as error in non-test files | Plan 2 (Privacy guard) |
-</phase_requirements>
+| ID                    | Description                                                               | Research Support                                                                                                                                                                                                                                                                                                                                                                                                                                 | Suggested Plan                                                                                                                          |
+| --------------------- | ------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------- |
+| **FND-01**            | App runs 100 % client-side at a public URL                                | Standard Stack §1 (Vite 8 GH Pages deploy, `base: '/vatlas/'`); CI workflow §4 (port `static.yml`); same shape as vsizer                                                                                                                                                                                                                                                                                                                         | Plan 1 (Bootstrap)                                                                                                                      |
+| **FND-02**            | Drag-and-drop zone on first load                                          | Pattern 2 (drag-and-drop shell); Code Example "Native HTML5 drop zone"; vsizer's `FileDropzone.tsx` is the visual reference; i18n keys `upload.dropzone.*`                                                                                                                                                                                                                                                                                       | Plan 5 (Snapshot store + sidebar) — but the drop zone shell can land in Plan 1 with a stub handler if the planner prefers to spread out |
+| **FND-03**            | i18n FR + EN, auto-detect + toggle                                        | Standard Stack §1 (i18next 26 + react-i18next 17 + browser-languagedetector 8); Pattern 5 (i18n bootstrap, ported from vsizer); only `common` + `upload` namespaces in Phase 1                                                                                                                                                                                                                                                                   | Plan 1 (Bootstrap)                                                                                                                      |
+| **FND-04**            | Light/dark theme                                                          | Pattern 6 (Tailwind v4 `@theme` blocks + class-strategy dark variant + FOUC script + `useTheme` hook ported from vsizer); rename storage key `vsizer-theme` → `vatlas-theme`                                                                                                                                                                                                                                                                     | Plan 1 (Bootstrap)                                                                                                                      |
+| **FND-05**            | Workbook capture-date indicator visible                                   | Snapshot model (§Data Model) carries `capturedAt: Date`; capture-date inference chain (Pattern 4); display in snapshot-list sidebar in Plan 5; full "header + footer of every export" lands in Phase 7 — Phase 1 just must surface it in the snapshot card                                                                                                                                                                                       | Plan 5                                                                                                                                  |
+| **PAR-01**            | Parse without blocking UI (Web Worker)                                    | Pattern 1 (Web Worker boundary, `new Worker(new URL('./parser.worker.ts', import.meta.url), { type: 'module' })`); Code Example "Worker message contract"; `XLSX.read(buf, { dense: true })`; **never** post the `WorkBook` object back — only canonical typed rows                                                                                                                                                                              | Plan 4 (Parser worker)                                                                                                                  |
+| **PAR-02**            | Clear error naming missing sheet/column                                   | Pattern 4 (Zod schemas with structured error reporting); the `ParseError` type carries `{ sheet, column?, kind, message }`; toast with `t('upload:errors.parseFailed', { message })`; specifically: missing sheet → "missing sheet: vInfo (workbook contained: vMetaData, vHost, vDatastore)"; missing column → "missing required column `# CPUs` in vInfo (also acceptable aliases: `CPUs`, `vCPU`); did you export from RVTools 3.9 or older?" | Plan 4 (Parser worker)                                                                                                                  |
+| **PAR-03**            | Column-name drift across RVTools 3.10/3.11/4.0/4.4 via alias dictionary   | Pattern 3 (alias dictionary extends vsizer's `adapters/columnMap.ts`); table of known column changes (§Common Pitfalls Pitfall 5); RVTools version detection via `vMetaData` sheet presence + marker-column sniffing                                                                                                                                                                                                                             | Plan 4 (Parser worker)                                                                                                                  |
+| **PAR-04**            | MB-as-MiB preserved (no `* 1.048576`)                                     | Pattern 7 (Branded units module, `engines/units/`); ADR-0010 inheritance (Code Example "ADR-0010 verbatim"); MiB canary fixture (§Test Fixtures); Pitfall 1 (Critical-1)                                                                                                                                                                                                                                                                         | Plan 3 (Units module + ADR)                                                                                                             |
+| **PAR-05**            | Refresh wipes everything (no localStorage/IndexedDB/OPFS of dataset rows) | Pattern 8 (Zustand store, memory-only); Code Example "Snapshot store shape"; only `vatlas-lang` (locale code) and `vatlas-theme` (preference) may use `localStorage`; CI grep for `localStorage.setItem` near `vinfo`/`vhost`/`vdatastore`/`Snapshot` should flag                                                                                                                                                                                | Plan 5 (Snapshot store)                                                                                                                 |
+| **PRV-01**            | Runtime fetch/XHR/WS/Beacon guard throws on non-same-origin               | Pattern 9 (Privacy guard, `src/privacy/fetchGuard.ts` installed at top of `src/main.tsx`); Code Example "Privacy guard implementation"; Critical-2 mitigation table                                                                                                                                                                                                                                                                              | Plan 2 (Privacy guard)                                                                                                                  |
+| **PRV-02**            | CSP meta tag `connect-src 'self'`                                         | Pattern 9 (CSP meta in `index.html`, full directive set); Code Example "CSP meta tag"                                                                                                                                                                                                                                                                                                                                                            | Plan 2 (Privacy guard)                                                                                                                  |
+| **PRV-03**            | No telemetry SDKs, CI denylist                                            | Pattern 9 (CI denylist via Biome `noRestrictedImports` + a `scripts/check-forbidden-deps.mjs` npm script + GH Actions step); Pitfall 2 (Critical-2 enumerated leak vectors); no source-map upload step; Biome `noConsole` as error in non-test files                                                                                                                                                                                             | Plan 2 (Privacy guard)                                                                                                                  |
+| </phase_requirements> |
 
 ## Architectural Responsibility Map
 
 vatlas runs entirely in one browser tab — there is no backend tier, no API server, no edge worker. The "tiers" here are intra-browser execution contexts. Mapping each Phase-1 capability to its execution context surfaces the parser-worker boundary as the most important architectural seam.
 
-| Capability | Primary Tier | Secondary Tier | Rationale |
-|------------|--------------|----------------|-----------|
-| RVTools `.xlsx` ingestion (FileReader → ArrayBuffer) | Browser main thread | Web Worker (parser) | The `File` → `ArrayBuffer` read is main-thread work; the buffer is then transferred to the worker. Use the transferable form: `worker.postMessage({ kind: 'parse', buf }, [buf])` so the main thread loses ownership and the worker reads in place — zero copy. |
-| SheetJS `XLSX.read` + RVTools adapter + Zod validation | **Web Worker (parser)** | — | A 30 MB workbook expands to 300–400 MB heap during parse (Critical-5). Main-thread parse freezes for seconds and risks OOM on small machines. Worker is mandatory from day one. |
-| Canonical row return (typed `Snapshot` minus `id`/`parsedAt`) | Web Worker → Main thread | — | The worker posts back already-validated rows. The `WorkBook` object MUST NOT cross the boundary — only `{ vinfo: VInfoRow[], vhost: VHostRow[], vdatastore: VDatastoreRow[], vpartition: VPartitionRow[], vCenterLabel, rvtoolsVersion, capturedAt, parseErrors }`. |
-| Snapshot store (Zustand) | Browser main thread | — | UI subscribes to the store; the store actions only ever set immutable snapshot objects. Memory only. |
-| Privacy guard (`fetch`/`XHR`/`WS`/`Beacon` wrapper) | Browser main thread, **install before all other imports** | Web Worker (same install in worker entry) | The guard must be installed at the **very top of `src/main.tsx`**, before any module that might race a fetch. The worker has its own global scope and `XMLHttpRequest` — the same guard module is imported at the top of `parser.worker.ts` too. |
-| CSP meta tag `connect-src 'self'` | Browser (parsed from `index.html` `<head>`) | — | Defense in depth alongside the runtime guard. CSP also blocks `<script src=>` injection, `frame-src`, inline scripts (we keep `'unsafe-inline'` only for the FOUC theme-init script — see §6). |
-| i18n initialization + language detection | Browser main thread | — | Must happen before `<App />` mounts so `useTranslation()` resolves keys synchronously on first paint. |
-| Theme resolution (FOUC prevention) | Browser main thread, **inline script in `<head>` before `<body>`** | — | Reads `localStorage['vatlas-theme']` and sets `<html class="dark">` before paint to avoid a flash of light theme. Pure DOM script, no React. |
-| Drag-and-drop zone | Browser main thread | — | Native HTML5 drag-and-drop events on the React component; dispatches files to the parser worker via the upload hook. |
-| Snapshot-list sidebar UI | Browser main thread | — | Reads from store, renders snapshot cards with `filename / vCenterLabel / capturedAt / rvtoolsVersion / row counts`. No charts in Phase 1. |
-| Test fixtures (RVTools-MiB canary + 4 real workbooks per generation) | Build-time / test runner | — | Vitest reads fixtures from `src/__fixtures__/` or `public/samples/`. Coverage gate on `engines/parser/**` and `engines/units/**`. |
-| CI: typecheck → lint → test → build → deploy + denylist enforcement | GitHub Actions runner (Node 24) | — | Mirrors vsizer's `static.yml`. Adds telemetry-package denylist step and SheetJS-tarball pinning verification step. |
+| Capability                                                           | Primary Tier                                                       | Secondary Tier                            | Rationale                                                                                                                                                                                                                                                           |
+| -------------------------------------------------------------------- | ------------------------------------------------------------------ | ----------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| RVTools `.xlsx` ingestion (FileReader → ArrayBuffer)                 | Browser main thread                                                | Web Worker (parser)                       | The `File` → `ArrayBuffer` read is main-thread work; the buffer is then transferred to the worker. Use the transferable form: `worker.postMessage({ kind: 'parse', buf }, [buf])` so the main thread loses ownership and the worker reads in place — zero copy.     |
+| SheetJS `XLSX.read` + RVTools adapter + Zod validation               | **Web Worker (parser)**                                            | —                                         | A 30 MB workbook expands to 300–400 MB heap during parse (Critical-5). Main-thread parse freezes for seconds and risks OOM on small machines. Worker is mandatory from day one.                                                                                     |
+| Canonical row return (typed `Snapshot` minus `id`/`parsedAt`)        | Web Worker → Main thread                                           | —                                         | The worker posts back already-validated rows. The `WorkBook` object MUST NOT cross the boundary — only `{ vinfo: VInfoRow[], vhost: VHostRow[], vdatastore: VDatastoreRow[], vpartition: VPartitionRow[], vCenterLabel, rvtoolsVersion, capturedAt, parseErrors }`. |
+| Snapshot store (Zustand)                                             | Browser main thread                                                | —                                         | UI subscribes to the store; the store actions only ever set immutable snapshot objects. Memory only.                                                                                                                                                                |
+| Privacy guard (`fetch`/`XHR`/`WS`/`Beacon` wrapper)                  | Browser main thread, **install before all other imports**          | Web Worker (same install in worker entry) | The guard must be installed at the **very top of `src/main.tsx`**, before any module that might race a fetch. The worker has its own global scope and `XMLHttpRequest` — the same guard module is imported at the top of `parser.worker.ts` too.                    |
+| CSP meta tag `connect-src 'self'`                                    | Browser (parsed from `index.html` `<head>`)                        | —                                         | Defense in depth alongside the runtime guard. CSP also blocks `<script src=>` injection, `frame-src`, inline scripts (we keep `'unsafe-inline'` only for the FOUC theme-init script — see §6).                                                                      |
+| i18n initialization + language detection                             | Browser main thread                                                | —                                         | Must happen before `<App />` mounts so `useTranslation()` resolves keys synchronously on first paint.                                                                                                                                                               |
+| Theme resolution (FOUC prevention)                                   | Browser main thread, **inline script in `<head>` before `<body>`** | —                                         | Reads `localStorage['vatlas-theme']` and sets `<html class="dark">` before paint to avoid a flash of light theme. Pure DOM script, no React.                                                                                                                        |
+| Drag-and-drop zone                                                   | Browser main thread                                                | —                                         | Native HTML5 drag-and-drop events on the React component; dispatches files to the parser worker via the upload hook.                                                                                                                                                |
+| Snapshot-list sidebar UI                                             | Browser main thread                                                | —                                         | Reads from store, renders snapshot cards with `filename / vCenterLabel / capturedAt / rvtoolsVersion / row counts`. No charts in Phase 1.                                                                                                                           |
+| Test fixtures (RVTools-MiB canary + 4 real workbooks per generation) | Build-time / test runner                                           | —                                         | Vitest reads fixtures from `src/__fixtures__/` or `public/samples/`. Coverage gate on `engines/parser/**` and `engines/units/**`.                                                                                                                                   |
+| CI: typecheck → lint → test → build → deploy + denylist enforcement  | GitHub Actions runner (Node 24)                                    | —                                         | Mirrors vsizer's `static.yml`. Adds telemetry-package denylist step and SheetJS-tarball pinning verification step.                                                                                                                                                  |
 
 ## Standard Stack
 
@@ -115,53 +115,53 @@ vatlas runs entirely in one browser tab — there is no backend tier, no API ser
 
 All versions verified against the npm registry on 2026-05-15 (`npm view <pkg> version`).
 
-| Library | Version | Purpose | Why Standard |
-|---------|---------|---------|--------------|
-| `react` | `^19.2.6` `[VERIFIED: npm view react = 19.2.6]` | UI runtime | vsizer is on 19.2.6; current stable line; no RSC concerns (client-only). |
-| `react-dom` | `^19.2.6` `[VERIFIED: npm]` | DOM bindings | Lockstep with React. |
-| `typescript` | `~5.9.3` `[CITED: vsizer package.json + tsconfig.app.json]` | Strict typing | Match vsizer; `strict` + `noUncheckedIndexedAccess` + `verbatimModuleSyntax` + `erasableSyntaxOnly`. |
-| `vite` | `^8.0.13` `[VERIFIED: npm view vite = 8.0.13]` | Dev server + bundler | vsizer on 8.0.12; 8.0.13 is a patch bump. Rolldown bundler. |
-| `@vitejs/plugin-react` | `^6.0.1` `[CITED: vsizer]` | React JSX/Fast Refresh | Required peer for Vite 8 + React 19. |
-| `tailwindcss` | `^4.3.0` `[VERIFIED: npm view tailwindcss = 4.3.0]` | Styling | v4 stable; CSS-first `@theme` blocks; v4.3 added logical-property utilities and `@container-size`. |
-| `@tailwindcss/vite` | `^4.3.0` `[CITED: STACK.md + Tailwind official docs]` | Tailwind Vite integration | First-party plugin; drops `tailwind.config.js` entirely. |
-| `zustand` | `^5.0.13` `[VERIFIED: npm view zustand = 5.0.13]` | Client state | v5 stable; **named imports only** (`import { create } from 'zustand'`); memory-only, no persistence of dataset rows. |
-| `zod` | `^4.4.3` `[VERIFIED: npm view zod = 4.4.3]` | Runtime schema validation | v4 stable since Aug 2025; do **not** mix v3 patterns. Use the `error` parameter, not `message`/`required_error`. |
-| `xlsx` | `https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz` `[VERIFIED: cdn.sheetjs.com returned HTTP 200 for the tarball]` | RVTools `.xlsx` parsing | The **only** correct install channel. The npm `xlsx` is frozen at 0.18.5 and CVE-affected (CVE-2024-22363 ReDoS + CVE-2023-30533 prototype pollution). |
-| `react-i18next` | `^17.0.8` `[VERIFIED: npm view react-i18next = 17.0.8]` | i18n | vsizer is on `^16.6.6`; **v17 is the current release**. The migration from v16 to v17 is small (TypeScript module typing moved from `react-i18next` to `i18next`; if you depend on `i18next.language` during a `languageChanged` callback, behavior changed) — vsizer's i18n usage does not depend on either. **Recommendation: ship `^17.0.8` from day one.** Use vsizer's `src/i18n/index.ts` shape verbatim, only update the `import` types. `[ASSUMED — based on search results; not deeply tested]` See Open Question Q3. |
-| `i18next` | `^26.2.0` `[VERIFIED: npm view i18next = 26.2.0]` | i18n core | Lockstep with react-i18next. |
-| `i18next-browser-languagedetector` | `^8.2.1` `[VERIFIED: npm]` | Locale detection chain | Same chain vsizer uses: `?lang=` → `localStorage['vatlas-lang']` → `navigator` → `fr` fallback. `vatlas-lang` (locale code only, **not** dataset content) is the *only* allowed `localStorage` write outside `vatlas-theme`. |
+| Library                            | Version                                                                                                               | Purpose                   | Why Standard                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| ---------------------------------- | --------------------------------------------------------------------------------------------------------------------- | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `react`                            | `^19.2.6` `[VERIFIED: npm view react = 19.2.6]`                                                                       | UI runtime                | vsizer is on 19.2.6; current stable line; no RSC concerns (client-only).                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `react-dom`                        | `^19.2.6` `[VERIFIED: npm]`                                                                                           | DOM bindings              | Lockstep with React.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| `typescript`                       | `~5.9.3` `[CITED: vsizer package.json + tsconfig.app.json]`                                                           | Strict typing             | Match vsizer; `strict` + `noUncheckedIndexedAccess` + `verbatimModuleSyntax` + `erasableSyntaxOnly`.                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| `vite`                             | `^8.0.13` `[VERIFIED: npm view vite = 8.0.13]`                                                                        | Dev server + bundler      | vsizer on 8.0.12; 8.0.13 is a patch bump. Rolldown bundler.                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `@vitejs/plugin-react`             | `^6.0.1` `[CITED: vsizer]`                                                                                            | React JSX/Fast Refresh    | Required peer for Vite 8 + React 19.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| `tailwindcss`                      | `^4.3.0` `[VERIFIED: npm view tailwindcss = 4.3.0]`                                                                   | Styling                   | v4 stable; CSS-first `@theme` blocks; v4.3 added logical-property utilities and `@container-size`.                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| `@tailwindcss/vite`                | `^4.3.0` `[CITED: STACK.md + Tailwind official docs]`                                                                 | Tailwind Vite integration | First-party plugin; drops `tailwind.config.js` entirely.                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `zustand`                          | `^5.0.13` `[VERIFIED: npm view zustand = 5.0.13]`                                                                     | Client state              | v5 stable; **named imports only** (`import { create } from 'zustand'`); memory-only, no persistence of dataset rows.                                                                                                                                                                                                                                                                                                                                                                                                           |
+| `zod`                              | `^4.4.3` `[VERIFIED: npm view zod = 4.4.3]`                                                                           | Runtime schema validation | v4 stable since Aug 2025; do **not** mix v3 patterns. Use the `error` parameter, not `message`/`required_error`.                                                                                                                                                                                                                                                                                                                                                                                                               |
+| `xlsx`                             | `https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz` `[VERIFIED: cdn.sheetjs.com returned HTTP 200 for the tarball]` | RVTools `.xlsx` parsing   | The **only** correct install channel. The npm `xlsx` is frozen at 0.18.5 and CVE-affected (CVE-2024-22363 ReDoS + CVE-2023-30533 prototype pollution).                                                                                                                                                                                                                                                                                                                                                                         |
+| `react-i18next`                    | `^17.0.8` `[VERIFIED: npm view react-i18next = 17.0.8]`                                                               | i18n                      | vsizer is on `^16.6.6`; **v17 is the current release**. The migration from v16 to v17 is small (TypeScript module typing moved from `react-i18next` to `i18next`; if you depend on `i18next.language` during a `languageChanged` callback, behavior changed) — vsizer's i18n usage does not depend on either. **Recommendation: ship `^17.0.8` from day one.** Use vsizer's `src/i18n/index.ts` shape verbatim, only update the `import` types. `[ASSUMED — based on search results; not deeply tested]` See Open Question Q3. |
+| `i18next`                          | `^26.2.0` `[VERIFIED: npm view i18next = 26.2.0]`                                                                     | i18n core                 | Lockstep with react-i18next.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| `i18next-browser-languagedetector` | `^8.2.1` `[VERIFIED: npm]`                                                                                            | Locale detection chain    | Same chain vsizer uses: `?lang=` → `localStorage['vatlas-lang']` → `navigator` → `fr` fallback. `vatlas-lang` (locale code only, **not** dataset content) is the _only_ allowed `localStorage` write outside `vatlas-theme`.                                                                                                                                                                                                                                                                                                   |
 
 ### Supporting
 
-| Library | Version | Purpose | When to Use |
-|---------|---------|---------|-------------|
-| `react-error-boundary` | `^6.1.1` `[VERIFIED: npm view = 6.1.1]` | Crash isolation | Wrap `<App />`. `FallbackProps.error` is typed `unknown` — always narrow with `instanceof Error` before reading `.message`. Critically: the fallback may ONLY read `error.message` and `error.name`, **never** `error.cause` (which may carry parsed VM rows — Critical-2 leak vector). |
-| `sonner` | `^2.0.7` `[VERIFIED: npm]` | Toast notifications | "Workbook loaded", "Parse error". One `<Toaster />` at root. |
+| Library                | Version                                 | Purpose             | When to Use                                                                                                                                                                                                                                                                            |
+| ---------------------- | --------------------------------------- | ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `react-error-boundary` | `^6.1.1` `[VERIFIED: npm view = 6.1.1]` | Crash isolation     | Wrap `<App />`.`FallbackProps.error` is typed `unknown` — always narrow with `instanceof Error` before reading `.message`. Critically: the fallback may ONLY read `error.message` and `error.name`, **never** `error.cause` (which may carry parsed VM rows — Critical-2 leak vector). |
+| `sonner`               | `^2.0.7` `[VERIFIED: npm]`              | Toast notifications | "Workbook loaded", "Parse error". One `<Toaster />` at root.                                                                                                                                                                                                                           |
 
 ### Development Tools
 
-| Tool | Version | Purpose | Notes |
-|------|---------|---------|-------|
-| `@biomejs/biome` | `^2.4.15` `[VERIFIED: npm]` | Lint + format | Copy `biome.json` verbatim from vsizer. Single quotes JS, double CSS, no semicolons, 2-space, 100-char. Add `noConsole` as **error** in non-test files (Critical-2 mitigation). |
-| `vitest` | `^4.1.6` `[VERIFIED: npm view vitest = 4.1.6]` | Unit + integration tests | vsizer on 4.1.2; 4.1.6 is a patch bump. Browser Mode stable (will use in Phase 2 for chart-render tests; Phase 1 stays on jsdom). |
-| `@vitest/coverage-v8` | `^4.1.6` | Coverage provider | 75 % gate on `src/engines/**` and `src/utils/**`. |
-| `@testing-library/react` | `^16.3.2` | Component tests | Standard. |
-| `@testing-library/jest-dom` | `^6.9.1` | DOM matchers | Standard. |
-| `@testing-library/user-event` | `^14.6.1` | Realistic user events | Standard. |
-| `jsdom` | `^29.1.1` | Default test environment | Standard. |
-| `@types/react` / `@types/react-dom` | `^19.2.14` / `^19.2.3` | Type defs | Lockstep with runtime. |
-| `@types/node` | `^25.7.0` | Vite/Node types | For `vite.config.ts`. |
+| Tool                                | Version                                        | Purpose                  | Notes                                                                                                                                                                           |
+| ----------------------------------- | ---------------------------------------------- | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `@biomejs/biome`                    | `^2.4.15` `[VERIFIED: npm]`                    | Lint + format            | Copy `biome.json` verbatim from vsizer. Single quotes JS, double CSS, no semicolons, 2-space, 100-char. Add `noConsole` as **error** in non-test files (Critical-2 mitigation). |
+| `vitest`                            | `^4.1.6` `[VERIFIED: npm view vitest = 4.1.6]` | Unit + integration tests | vsizer on 4.1.2; 4.1.6 is a patch bump. Browser Mode stable (will use in Phase 2 for chart-render tests; Phase 1 stays on jsdom).                                               |
+| `@vitest/coverage-v8`               | `^4.1.6`                                       | Coverage provider        | 75 % gate on `src/engines/**` and `src/utils/**`.                                                                                                                               |
+| `@testing-library/react`            | `^16.3.2`                                      | Component tests          | Standard.                                                                                                                                                                       |
+| `@testing-library/jest-dom`         | `^6.9.1`                                       | DOM matchers             | Standard.                                                                                                                                                                       |
+| `@testing-library/user-event`       | `^14.6.1`                                      | Realistic user events    | Standard.                                                                                                                                                                       |
+| `jsdom`                             | `^29.1.1`                                      | Default test environment | Standard.                                                                                                                                                                       |
+| `@types/react` / `@types/react-dom` | `^19.2.14` / `^19.2.3`                         | Type defs                | Lockstep with runtime.                                                                                                                                                          |
+| `@types/node`                       | `^25.7.0`                                      | Vite/Node types          | For `vite.config.ts`.                                                                                                                                                           |
 
 ### Alternatives Considered
 
-| Instead of | Could Use | Tradeoff |
-|------------|-----------|----------|
-| Native HTML5 drag-and-drop | `react-dropzone` (`^14.x`) | react-dropzone gives free file-type filtering and accessibility plumbing; the cost is one more dep, ~13 KB gz, and an indirect way of doing what 40 lines of native event handlers can do. **KISS argues native.** Recommendation: native — see Pattern 2. |
-| Plain `postMessage` for Worker contract | `Comlink` (`^4.x`) | Comlink hides the message protocol behind RPC-style async calls. Beautiful for complex worker APIs; over-engineered for one operation (`parseWorkbook(buf): Snapshot`). **KISS argues plain.** Recommendation: plain — see Pattern 1. |
-| Branded number types via intersection | `Tagged` / `Newtype` libs (e.g. `ts-brand`, `newtype-ts`) | Adds a dep for what is a six-line type definition. Recommendation: hand-rolled — see Pattern 7. |
-| `crypto.randomUUID()` for snapshot id | `ulid` / `uuid` v7 | Native API, zero dep. ULID's lexicographic-sort property is irrelevant here because snapshots sort by `capturedAt`. **Recommendation: `crypto.randomUUID()`.** |
-| Centralized fetch-guard via `service worker` | Runtime monkey-patch in `main.tsx` | Service workers are explicitly **forbidden** by Critical-2 (increase attack surface). Runtime monkey-patch it is. |
-| `i18next-resources-to-backend` lazy-load | Bundled-at-build-time resources | Lazy-loading FR JSON over HTTP is a same-origin request that the privacy guard would allow — but adds complexity. vsizer bundles; we bundle. |
+| Instead of                                   | Could Use                                                 | Tradeoff                                                                                                                                                                                                                                                   |
+| -------------------------------------------- | --------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Native HTML5 drag-and-drop                   | `react-dropzone` (`^14.x`)                                | react-dropzone gives free file-type filtering and accessibility plumbing; the cost is one more dep, ~13 KB gz, and an indirect way of doing what 40 lines of native event handlers can do. **KISS argues native.** Recommendation: native — see Pattern 2. |
+| Plain `postMessage` for Worker contract      | `Comlink` (`^4.x`)                                        | Comlink hides the message protocol behind RPC-style async calls. Beautiful for complex worker APIs; over-engineered for one operation (`parseWorkbook(buf): Snapshot`). **KISS argues plain.** Recommendation: plain — see Pattern 1.                      |
+| Branded number types via intersection        | `Tagged` / `Newtype` libs (e.g. `ts-brand`, `newtype-ts`) | Adds a dep for what is a six-line type definition. Recommendation: hand-rolled — see Pattern 7.                                                                                                                                                            |
+| `crypto.randomUUID()` for snapshot id        | `ulid` / `uuid` v7                                        | Native API, zero dep. ULID's lexicographic-sort property is irrelevant here because snapshots sort by `capturedAt`.**Recommendation: `crypto.randomUUID()`.**                                                                                              |
+| Centralized fetch-guard via `service worker` | Runtime monkey-patch in `main.tsx`                        | Service workers are explicitly **forbidden** by Critical-2 (increase attack surface). Runtime monkey-patch it is.                                                                                                                                          |
+| `i18next-resources-to-backend` lazy-load     | Bundled-at-build-time resources                           | Lazy-loading FR JSON over HTTP is a same-origin request that the privacy guard would allow — but adds complexity. vsizer bundles; we bundle.                                                                                                               |
 
 **Installation:**
 
@@ -206,21 +206,21 @@ node -e "console.log(require('./package.json').dependencies.xlsx)"
 
 **Version verification — done 2026-05-15 against the npm registry:**
 
-| Package | Reported by `npm view <pkg> version` | Source |
-|---------|--------------------------------------|--------|
-| tailwindcss | 4.3.0 | npm registry |
-| zod | 4.4.3 | npm registry |
-| vite | 8.0.13 | npm registry |
-| echarts | 6.0.0 (not used in Phase 1) | npm registry — flag for Phase 2 |
-| echarts-for-react | 3.0.6 (not used in Phase 1) | npm registry — flag for Phase 2 |
-| zustand | 5.0.13 | npm registry |
-| react | 19.2.6 | npm registry |
-| i18next | 26.2.0 | npm registry |
-| react-i18next | 17.0.8 | npm registry |
-| vitest | 4.1.6 | npm registry |
-| @biomejs/biome | 2.4.15 | npm registry |
-| pptxgenjs | 4.0.1 (not used in Phase 1) | npm registry |
-| SheetJS xlsx tarball | 0.20.3 reachable, HTTP 200 | cdn.sheetjs.com |
+| Package              | Reported by `npm view <pkg> version` | Source                          |
+| -------------------- | ------------------------------------ | ------------------------------- |
+| tailwindcss          | 4.3.0                                | npm registry                    |
+| zod                  | 4.4.3                                | npm registry                    |
+| vite                 | 8.0.13                               | npm registry                    |
+| echarts              | 6.0.0 (not used in Phase 1)          | npm registry — flag for Phase 2 |
+| echarts-for-react    | 3.0.6 (not used in Phase 1)          | npm registry — flag for Phase 2 |
+| zustand              | 5.0.13                               | npm registry                    |
+| react                | 19.2.6                               | npm registry                    |
+| i18next              | 26.2.0                               | npm registry                    |
+| react-i18next        | 17.0.8                               | npm registry                    |
+| vitest               | 4.1.6                                | npm registry                    |
+| @biomejs/biome       | 2.4.15                               | npm registry                    |
+| pptxgenjs            | 4.0.1 (not used in Phase 1)          | npm registry                    |
+| SheetJS xlsx tarball | 0.20.3 reachable, HTTP 200           | cdn.sheetjs.com                 |
 
 **Note for Phase 2 planner:** ECharts shipped 6.0 in mid-2025. STACK.md pins `^5.6.0`. The v5→v6 breakup is a real migration (default theme changed; CartesianAxis position-shift; CanvasRenderer no longer included by default in the on-demand interface). Phase 2 must decide: stay on 5.6 (lower risk, recommended by STACK.md) or jump to 6.0 (current). Not Phase 1's problem.
 
@@ -544,7 +544,10 @@ export const FileDropzone = ({ onFiles, disabled }: Props): JSX.Element => {
 
   return (
     <div
-      onDragOver={(e) => { e.preventDefault(); setIsDragOver(true) }}
+      onDragOver={(e) => {
+        e.preventDefault()
+        setIsDragOver(true)
+      }}
       onDragLeave={() => setIsDragOver(false)}
       onDrop={handleDrop}
       className={
@@ -617,7 +620,7 @@ const VDATASTORE_COLS = {
   freeMib: ['free mb', 'free (mb)', 'free'],
   provisionedMib: ['provisioned mb', 'provisioned (mb)'],
   naa: ['address', 'datastore url', 'url'], // NAA / UUID identity key
-  type: ['type'],                            // VMFS, NFS, vSAN
+  type: ['type'], // VMFS, NFS, vSAN
 } as const
 
 const VPARTITION_COLS = {
@@ -638,16 +641,16 @@ const VMETADATA_COLS = {
 
 **Known column changes table** (from PITFALLS.md Moderate-1):
 
-| RVTools version | Sheet | Change |
-|-----------------|-------|--------|
-| 4.0 | vInfo | + `Virtual machine tags`, `min Required EVC mode key`; − `Config Checksum` |
-| 4.0 | vCluster | + `Cluster tags`, custom attributes, `object ID` |
-| 4.0 | vHost | + Host tags in maintenance/quarantine mode |
-| 3.11 | vInfo | + `Creation date`, `Primary IP Address`, `vmx Config Checksum` |
-| 3.11 | vHost | + `Serial number`, `BIOS vendor` |
-| 3.10 | vInfo | + latency-sensitivity, CBT, `disk.EnableUUID` |
-| 3.10 | vHost | + Assigned License(s), ATS heartbeat/locking, CPU power |
-| 3.7 | many | + `VM Folder` |
+| RVTools version | Sheet    | Change                                                                     |
+| --------------- | -------- | -------------------------------------------------------------------------- |
+| 4.0             | vInfo    | + `Virtual machine tags`, `min Required EVC mode key`; − `Config Checksum` |
+| 4.0             | vCluster | + `Cluster tags`, custom attributes, `object ID`                           |
+| 4.0             | vHost    | + Host tags in maintenance/quarantine mode                                 |
+| 3.11            | vInfo    | + `Creation date`, `Primary IP Address`, `vmx Config Checksum`             |
+| 3.11            | vHost    | + `Serial number`, `BIOS vendor`                                           |
+| 3.10            | vInfo    | + latency-sensitivity, CBT, `disk.EnableUUID`                              |
+| 3.10            | vHost    | + Assigned License(s), ATS heartbeat/locking, CPU power                    |
+| 3.7             | many     | + `VM Folder`                                                              |
 
 `[CITED: PITFALLS.md (Moderate-1) + vinfrastructure.it RVTools 4.0 release notes]`
 
@@ -736,7 +739,7 @@ i18n
     detection: {
       order: ['querystring', 'localStorage', 'navigator'],
       lookupQuerystring: 'lang',
-      lookupLocalStorage: 'vatlas-lang',   // ← renamed from 'vsizer-lang'
+      lookupLocalStorage: 'vatlas-lang', // ← renamed from 'vsizer-lang'
       caches: ['localStorage'],
     },
   })
@@ -764,40 +767,50 @@ The theme MUST be in `<html class="dark">` form (not the modern `data-theme=` fo
 
 ```ts
 // src/engines/units/types.ts
-export type MiB    = number & { readonly __brand: 'MiB' }
-export type GiB    = number & { readonly __brand: 'GiB' }
-export type TiB    = number & { readonly __brand: 'TiB' }
-export type Bytes  = number & { readonly __brand: 'Bytes' }
-export type MHz    = number & { readonly __brand: 'MHz' }
-export type GHz    = number & { readonly __brand: 'GHz' }
-export type Cores  = number & { readonly __brand: 'Cores' }
+export type MiB = number & { readonly __brand: 'MiB' }
+export type GiB = number & { readonly __brand: 'GiB' }
+export type TiB = number & { readonly __brand: 'TiB' }
+export type Bytes = number & { readonly __brand: 'Bytes' }
+export type MHz = number & { readonly __brand: 'MHz' }
+export type GHz = number & { readonly __brand: 'GHz' }
+export type Cores = number & { readonly __brand: 'Cores' }
 export type Sockets = number & { readonly __brand: 'Sockets' }
 
 // Constructors: explicit casts confined to one location each
-export const mib   = (n: number): MiB    => n as MiB
-export const gib   = (n: number): GiB    => n as GiB
-export const tib   = (n: number): TiB    => n as TiB
-export const bytes = (n: number): Bytes  => n as Bytes
-export const mhz   = (n: number): MHz    => n as MHz
-export const ghz   = (n: number): GHz    => n as GHz
-export const cores = (n: number): Cores  => n as Cores
+export const mib = (n: number): MiB => n as MiB
+export const gib = (n: number): GiB => n as GiB
+export const tib = (n: number): TiB => n as TiB
+export const bytes = (n: number): Bytes => n as Bytes
+export const mhz = (n: number): MHz => n as MHz
+export const ghz = (n: number): GHz => n as GHz
+export const cores = (n: number): Cores => n as Cores
 
 // src/engines/units/constants.ts
 export const BYTES_PER_MIB = 1_048_576 as const
-export const MIB_PER_GIB   = 1_024 as const
-export const GIB_PER_TIB   = 1_024 as const
-export const MHZ_PER_GHZ   = 1_000 as const
+export const MIB_PER_GIB = 1_024 as const
+export const GIB_PER_TIB = 1_024 as const
+export const MHZ_PER_GHZ = 1_000 as const
 
 // src/engines/units/converters.ts
-import { type MiB, type GiB, type TiB, type Bytes, type MHz, type GHz,
-         gib, tib, bytes, ghz } from './types'
+import {
+  type MiB,
+  type GiB,
+  type TiB,
+  type Bytes,
+  type MHz,
+  type GHz,
+  gib,
+  tib,
+  bytes,
+  ghz,
+} from './types'
 import { BYTES_PER_MIB, MIB_PER_GIB, GIB_PER_TIB, MHZ_PER_GHZ } from './constants'
 
-export const mibToGib   = (n: MiB):   GiB   => gib(n / MIB_PER_GIB)
-export const gibToTib   = (n: GiB):   TiB   => tib(n / GIB_PER_TIB)
-export const mibToTib   = (n: MiB):   TiB   => tib(n / (MIB_PER_GIB * GIB_PER_TIB))
-export const mibToBytes = (n: MiB):   Bytes => bytes(n * BYTES_PER_MIB)
-export const mhzToGhz   = (n: MHz):   GHz   => ghz(n / MHZ_PER_GHZ)
+export const mibToGib = (n: MiB): GiB => gib(n / MIB_PER_GIB)
+export const gibToTib = (n: GiB): TiB => tib(n / GIB_PER_TIB)
+export const mibToTib = (n: MiB): TiB => tib(n / (MIB_PER_GIB * GIB_PER_TIB))
+export const mibToBytes = (n: MiB): Bytes => bytes(n * BYTES_PER_MIB)
+export const mhzToGhz = (n: MHz): GHz => ghz(n / MHZ_PER_GHZ)
 ```
 
 **Zod 4 produces branded outputs cleanly:**
@@ -809,12 +822,15 @@ import type { MiB, MHz, Cores } from '../units'
 
 // Two ways. Pick one consistently across the codebase. RECOMMEND option A:
 // Option A — schema validates a plain number, .transform() casts to brand
-const MibSchema = z.number().nonnegative().transform((n) => n as MiB)
+const MibSchema = z
+  .number()
+  .nonnegative()
+  .transform((n) => n as MiB)
 // Option B — Zod's native .brand() (the v4 syntax — see zod.dev/api)
-const MibSchemaB = z.number().nonnegative().brand<'MiB'>()  // output type: number & z.$brand<'MiB'>
+const MibSchemaB = z.number().nonnegative().brand<'MiB'>() // output type: number & z.$brand<'MiB'>
 ```
 
-`[VERIFIED: zod.dev/api — "Branded types" section confirms`.brand<'MiB'>()` syntax in v4. The output is `number & z.$brand<'MiB'>` — slightly different from our hand-rolled `number & { readonly __brand: 'MiB' }`. Pick one shape for the whole project.]`
+`[VERIFIED: zod.dev/api — "Branded types" section confirms`.brand<'MiB'>()`syntax in v4. The output is`number & z.$brand<'MiB'>`— slightly different from our hand-rolled`number & { readonly __brand: 'MiB' }`. Pick one shape for the whole project.]`
 
 **Recommendation:** Hand-rolled branded types (Option A in the example above) — the Zod brand shape `z.$brand<'X'>` is a Zod-internal symbol and bleeds Zod's type identity into engine code that has no other reason to know about Zod. Hand-rolled brands keep engines completely Zod-free.
 
@@ -868,9 +884,12 @@ export const useSnapshotStore = create<SnapshotState>((set) => ({
       if (!state.snapshots.has(id)) return {}
       const next = new Map(state.snapshots)
       next.delete(id)
-      const nextActive = state.activeSnapshotId === id
-        ? (next.size > 0 ? [...next.keys()][0]! : null)
-        : state.activeSnapshotId
+      const nextActive =
+        state.activeSnapshotId === id
+          ? next.size > 0
+            ? [...next.keys()][0]!
+            : null
+          : state.activeSnapshotId
       return { snapshots: next, activeSnapshotId: nextActive }
     }),
 
@@ -900,7 +919,7 @@ export const useSnapshotStore = create<SnapshotState>((set) => ({
 // Selectors with stable references (no new objects/arrays inside)
 export const selectHasSnapshots = (s: SnapshotState): boolean => s.snapshots.size > 0
 export const selectActiveSnapshot = (s: SnapshotState): Snapshot | null =>
-  s.activeSnapshotId ? s.snapshots.get(s.activeSnapshotId) ?? null : null
+  s.activeSnapshotId ? (s.snapshots.get(s.activeSnapshotId) ?? null) : null
 ```
 
 **Key invariants encoded in the shape:**
@@ -957,9 +976,13 @@ const sameOrigin = (target: string | URL): boolean => {
 const originalFetch = globalThis.fetch
 globalThis.fetch = function patchedFetch(input: RequestInfo | URL, init?: RequestInit) {
   const target =
-    typeof input === 'string' ? input :
-    input instanceof URL      ? input :
-    input instanceof Request  ? input.url : ''
+    typeof input === 'string'
+      ? input
+      : input instanceof URL
+        ? input
+        : input instanceof Request
+          ? input.url
+          : ''
   if (!sameOrigin(target as string | URL)) throw new PrivacyViolation('fetch', String(target))
   return originalFetch.call(this, input, init)
 } as typeof fetch
@@ -983,7 +1006,10 @@ if (typeof XMLHttpRequest !== 'undefined') {
 // 3. navigator.sendBeacon
 if (typeof navigator !== 'undefined' && 'sendBeacon' in navigator) {
   const origBeacon = navigator.sendBeacon.bind(navigator)
-  navigator.sendBeacon = function patchedBeacon(url: string | URL, data?: BodyInit | null): boolean {
+  navigator.sendBeacon = function patchedBeacon(
+    url: string | URL,
+    data?: BodyInit | null,
+  ): boolean {
     if (!sameOrigin(url)) throw new PrivacyViolation('sendBeacon', String(url))
     return origBeacon(url, data ?? null)
   } as Navigator['sendBeacon']
@@ -1005,7 +1031,10 @@ if (typeof WebSocket !== 'undefined') {
       return false
     }
   }
-  globalThis.WebSocket = function PatchedWebSocket(url: string | URL, protocols?: string | string[]) {
+  globalThis.WebSocket = function PatchedWebSocket(
+    url: string | URL,
+    protocols?: string | string[],
+  ) {
     if (!sameOrigin(url)) throw new PrivacyViolation('WebSocket', String(url))
     if (!isSecureUrl(url)) throw new InsecureTransportViolation('WebSocket', String(url))
     return new OriginalWebSocket(url, protocols)
@@ -1114,7 +1143,7 @@ Wire it into `static.yml` as a step before `npm ci` (so an offending package is 
 ### Anti-Patterns to Avoid
 
 - **`localStorage.setItem('snapshot:...', JSON.stringify(snapshot))`** — Breaks PAR-05. Snapshots live only in the Zustand `Map`. Only `vatlas-lang` and `vatlas-theme` may be written to `localStorage`.
-- **`fetch('/api/log', { method: 'POST', body: error })` in an error boundary** — Breaks PRV-01 *if* the URL ever leaves `'self'`. Even same-origin: `FallbackError` must read only `error.message` and `error.name`; `error.cause` may carry parsed rows.
+- **`fetch('/api/log', { method: 'POST', body: error })` in an error boundary** — Breaks PRV-01 _if_ the URL ever leaves `'self'`. Even same-origin: `FallbackError` must read only `error.message` and `error.name`; `error.cause` may carry parsed rows.
 - **Cleartext WebSocket connections** — Breaks the secure-transport invariant (CWE-319). The guard rejects any non-`wss:` scheme even if same-origin. Production is HTTPS; mixed-content rules would block them anyway. Only `wss:` is acceptable.
 - **Parsing on the main thread "to start with"** — Critical-5. Retrofit is painful because every call site moves from sync to async; ship the worker boundary from day one.
 - **Positional column indexing (`row[3]`, `cell.B`)** — Breaks PAR-03 the moment RVTools moves a column. Always go through `findColumn` / `mapColumns`.
@@ -1128,21 +1157,21 @@ Wire it into `static.yml` as a step before `npm ci` (so an offending package is 
 
 ## Don't Hand-Roll
 
-| Problem | Don't Build | Use Instead | Why |
-|---------|-------------|-------------|-----|
-| `.xlsx` parsing | Custom OOXML reader | SheetJS (`xlsx@0.20.3` CDN tarball) | OOXML is a multi-spec ZIP/XML format with vendor extensions; SheetJS handles RVTools' particular flavor of empty cells, merged headers, and locale separators. |
-| Zod v4 schemas | Hand-rolled "is this a valid VInfoRow" validators | `z.object({...})` + `safeParse` | Zod gives structured errors with `path` / `code`, free type inference, and consistent `null`/`undefined`/`""` preprocessing. Hand-rolled validators always miss edge cases. |
-| State management | `useReducer` + Context | Zustand 5 | Multi-snapshot store with selective subscriptions is exactly what Zustand was built for. Context re-renders the whole subtree on every change. |
-| i18n key resolution + locale detection | Custom `t(key, lang)` lookup | react-i18next + i18next-browser-languagedetector | The detector chain (querystring → localStorage → navigator) is a small fortune of edge cases — pluralization, nesting, namespaces. |
-| Theme management (light/dark/auto + FOUC) | DIY `localStorage` watcher | vsizer's `useTheme.ts` + `theme-init.js` script | Already shipped, FOUC-tested, three-state logic. Port verbatim with a key rename. |
-| Worker message protocol | Custom RPC layer with promises | Plain `postMessage` + discriminated union | KISS. One operation (parse a workbook); no need for Comlink. |
-| Unique IDs for snapshots | UUID v4 hand-roll | `crypto.randomUUID()` | Native API since 2022; zero dep. |
-| Drag-and-drop in 2026 | Custom drag tracking with `dragenter`/`dragleave` counter | Native HTML5 events on the React component | ~40 LOC handles it cleanly; react-dropzone is overkill for one drop target. |
-| ZIP extraction | `fflate`, `jszip` | **Don't extract anything** | vatlas v1 is RVTools `.xlsx` only — no `.zip` ingestion. fflate stays out of `package.json`. |
-| Telemetry / error reporting | Sentry, PostHog, Datadog, anything | **Don't ship telemetry** | Critical-2. Even an "anonymous error reporter" silently exfiltrates `error.message` strings that may carry VM names or hostnames. |
-| Number formatting | DIY `n.toFixed(2).replace('.', ',')` | `Intl.NumberFormat` | Pattern lives in `utils/format.ts` (port from vsizer in Phase 2; not needed in Phase 1 since the sidebar shows raw counts). |
+| Problem                                   | Don't Build                                               | Use Instead                                      | Why                                                                                                                                                                         |
+| ----------------------------------------- | --------------------------------------------------------- | ------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `.xlsx` parsing                           | Custom OOXML reader                                       | SheetJS (`xlsx@0.20.3` CDN tarball)              | OOXML is a multi-spec ZIP/XML format with vendor extensions; SheetJS handles RVTools' particular flavor of empty cells, merged headers, and locale separators.              |
+| Zod v4 schemas                            | Hand-rolled "is this a valid VInfoRow" validators         | `z.object({...})` + `safeParse`                  | Zod gives structured errors with `path` / `code`, free type inference, and consistent `null`/`undefined`/`""` preprocessing. Hand-rolled validators always miss edge cases. |
+| State management                          | `useReducer` + Context                                    | Zustand 5                                        | Multi-snapshot store with selective subscriptions is exactly what Zustand was built for. Context re-renders the whole subtree on every change.                              |
+| i18n key resolution + locale detection    | Custom `t(key, lang)` lookup                              | react-i18next + i18next-browser-languagedetector | The detector chain (querystring → localStorage → navigator) is a small fortune of edge cases — pluralization, nesting, namespaces.                                          |
+| Theme management (light/dark/auto + FOUC) | DIY `localStorage` watcher                                | vsizer's `useTheme.ts` + `theme-init.js` script  | Already shipped, FOUC-tested, three-state logic. Port verbatim with a key rename.                                                                                           |
+| Worker message protocol                   | Custom RPC layer with promises                            | Plain `postMessage` + discriminated union        | KISS. One operation (parse a workbook); no need for Comlink.                                                                                                                |
+| Unique IDs for snapshots                  | UUID v4 hand-roll                                         | `crypto.randomUUID()`                            | Native API since 2022; zero dep.                                                                                                                                            |
+| Drag-and-drop in 2026                     | Custom drag tracking with `dragenter`/`dragleave` counter | Native HTML5 events on the React component       | ~40 LOC handles it cleanly; react-dropzone is overkill for one drop target.                                                                                                 |
+| ZIP extraction                            | `fflate`, `jszip`                                         | **Don't extract anything**                       | vatlas v1 is RVTools `.xlsx` only — no `.zip` ingestion. fflate stays out of `package.json`.                                                                                |
+| Telemetry / error reporting               | Sentry, PostHog, Datadog, anything                        | **Don't ship telemetry**                         | Critical-2. Even an "anonymous error reporter" silently exfiltrates `error.message` strings that may carry VM names or hostnames.                                           |
+| Number formatting                         | DIY `n.toFixed(2).replace('.', ',')`                      | `Intl.NumberFormat`                              | Pattern lives in `utils/format.ts` (port from vsizer in Phase 2; not needed in Phase 1 since the sidebar shows raw counts).                                                 |
 
-**Key insight:** Phase 1 is bootstrapping infrastructure — the temptation to "just write the parser" or "just write a fetch wrapper" is high. The pitfall inventory in PITFALLS.md exists *because* prior projects took those temptations. Lean hard on existing patterns: vsizer for everything portable, well-trodden web platform APIs (`crypto.randomUUID`, `Intl.NumberFormat`, native drag-and-drop) for the rest.
+**Key insight:** Phase 1 is bootstrapping infrastructure — the temptation to "just write the parser" or "just write a fetch wrapper" is high. The pitfall inventory in PITFALLS.md exists _because_ prior projects took those temptations. Lean hard on existing patterns: vsizer for everything portable, well-trodden web platform APIs (`crypto.randomUUID`, `Intl.NumberFormat`, native drag-and-drop) for the rest.
 
 ## Common Pitfalls
 
@@ -1167,22 +1196,22 @@ Wire it into `static.yml` as a step before `npm ci` (so an offending package is 
 
 **How to avoid:** The enumerated mitigation table — every row of which is encoded in Pattern 9.
 
-| Leak vector | Mitigation |
-|-------------|-----------|
-| Sentry / error-tracking SDK | Don't ship one. CI denylist on `@sentry/*`. |
-| Analytics SDKs (GA, Plausible, posthog, Amplitude, Mixpanel) | CI denylist. Biome may add `noRestrictedImports` for further depth. |
-| Source-map upload services | No upload step in `static.yml`. Sourcemaps generated only for local debug. |
-| Error boundary serializing payload | `FallbackError` reads only `error.message` + `error.name`. Test: pass `Error('x', { cause: { vms } })`, assert nothing from `cause` appears in DOM. |
-| `console.log` / `console.error` in prod | Biome `noConsole` as **error** in non-test files. CI fails on a console call. |
-| Devtools-style debug overlays in prod | `if (import.meta.env.DEV)` gate; never `process.env.NODE_ENV`. |
-| `fetch` / XHR / WebSocket / sendBeacon | Runtime guard (Pattern 9). |
-| Cleartext transport (cleartext WebSocket scheme / non-HTTPS fetch) | Runtime guard rejects via `InsecureTransportViolation` (Pattern 9); production origin is HTTPS-only. |
-| CSP meta tag | `connect-src 'self'` — Pattern 9. |
-| Service Worker registering and POSTing | Forbidden. CI grep `navigator.serviceWorker.register`. |
-| Web font from Google Fonts / CDN | Self-host; `font-src 'self' data:` in CSP. |
-| `<link rel="prefetch">` to third-party | None. CI grep `<link rel="preconnect"|prefetch"` for non-self URLs. |
-| Third-party iframe | `frame-src 'none'` in CSP. |
-| CDN-loaded script | No CDN scripts in `index.html`. |
+| Leak vector                                                        | Mitigation                                                                                                                                          |
+| ------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Sentry / error-tracking SDK                                        | Don't ship one. CI denylist on `@sentry/*`.                                                                                                         |
+| Analytics SDKs (GA, Plausible, posthog, Amplitude, Mixpanel)       | CI denylist. Biome may add `noRestrictedImports` for further depth.                                                                                 |
+| Source-map upload services                                         | No upload step in `static.yml`. Sourcemaps generated only for local debug.                                                                          |
+| Error boundary serializing payload                                 | `FallbackError` reads only `error.message` + `error.name`. Test: pass `Error('x', { cause: { vms } })`, assert nothing from `cause` appears in DOM. |
+| `console.log` / `console.error` in prod                            | Biome `noConsole` as **error** in non-test files. CI fails on a console call.                                                                       |
+| Devtools-style debug overlays in prod                              | `if (import.meta.env.DEV)` gate; never `process.env.NODE_ENV`.                                                                                      |
+| `fetch` / XHR / WebSocket / sendBeacon                             | Runtime guard (Pattern 9).                                                                                                                          |
+| Cleartext transport (cleartext WebSocket scheme / non-HTTPS fetch) | Runtime guard rejects via `InsecureTransportViolation` (Pattern 9); production origin is HTTPS-only.                                                |
+| CSP meta tag                                                       | `connect-src 'self'` — Pattern 9.                                                                                                                   |
+| Service Worker registering and POSTing                             | Forbidden. CI grep `navigator.serviceWorker.register`.                                                                                              |
+| Web font from Google Fonts / CDN                                   | Self-host; `font-src 'self' data:` in CSP.                                                                                                          |
+| `<link rel="prefetch">` to third-party                             | None. CI grep `<link rel="preconnect"                                                                                                               | prefetch"` for non-self URLs. |
+| Third-party iframe                                                 | `frame-src 'none'` in CSP.                                                                                                                          |
+| CDN-loaded script                                                  | No CDN scripts in `index.html`.                                                                                                                     |
 
 **Warning signs:** Network tab during `npm run preview` shows ANY outbound request after page load except the GH Pages base URL. New dependency adds `analytics` / `telemetry` keyword in `package.json`. A `Sentry.init({...})` lands. Source maps configured to upload at build time.
 
@@ -1337,13 +1366,13 @@ Phase 1 is **greenfield** — there is no existing rvtui codebase to migrate. Th
 
 This section is intentionally minimal — left as a stub so subsequent phases that DO involve migration (e.g., renaming the project, refactoring after Phase 2's `useEstateView` lands) can recognize the pattern and fill it in.
 
-| Category | Items Found | Action Required |
-|----------|-------------|------------------|
-| Stored data | None — no prior rvtui codebase exists | — |
-| Live service config | None — no external services configured | — |
-| OS-registered state | None — no scheduled tasks, no installed packages besides Node/npm | — |
-| Secrets / env vars | None — vatlas is 100 % client-side, has no secrets | — |
-| Build artifacts | None — first build of this project | — |
+| Category            | Items Found                                                       | Action Required |
+| ------------------- | ----------------------------------------------------------------- | --------------- |
+| Stored data         | None — no prior rvtui codebase exists                             | —               |
+| Live service config | None — no external services configured                            | —               |
+| OS-registered state | None — no scheduled tasks, no installed packages besides Node/npm | —               |
+| Secrets / env vars  | None — vatlas is 100 % client-side, has no secrets                | —               |
+| Build artifacts     | None — first build of this project                                | —               |
 
 **Nothing found in any category:** Verified by directory listing of `/Users/fjacquet/Projects/rvtui/` (only `.planning/`, `.claude/`, `.git/`, and `CLAUDE.md` exist — no `src/`, no `package.json`, no `dist/`, no `node_modules/`).
 
@@ -1351,15 +1380,15 @@ This section is intentionally minimal — left as a stub so subsequent phases th
 
 Phase 1 has clear external dependencies — every one must be present for execution.
 
-| Dependency | Required By | Available | Version | Fallback |
-|------------|------------|-----------|---------|----------|
-| Node.js | Vite, Vitest, Biome, all dev tooling | ✓ | v26.0.0 (`node --version`) | — |
-| npm | Package install | ✓ | 11.12.1 (`npm --version`) | — |
-| Git | Version control, CI workflow | ✓ | 2.54.0 | — |
-| SheetJS CDN (`cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz`) | RVTools `.xlsx` parsing | ✓ (HTTP 200 verified 2026-05-15) | 0.20.3 | None — CVE-affected npm package is forbidden. If CDN unreachable at install time, halt. |
-| npm registry (registry.npmjs.org) | All other deps | ✓ assumed | — | — |
-| GitHub (for CI + Pages deploy) | DEP-01/DEP-02 (Phase 7 deploy; Phase 1 just needs the workflow to land) | ✓ assumed | — | — |
-| Real RVTools workbooks for fixtures | Test coverage of PAR-01..05 | ✓ — three real exports + one synthetic on disk | — | If real fixtures became unavailable, ship synthetic-only — but the synthetic vsizer sample is only 26 KB and lacks the 10k-VM-scale assertions for Critical-5. The real workbooks are MANDATORY for the perf test. |
+| Dependency                                                  | Required By                                                             | Available                                      | Version                    | Fallback                                                                                                                                                                                                           |
+| ----------------------------------------------------------- | ----------------------------------------------------------------------- | ---------------------------------------------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Node.js                                                     | Vite, Vitest, Biome, all dev tooling                                    | ✓                                              | v26.0.0 (`node --version`) | —                                                                                                                                                                                                                  |
+| npm                                                         | Package install                                                         | ✓                                              | 11.12.1 (`npm --version`)  | —                                                                                                                                                                                                                  |
+| Git                                                         | Version control, CI workflow                                            | ✓                                              | 2.54.0                     | —                                                                                                                                                                                                                  |
+| SheetJS CDN (`cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz`) | RVTools `.xlsx` parsing                                                 | ✓ (HTTP 200 verified 2026-05-15)               | 0.20.3                     | None — CVE-affected npm package is forbidden. If CDN unreachable at install time, halt.                                                                                                                            |
+| npm registry (registry.npmjs.org)                           | All other deps                                                          | ✓ assumed                                      | —                          | —                                                                                                                                                                                                                  |
+| GitHub (for CI + Pages deploy)                              | DEP-01/DEP-02 (Phase 7 deploy; Phase 1 just needs the workflow to land) | ✓ assumed                                      | —                          | —                                                                                                                                                                                                                  |
+| Real RVTools workbooks for fixtures                         | Test coverage of PAR-01..05                                             | ✓ — three real exports + one synthetic on disk | —                          | If real fixtures became unavailable, ship synthetic-only — but the synthetic vsizer sample is only 26 KB and lacks the 10k-VM-scale assertions for Critical-5. The real workbooks are MANDATORY for the perf test. |
 
 **Real RVTools workbooks on disk** (verified 2026-05-15 via `find`):
 
@@ -1378,32 +1407,32 @@ The planner's Plan-4 or Plan-5 task list should include "harvest these four real
 
 The fixture matrix Phase 1 must ship:
 
-| Fixture | Source | Purpose |
-|---------|--------|---------|
-| `rvtools-mib-canary.xlsx` | Generated by `scripts/generate-mib-canary.mjs` | Critical-1 guard: 1 VM with `Provisioned MB = 102400` (i.e. 100 GiB). Test asserts `mibToGib(parsed.vinfo[0].provisionedMib) === gib(100)`. |
-| `rvtools-3.10-sample.xlsx` | Harvested (rename of an existing real export) | PAR-03 — verify 3.10's column shape parses |
-| `rvtools-3.11-sample.xlsx` | Harvested | PAR-03 — verify 3.11 |
-| `rvtools-4.0-sample.xlsx` | Harvested | PAR-03 — verify 4.0 |
-| `rvtools-4.4-sample.xlsx` | Harvested (the most recent real export) | PAR-03 + Critical-5 perf test target |
-| `rvtools-empty.xlsx` | Generated synthetic | PAR-02 — `vInfo` sheet missing; expect structured error |
-| `rvtools-missing-column.xlsx` | Generated synthetic | PAR-02 — `# CPUs` column missing; expect error naming column |
+| Fixture                       | Source                                         | Purpose                                                                                                                                     |
+| ----------------------------- | ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| `rvtools-mib-canary.xlsx`     | Generated by `scripts/generate-mib-canary.mjs` | Critical-1 guard: 1 VM with `Provisioned MB = 102400` (i.e. 100 GiB). Test asserts `mibToGib(parsed.vinfo[0].provisionedMib) === gib(100)`. |
+| `rvtools-3.10-sample.xlsx`    | Harvested (rename of an existing real export)  | PAR-03 — verify 3.10's column shape parses                                                                                                  |
+| `rvtools-3.11-sample.xlsx`    | Harvested                                      | PAR-03 — verify 3.11                                                                                                                        |
+| `rvtools-4.0-sample.xlsx`     | Harvested                                      | PAR-03 — verify 4.0                                                                                                                         |
+| `rvtools-4.4-sample.xlsx`     | Harvested (the most recent real export)        | PAR-03 + Critical-5 perf test target                                                                                                        |
+| `rvtools-empty.xlsx`          | Generated synthetic                            | PAR-02 — `vInfo` sheet missing; expect structured error                                                                                     |
+| `rvtools-missing-column.xlsx` | Generated synthetic                            | PAR-02 — `# CPUs` column missing; expect error naming column                                                                                |
 
 The planner should NOT commit large (>1 MB) fixtures to git directly; either git-lfs them or keep them out of `public/` and load from a `tests/fixtures/` directory with a `.gitignore` that excludes the binary blobs. A small `seed-fixtures.mjs` script can rebuild the dir from `~/Library/CloudStorage/...` on first checkout. `[ASSUMED — exact fixture strategy is Claude's discretion within the constraint "fixtures must be reproducible".]`
 
 ## State of the Art
 
-| Old Approach | Current Approach | When Changed | Impact |
-|--------------|------------------|--------------|--------|
-| `npm install xlsx` (npm registry SheetJS) | Tarball install from `cdn.sheetjs.com` | SheetJS stopped publishing to npm registry circa 2022; npm `xlsx@0.18.5` is CVE-affected (CVE-2024-22363, CVE-2023-30533). | Pin in `package.json` as the full tarball URL; CI verifies. |
-| Default Tailwind `tailwind.config.js` + PostCSS | Tailwind v4 `@theme` block in CSS + `@tailwindcss/vite` plugin | Tailwind v4 GA Jan 2025 | No JS config file; theme tokens live in `src/index.css`. |
-| Zod 3 (`message`, `required_error`) | Zod 4 (`error` parameter; `.brand<...>()` native syntax) | Zod 4 GA Aug 2025 | Migration codemod available; vsizer is already on v4. |
-| `import create from 'zustand'` (default) | `import { create } from 'zustand'` (named) | Deprecated v4, warns v5 | One-line change at import site. |
-| Recharts / visx hand-rolled charts | Apache ECharts + `echarts-for-react` (SVG renderer) | This project's decision (STACK.md) | **Phase 2 concern**, not Phase 1. |
-| Sentry / PostHog for "anonymous metrics" | None (forbidden) | This project's invariant | Critical-2 enforcement. |
-| Storing parsed rows in `localStorage` for resilience | Memory only — refresh wipes | This project's invariant | ADR-0001/0004 inherited. |
-| Live Optics + RVTools mixed parser (vsizer) | RVTools-only (vatlas v1) | This project's narrowing | Drop `detectSource.ts`, `adapters/liveoptics.ts`, `extractWorkbook.ts`. |
-| Service worker for offline | Forbidden | Critical-2 enforcement | No `service-worker.js` anywhere. |
-| Cleartext WebSocket connections | `wss:` only, runtime-enforced | This project's invariant | CWE-319 mitigation. |
+| Old Approach                                         | Current Approach                                               | When Changed                                                                                                               | Impact                                                                  |
+| ---------------------------------------------------- | -------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| `npm install xlsx` (npm registry SheetJS)            | Tarball install from `cdn.sheetjs.com`                         | SheetJS stopped publishing to npm registry circa 2022; npm `xlsx@0.18.5` is CVE-affected (CVE-2024-22363, CVE-2023-30533). | Pin in `package.json` as the full tarball URL; CI verifies.             |
+| Default Tailwind `tailwind.config.js` + PostCSS      | Tailwind v4 `@theme` block in CSS + `@tailwindcss/vite` plugin | Tailwind v4 GA Jan 2025                                                                                                    | No JS config file; theme tokens live in `src/index.css`.                |
+| Zod 3 (`message`, `required_error`)                  | Zod 4 (`error` parameter; `.brand<...>()` native syntax)       | Zod 4 GA Aug 2025                                                                                                          | Migration codemod available; vsizer is already on v4.                   |
+| `import create from 'zustand'` (default)             | `import { create } from 'zustand'` (named)                     | Deprecated v4, warns v5                                                                                                    | One-line change at import site.                                         |
+| Recharts / visx hand-rolled charts                   | Apache ECharts + `echarts-for-react` (SVG renderer)            | This project's decision (STACK.md)                                                                                         | **Phase 2 concern**, not Phase 1.                                       |
+| Sentry / PostHog for "anonymous metrics"             | None (forbidden)                                               | This project's invariant                                                                                                   | Critical-2 enforcement.                                                 |
+| Storing parsed rows in `localStorage` for resilience | Memory only — refresh wipes                                    | This project's invariant                                                                                                   | ADR-0001/0004 inherited.                                                |
+| Live Optics + RVTools mixed parser (vsizer)          | RVTools-only (vatlas v1)                                       | This project's narrowing                                                                                                   | Drop `detectSource.ts`, `adapters/liveoptics.ts`, `extractWorkbook.ts`. |
+| Service worker for offline                           | Forbidden                                                      | Critical-2 enforcement                                                                                                     | No `service-worker.js` anywhere.                                        |
+| Cleartext WebSocket connections                      | `wss:` only, runtime-enforced                                  | This project's invariant                                                                                                   | CWE-319 mitigation.                                                     |
 
 **Deprecated/outdated:**
 
@@ -1414,18 +1443,18 @@ The planner should NOT commit large (>1 MB) fixtures to git directly; either git
 
 ## Assumptions Log
 
-| # | Claim | Section | Risk if Wrong |
-|---|-------|---------|---------------|
-| A1 | `react-i18next@^17.0.8` is a safe upgrade from vsizer's `^16.6.6` for vatlas's usage (which doesn't depend on `i18next.language` during a `languageChanged` callback) | Standard Stack | LOW — if v17 has a breaking change vsizer's pattern hits, fall back to `^16.6.6` (still current and supported); cost is one line in package.json |
-| A2 | The runtime privacy guard preserves Vite dev-mode HMR (which uses a same-origin WebSocket established by Vite's own runtime, not via `globalThis.WebSocket` app-code calls) | Pattern 9 | LOW — same-origin equivalence holds by definition and Vite's HMR client bypasses our wrapper; if HMR breaks, an explicit allowlist for `localhost:5173` in dev mode is a 3-line patch |
-| A3 | CSP `worker-src 'self' blob:` is required for Vite's dev-mode worker bootstrap | Pattern 9 (CSP meta) | LOW — if dev worker fails to load, relaxing `worker-src` for dev (or detecting dev mode in the meta tag) is straightforward |
-| A4 | Test fixture strategy of "harvest real workbooks into `tests/fixtures/` outside git" is acceptable; the alternative (git-lfs) is heavier | Test Fixtures | LOW — both work; planner can switch to git-lfs without breaking anything |
-| A5 | Phase 1 only needs `common` and `upload` i18n namespaces; other namespaces accrue in later phases | Pattern 5 | LOW — adding a namespace is one entry per locale; if the planner discovers a need for a "validation" namespace in Phase 1, it's a trivial addition |
-| A6 | RVTools `vMetaData` sheet, when present, has an `Exported Timestamp` column the capture-date inference can read | Pattern 4 | MEDIUM — RVTools documentation does not list `vMetaData`'s schema explicitly. Inference order falls back gracefully to filename / mtime if the sheet is absent or differently shaped; the user can still override in Phase 6. |
-| A7 | The four real RVTools workbooks on disk span enough of the 3.10/3.11/4.0/4.4 version range to lock in the column-alias dictionary | Test Fixtures | MEDIUM — three are dated 2026-01 and 2026-04 (likely RVTools 4.x); a 3.10 or 3.11 may not be among them. Plan-4 should inspect each file's `vMetaData.RVTools Version` and, if 3.10/3.11 are missing, surface that as a gap for the user to provide. |
-| A8 | Hand-rolled branded types (`number & { __brand: 'MiB' }`) is preferable to Zod's `.brand<>()` for engine code | Pattern 7 | LOW — both work; the rationale "keep engines Zod-free" is design taste, not correctness |
-| A9 | A 30 MB workbook parses in under 10 seconds in a Web Worker on a desktop runner | Pitfall 3 / Critical-5 | MEDIUM — SUMMARY.md's order-of-magnitude estimate; will be validated in Plan-4 with the largest real fixture. If perf is worse, the mitigation is to background-parse non-active snapshots (a Phase 6 enhancement that could be pre-built in Phase 1). |
-| A10 | Production deployment is HTTPS-only (GitHub Pages serves all sites over HTTPS) and there is no need to support cleartext-WebSocket fallbacks | Pattern 9 (InsecureTransportViolation) | LOW — GitHub Pages has been HTTPS-only since 2018; localhost dev runs over HTTP but the wrapper does not intercept Vite's HMR socket |
+| #   | Claim                                                                                                                                                                       | Section                                | Risk if Wrong                                                                                                                                                                                                                                          |
+| --- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| A1  | `react-i18next@^17.0.8` is a safe upgrade from vsizer's `^16.6.6` for vatlas's usage (which doesn't depend on `i18next.language` during a `languageChanged` callback)       | Standard Stack                         | LOW — if v17 has a breaking change vsizer's pattern hits, fall back to `^16.6.6` (still current and supported); cost is one line in package.json                                                                                                       |
+| A2  | The runtime privacy guard preserves Vite dev-mode HMR (which uses a same-origin WebSocket established by Vite's own runtime, not via `globalThis.WebSocket` app-code calls) | Pattern 9                              | LOW — same-origin equivalence holds by definition and Vite's HMR client bypasses our wrapper; if HMR breaks, an explicit allowlist for `localhost:5173` in dev mode is a 3-line patch                                                                  |
+| A3  | CSP `worker-src 'self' blob:` is required for Vite's dev-mode worker bootstrap                                                                                              | Pattern 9 (CSP meta)                   | LOW — if dev worker fails to load, relaxing `worker-src` for dev (or detecting dev mode in the meta tag) is straightforward                                                                                                                            |
+| A4  | Test fixture strategy of "harvest real workbooks into `tests/fixtures/` outside git" is acceptable; the alternative (git-lfs) is heavier                                    | Test Fixtures                          | LOW — both work; planner can switch to git-lfs without breaking anything                                                                                                                                                                               |
+| A5  | Phase 1 only needs `common` and `upload` i18n namespaces; other namespaces accrue in later phases                                                                           | Pattern 5                              | LOW — adding a namespace is one entry per locale; if the planner discovers a need for a "validation" namespace in Phase 1, it's a trivial addition                                                                                                     |
+| A6  | RVTools `vMetaData` sheet, when present, has an `Exported Timestamp` column the capture-date inference can read                                                             | Pattern 4                              | MEDIUM — RVTools documentation does not list `vMetaData`'s schema explicitly. Inference order falls back gracefully to filename / mtime if the sheet is absent or differently shaped; the user can still override in Phase 6.                          |
+| A7  | The four real RVTools workbooks on disk span enough of the 3.10/3.11/4.0/4.4 version range to lock in the column-alias dictionary                                           | Test Fixtures                          | MEDIUM — three are dated 2026-01 and 2026-04 (likely RVTools 4.x); a 3.10 or 3.11 may not be among them. Plan-4 should inspect each file's `vMetaData.RVTools Version` and, if 3.10/3.11 are missing, surface that as a gap for the user to provide.   |
+| A8  | Hand-rolled branded types (`number & { __brand: 'MiB' }`) is preferable to Zod's `.brand<>()` for engine code                                                               | Pattern 7                              | LOW — both work; the rationale "keep engines Zod-free" is design taste, not correctness                                                                                                                                                                |
+| A9  | A 30 MB workbook parses in under 10 seconds in a Web Worker on a desktop runner                                                                                             | Pitfall 3 / Critical-5                 | MEDIUM — SUMMARY.md's order-of-magnitude estimate; will be validated in Plan-4 with the largest real fixture. If perf is worse, the mitigation is to background-parse non-active snapshots (a Phase 6 enhancement that could be pre-built in Phase 1). |
+| A10 | Production deployment is HTTPS-only (GitHub Pages serves all sites over HTTPS) and there is no need to support cleartext-WebSocket fallbacks                                | Pattern 9 (InsecureTransportViolation) | LOW — GitHub Pages has been HTTPS-only since 2018; localhost dev runs over HTTP but the wrapper does not intercept Vite's HMR socket                                                                                                                   |
 
 The planner should call out A6, A7, and A9 to the user before they become locked decisions — they're the assumptions most likely to need adjustment during execution.
 
@@ -1452,7 +1481,7 @@ The planner should call out A6, A7, and A9 to the user before they become locked
    - Recommendation: Phase 1 ships browser + drop-zone with `role="button"` and `aria-label`. WCAG hard-contractual review is a future polish concern; not blocking.
 
 5. **`<StrictMode>` in `App` and Web Workers.**
-   - What we know: React 19's `<StrictMode>` double-invokes effects in dev. The drop handler is in a callback, not an effect, so it's safe. But: a `useEffect` that lazily instantiates the parser worker would create *two* workers in dev — wasteful but not broken.
+   - What we know: React 19's `<StrictMode>` double-invokes effects in dev. The drop handler is in a callback, not an effect, so it's safe. But: a `useEffect` that lazily instantiates the parser worker would create _two_ workers in dev — wasteful but not broken.
    - Recommendation: Pattern 1's `getWorker()` uses module-scope memoization (not `useEffect`), so StrictMode double-invoke doesn't double-instantiate.
 
 ## Validation Architecture
@@ -1465,32 +1494,32 @@ The planner should call out A6, A7, and A9 to the user before they become locked
 
 ### Applicable ASVS Categories
 
-| ASVS Category | Applies | Standard Control |
-|---------------|---------|-----------------|
-| V2 Authentication | no | vatlas has no accounts; nothing to authenticate against. |
-| V3 Session Management | no | No sessions. |
-| V4 Access Control | no | No authorization. |
-| V5 Input Validation | **yes** | Zod 4 schemas at the parser boundary validate every row; structured errors surface missing sheets/columns. PAR-02. |
-| V6 Cryptography | n/a (use built-ins) | `crypto.randomUUID()` for snapshot IDs — native, no hand-roll. No other crypto in Phase 1. |
-| V9 Communications | **yes** | The privacy guard (Pattern 9) ensures NO non-same-origin communication AND no cleartext-transport sockets (CWE-319). PRV-01, PRV-02. CSP meta tag enforces same. |
-| V10 Malicious Code | **yes** | CI denylist on telemetry packages (Pattern 9). OSV-Scanner inherited from vsizer's `static.yml`. SheetJS-pin verification step. |
-| V14 Configuration | **yes** | `base: '/vatlas/'` correct for GH Pages; `tsconfig` strict mode; Biome `noConsole` error in non-test. |
+| ASVS Category         | Applies             | Standard Control                                                                                                                                                 |
+| --------------------- | ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| V2 Authentication     | no                  | vatlas has no accounts; nothing to authenticate against.                                                                                                         |
+| V3 Session Management | no                  | No sessions.                                                                                                                                                     |
+| V4 Access Control     | no                  | No authorization.                                                                                                                                                |
+| V5 Input Validation   | **yes**             | Zod 4 schemas at the parser boundary validate every row; structured errors surface missing sheets/columns. PAR-02.                                               |
+| V6 Cryptography       | n/a (use built-ins) | `crypto.randomUUID()` for snapshot IDs — native, no hand-roll. No other crypto in Phase 1.                                                                       |
+| V9 Communications     | **yes**             | The privacy guard (Pattern 9) ensures NO non-same-origin communication AND no cleartext-transport sockets (CWE-319). PRV-01, PRV-02. CSP meta tag enforces same. |
+| V10 Malicious Code    | **yes**             | CI denylist on telemetry packages (Pattern 9). OSV-Scanner inherited from vsizer's `static.yml`. SheetJS-pin verification step.                                  |
+| V14 Configuration     | **yes**             | `base: '/vatlas/'` correct for GH Pages; `tsconfig` strict mode; Biome `noConsole` error in non-test.                                                            |
 
 ### Known Threat Patterns for browser-only RVTools analytics
 
-| Pattern | STRIDE | Standard Mitigation |
-|---------|--------|---------------------|
-| Workbook bytes exfiltrated via fetch/XHR/WS/Beacon | Information Disclosure | Runtime guard throws on non-same-origin (Pattern 9); CSP `connect-src 'self'`; CI denylist of telemetry packages. |
-| Workbook bytes exfiltrated via service worker | Information Disclosure | Service workers forbidden; CI grep blocks `navigator.serviceWorker.register`. |
-| Cleartext WebSocket (CWE-319) | Information Disclosure / Tampering | Runtime guard rejects any non-`wss:` URL (Pattern 9 `InsecureTransportViolation`); production origin is HTTPS-only; mixed-content rules in browsers add a second layer. |
-| Maliciously crafted `.xlsx` triggering ReDoS in SheetJS | Denial of Service | Pin SheetJS to 0.20.3+ (CVE-2024-22363 fixed in 0.20.2); CI verifies tarball URL. |
-| Prototype pollution via old SheetJS (npm `xlsx@0.18.5`) | Tampering | Tarball-pin only; never `npm install xlsx`. CI grep. |
-| Workbook content in error messages | Information Disclosure | `FallbackError` reads only `error.message` and `error.name`; tests assert `error.cause` content does not appear in DOM. |
-| Workbook content in `console.log` | Information Disclosure | Biome `noConsole` as error in non-test files. |
-| Workbook content in source-map upload | Information Disclosure | No source-map upload step in CI. Source maps generated only for local debug. |
-| Sourcemap-revealed internals to public users | Information Disclosure | Production build's sourcemaps are `sourcemap: true` in vite.config.ts (per vsizer) — **flag for review**: the planner should decide whether to keep source maps in the public bundle or generate them only for a private debug build. `[ASSUMED — vsizer ships sourcemaps publicly; this is a deliberate choice for transparency. Carry over for vatlas unless user objects.]` |
-| Inline-script XSS | Tampering | CSP `script-src 'self' 'unsafe-inline'` — the inline allowance is intentional for the FOUC theme-init script. No user-controlled HTML rendering, so XSS surface is minimal. |
-| Maliciously crafted `data:` URI (font-src) | Tampering | Phase 1 has no `data:` font URIs; Phase 7 (HTML report export) will. |
+| Pattern                                                 | STRIDE                             | Standard Mitigation                                                                                                                                                                                                                                                                                                                                                            |
+| ------------------------------------------------------- | ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Workbook bytes exfiltrated via fetch/XHR/WS/Beacon      | Information Disclosure             | Runtime guard throws on non-same-origin (Pattern 9); CSP `connect-src 'self'`; CI denylist of telemetry packages.                                                                                                                                                                                                                                                              |
+| Workbook bytes exfiltrated via service worker           | Information Disclosure             | Service workers forbidden; CI grep blocks `navigator.serviceWorker.register`.                                                                                                                                                                                                                                                                                                  |
+| Cleartext WebSocket (CWE-319)                           | Information Disclosure / Tampering | Runtime guard rejects any non-`wss:` URL (Pattern 9 `InsecureTransportViolation`); production origin is HTTPS-only; mixed-content rules in browsers add a second layer.                                                                                                                                                                                                        |
+| Maliciously crafted `.xlsx` triggering ReDoS in SheetJS | Denial of Service                  | Pin SheetJS to 0.20.3+ (CVE-2024-22363 fixed in 0.20.2); CI verifies tarball URL.                                                                                                                                                                                                                                                                                              |
+| Prototype pollution via old SheetJS (npm `xlsx@0.18.5`) | Tampering                          | Tarball-pin only; never `npm install xlsx`. CI grep.                                                                                                                                                                                                                                                                                                                           |
+| Workbook content in error messages                      | Information Disclosure             | `FallbackError` reads only `error.message` and `error.name`; tests assert `error.cause` content does not appear in DOM.                                                                                                                                                                                                                                                        |
+| Workbook content in `console.log`                       | Information Disclosure             | Biome `noConsole` as error in non-test files.                                                                                                                                                                                                                                                                                                                                  |
+| Workbook content in source-map upload                   | Information Disclosure             | No source-map upload step in CI. Source maps generated only for local debug.                                                                                                                                                                                                                                                                                                   |
+| Sourcemap-revealed internals to public users            | Information Disclosure             | Production build's sourcemaps are `sourcemap: true` in vite.config.ts (per vsizer) — **flag for review**: the planner should decide whether to keep source maps in the public bundle or generate them only for a private debug build. `[ASSUMED — vsizer ships sourcemaps publicly; this is a deliberate choice for transparency. Carry over for vatlas unless user objects.]` |
+| Inline-script XSS                                       | Tampering                          | CSP `script-src 'self' 'unsafe-inline'` — the inline allowance is intentional for the FOUC theme-init script. No user-controlled HTML rendering, so XSS surface is minimal.                                                                                                                                                                                                    |
+| Maliciously crafted `data:` URI (font-src)              | Tampering                          | Phase 1 has no `data:` font URIs; Phase 7 (HTML report export) will.                                                                                                                                                                                                                                                                                                           |
 
 ## Project Constraints (from CLAUDE.md)
 

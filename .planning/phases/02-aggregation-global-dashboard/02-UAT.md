@@ -1,4 +1,5 @@
 ---
+
 status: complete
 phase: 02-aggregation-global-dashboard
 source: [02-01-SUMMARY.md, 02-02-SUMMARY.md, 02-03-SUMMARY.md]
@@ -7,14 +8,15 @@ updated: 2026-05-16T00:00:00Z
 ---
 
 ## Current Test
+
 <!-- OVERWRITE each test - shows where we are -->
 
 number: 3
 name: Per-cluster metrics
 expected: |
-  Each cluster column shows ESX count, VM count split Windows/Linux/Other,
-  datastore count, physical GHz, consumed GHz, mean CPU %, mean RAM %, vCPU
-  allocation, and CPU Ready %. Numbers look plausible vs. RVTools.
+Each cluster column shows ESX count, VM count split Windows/Linux/Other,
+datastore count, physical GHz, consumed GHz, mean CPU %, mean RAM %, vCPU
+allocation, and CPU Ready %. Numbers look plausible vs. RVTools.
 awaiting: user response
 
 ## Tests

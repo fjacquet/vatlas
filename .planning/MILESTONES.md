@@ -8,7 +8,7 @@
 
 **Key accomplishments:**
 
-- **Privacy ADR amended + enforced (GOV):** ADR-0001 gained an Accepted, tightly-scoped service-worker exception (injectManifest, precache-only, same-origin, guard-first `sw.ts`); `check-supply-chain.mjs` refactored to a pure tested gate that *blocks* a non-compliant SW (extends the three-layer privacy model into the SW scope).
+- **Privacy ADR amended + enforced (GOV):** ADR-0001 gained an Accepted, tightly-scoped service-worker exception (injectManifest, precache-only, same-origin, guard-first `sw.ts`); `check-supply-chain.mjs` refactored to a pure tested gate that _blocks_ a non-compliant SW (extends the three-layer privacy model into the SW scope).
 - **Installable, fully-offline PWA (PWA):** `vite-plugin-pwa` injectManifest + audited `src/sw.ts` (imports the privacy guard first, precache-only) + smart auto-update that never wipes a loaded estate. Installability browser-confirmed in Chrome.
 - **UX/IA redesign (NAV/UIX):** primary nav folded into a single left column; estate summary, operational insights and cluster detail rebuilt as grouped KPI tiles with a vendored same-origin icon set; the per-cluster columns became a scannable cluster table with central stretched toggles.
 - **Capacity Planning visual return (PLN):** measured-vs-planned vCPU/vRAM headroom (chart + tiles) from the existing engine outputs — no new memo, factual, no editorial verbs.

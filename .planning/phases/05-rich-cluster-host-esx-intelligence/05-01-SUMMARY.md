@@ -1,46 +1,47 @@
 ---
+
 phase: 05-rich-cluster-host-esx-intelligence
 plan: 01
 subsystem: aggregation
 tags: [parser, powerstate, vpartition, operational-insights, estate-view]
 
 requires:
-  - phase: 04
-    provides: merged estate + single useEstateView memo + per-site stretched
-provides:
-  - "parser: VPowerState enum + Template + host model/vendor/esxVersion (poweredOn derived)"
-  - "MergedEstate.vpartition (concatenated) + pure aggregateGuestData engine"
-  - "EstateView.operationalInsights (estate) + clusterInsights + clusterDetail (per-cluster), single memo"
-affects: [05-02, 06, 07]
+- phase: 04
+  provides: merged estate + single useEstateView memo + per-site stretched
+  provides:
+- "parser: VPowerState enum + Template + host model/vendor/esxVersion (poweredOn derived)"
+- "MergedEstate.vpartition (concatenated) + pure aggregateGuestData engine"
+- "EstateView.operationalInsights (estate) + clusterInsights + clusterDetail (per-cluster), single memo"
+  affects: [05-02, 06, 07]
 
 tech-stack:
-  added: []
-  patterns:
-    - "Additive parser column aliases + derived-field shim = zero-blast-radius schema extension, regression-gated"
-    - "Parallel EstateView maps (not ClusterAggregate fields) keep fixture blast radius near-zero"
+added: []
+patterns:
+- "Additive parser column aliases + derived-field shim = zero-blast-radius schema extension, regression-gated"
+- "Parallel EstateView maps (not ClusterAggregate fields) keep fixture blast radius near-zero"
 
 key-files:
-  created:
-    - src/engines/aggregation/guestData.ts
-    - src/engines/aggregation/guestData.test.ts
+created:
+- src/engines/aggregation/guestData.ts
+- src/engines/aggregation/guestData.test.ts
   modified:
-    - src/engines/parser/adapters/rvtools.ts
-    - src/engines/parser/schemas.ts
-    - src/types/vinfo.ts (VPowerState, powerState, template)
-    - src/types/vhost.ts (model, vendor, esxVersion)
-    - src/types/estate.ts (OperationalInsights, ClusterDetail, EstateView fields)
-    - src/types/index.ts
-    - src/engines/snapshotMerge/mergeSnapshotsToEstate.ts (vpartition)
-    - src/engines/aggregation/estateView.ts (insights in the single pass)
-    - 16 test builders conformed to the new required fields
+- src/engines/parser/adapters/rvtools.ts
+- src/engines/parser/schemas.ts
+- src/types/vinfo.ts (VPowerState, powerState, template)
+- src/types/vhost.ts (model, vendor, esxVersion)
+- src/types/estate.ts (OperationalInsights, ClusterDetail, EstateView fields)
+- src/types/index.ts
+- src/engines/snapshotMerge/mergeSnapshotsToEstate.ts (vpartition)
+- src/engines/aggregation/estateView.ts (insights in the single pass)
+- 16 test builders conformed to the new required fields
 
 key-decisions:
-  - "poweredOn kept as a DERIVED boolean from powerState → no consumer breakage"
-  - "guest data null when vPartition absent (factual, never invented 0)"
-  - "operational insights as parallel EstateView maps, not ClusterAggregate fields (low blast radius)"
+- "poweredOn kept as a DERIVED boolean from powerState → no consumer breakage"
+- "guest data null when vPartition absent (factual, never invented 0)"
+- "operational insights as parallel EstateView maps, not ClusterAggregate fields (low blast radius)"
 
 patterns-established:
-  - "calc-from-real-data: an unavailable metric is null/em-dash, never fabricated"
+- "calc-from-real-data: an unavailable metric is null/em-dash, never fabricated"
 
 requirements-completed: [RCI-01, RCI-02, RCI-03, RCI-04]
 

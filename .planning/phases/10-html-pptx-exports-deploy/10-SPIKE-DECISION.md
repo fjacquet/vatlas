@@ -19,13 +19,13 @@ so PPTX charts must be rasterized to PNG. The chosen mechanism is
 **Added dependency:** `@resvg/resvg-wasm@^2.6.2` (resolved 2.6.2).
 
 **Gate results (Task 2, all green with the dep installed):**
-| Gate | Result |
-|------|--------|
-| `node scripts/check-supply-chain.mjs` | `check-supply-chain: OK` (exit 0) — telemetry denylist clean |
-| `npm audit --audit-level=low` | `found 0 vulnerabilities` (exit 0) |
-| `node scripts/check-bundle-size.mjs` | OK (exit 0) — echarts chunk 269.8 KiB ≤ 300; **spike is NOT in `dist/`** (heavy echarts/resvg imports confined to the spike file → production bundle unaffected) |
-| xlsx SheetJS tarball pin | byte-exact: `grep -c "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz" package.json` = **1**, value unchanged (line moved 37→39 only because two deps sort before it) |
-| OSV | runs in CI (`static.yml` `osv-scanner`, green on PR #2, every push); local equivalent = npm audit + supply-chain above |
+| Gate                                  | Result                                                                                                                                                                    |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `node scripts/check-supply-chain.mjs` | `check-supply-chain: OK` (exit 0) — telemetry denylist clean                                                                                                              |
+| `npm audit --audit-level=low`         | `found 0 vulnerabilities` (exit 0)                                                                                                                                        |
+| `node scripts/check-bundle-size.mjs`  | OK (exit 0) — echarts chunk 269.8 KiB ≤ 300; **spike is NOT in `dist/`** (heavy echarts/resvg imports confined to the spike file → production bundle unaffected)          |
+| xlsx SheetJS tarball pin              | byte-exact: `grep -c "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz" package.json` = **1**, value unchanged (line moved 37→39 only because two deps sort before it) |
+| OSV                                   | runs in CI (`static.yml` `osv-scanner`, green on PR #2, every push); local equivalent = npm audit + supply-chain above                                                    |
 
 **WASM loading (privacy):** the wasm binary is provided to `initWasm` as injected
 bytes/URL — never a remote network fetch (privacy invariant; the guard throws on

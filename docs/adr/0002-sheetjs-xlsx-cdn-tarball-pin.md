@@ -29,7 +29,7 @@ https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz
 The npm `xlsx` package and any semver range resolving to it are never used.
 The pin is enforced by `node scripts/check-supply-chain.mjs` (the
 `check:supply-chain` npm script, also wired as the `prebuild` hook and as a CI
-step that runs *before* `npm ci`): if `dependencies.xlsx` is present and not
+step that runs _before_ `npm ci`): if `dependencies.xlsx` is present and not
 exactly the required URL, the script exits non-zero with the expected/found
 values.
 

@@ -1,62 +1,63 @@
 ---
+
 phase: 01-foundation-invariants
 plan: 05
 subsystem: store-ui
 tags: [zustand, react, i18n, tailwind, sidebar, e2e, vitest, privacy, par-05]
 
 requires:
-  - phase: 01-foundation-invariants
-    plan: 01
-    provides: "UploadZone shell (onFiles/variant), FallbackError hardened, i18n upload.snapshots keys, vatlas-theme/vatlas-lang localStorage policy"
-  - phase: 01-foundation-invariants
-    plan: 04
-    provides: "parseInWorker(file) -> { snapshot: Omit<Snapshot,'id'|'parsedAt'>, warnings }; Snapshot type; parseXlsx/parseSnapshot/captureDate pure path for the e2e mock"
-provides:
-  - "src/store/snapshotStore.ts — inputs-only Zustand store: Map<id,Snapshot> append-only + activeSnapshotId; addSnapshot/removeSnapshot/setActiveSnapshot/renameVCenter/setCapturedAt/clearAll; selectHasSnapshots/selectActiveSnapshot. NO aggregates, NO persist."
-  - "src/hooks/useSnapshotUpload.ts — useSnapshotUpload(): { upload(files), isUploading }; sequential per-file parse via singleton worker, UUID+parsedAt stamp, message-only error toast"
-  - "src/components/SnapshotListSidebar.tsx — capturedAt-sorted sidebar with compact UploadZone + empty state"
-  - "src/components/SnapshotCard.tsx — filename/vCenter/capturedAt(FND-05)/RVTools version/row counts; semantic button, a11y-clean"
-  - "src/App.tsx — selectHasSnapshots swaps hero UploadZone <-> sidebar; real upload wired"
-  - "src/__tests__/e2e-smoke.test.tsx — canary fixture drop->parse->store->render + PAR-05 fresh-store assertion"
-  - "src/components/FallbackError.test.tsx — Critical-2 leak guard (error.cause never reaches DOM)"
-affects: [02-aggregation]
+- phase: 01-foundation-invariants
+  plan: 01
+  provides: "UploadZone shell (onFiles/variant), FallbackError hardened, i18n upload.snapshots keys, vatlas-theme/vatlas-lang localStorage policy"
+- phase: 01-foundation-invariants
+  plan: 04
+  provides: "parseInWorker(file) -> { snapshot: Omit<Snapshot,'id'|'parsedAt'>, warnings }; Snapshot type; parseXlsx/parseSnapshot/captureDate pure path for the e2e mock"
+  provides:
+- "src/store/snapshotStore.ts — inputs-only Zustand store: Map<id,Snapshot> append-only + activeSnapshotId; addSnapshot/removeSnapshot/setActiveSnapshot/renameVCenter/setCapturedAt/clearAll; selectHasSnapshots/selectActiveSnapshot. NO aggregates, NO persist."
+- "src/hooks/useSnapshotUpload.ts — useSnapshotUpload(): { upload(files), isUploading }; sequential per-file parse via singleton worker, UUID+parsedAt stamp, message-only error toast"
+- "src/components/SnapshotListSidebar.tsx — capturedAt-sorted sidebar with compact UploadZone + empty state"
+- "src/components/SnapshotCard.tsx — filename/vCenter/capturedAt(FND-05)/RVTools version/row counts; semantic button, a11y-clean"
+- "src/App.tsx — selectHasSnapshots swaps hero UploadZone <-> sidebar; real upload wired"
+- "src/**tests**/e2e-smoke.test.tsx — canary fixture drop->parse->store->render + PAR-05 fresh-store assertion"
+- "src/components/FallbackError.test.tsx — Critical-2 leak guard (error.cause never reaches DOM)"
+  affects: [02-aggregation]
 
 tech-stack:
-  added: []
-  patterns:
-    - "Inputs-only Zustand store (ARCHITECTURE.md §5 deviation from vsizer): Map identity REPLACED on every content mutation (Object.is); no cached aggregates — derived later via useEstateView+useMemo"
-    - "Sort/derivation lives at the component callsite behind useMemo, never inside a selector (stable-reference rule)"
-    - "Sequential singleton-worker upload loop (STRIDE T-05-07): one bad workbook never aborts the batch (per-file try/catch)"
-    - "Error toast surfaces err.message ONLY, never the error object (Critical-2 / Pitfall 4)"
-    - "a11y: card body is a real <button>; remove control is a SIBLING button (no nested buttons; satisfies Biome useSemanticElements)"
-    - "Test-file typecheck: *.test.tsx + src/__tests__ excluded from app tsc -b, included in standalone tsconfig.test.json"
+added: []
+patterns:
+- "Inputs-only Zustand store (ARCHITECTURE.md §5 deviation from vsizer): Map identity REPLACED on every content mutation (Object.is); no cached aggregates — derived later via useEstateView+useMemo"
+- "Sort/derivation lives at the component callsite behind useMemo, never inside a selector (stable-reference rule)"
+- "Sequential singleton-worker upload loop (STRIDE T-05-07): one bad workbook never aborts the batch (per-file try/catch)"
+- "Error toast surfaces err.message ONLY, never the error object (Critical-2 / Pitfall 4)"
+- "a11y: card body is a real <button>; remove control is a SIBLING button (no nested buttons; satisfies Biome useSemanticElements)"
+- "Test-file typecheck: *.test.tsx + src/**tests** excluded from app tsc -b, included in standalone tsconfig.test.json"
 
 key-files:
-  created:
-    - "src/store/snapshotStore.ts"
-    - "src/store/snapshotStore.test.ts"
-    - "src/hooks/useSnapshotUpload.ts"
-    - "src/hooks/useSnapshotUpload.test.ts"
-    - "src/components/SnapshotListSidebar.tsx"
-    - "src/components/SnapshotCard.tsx"
-    - "src/components/FallbackError.test.tsx"
-    - "src/__tests__/e2e-smoke.test.tsx"
+created:
+- "src/store/snapshotStore.ts"
+- "src/store/snapshotStore.test.ts"
+- "src/hooks/useSnapshotUpload.ts"
+- "src/hooks/useSnapshotUpload.test.ts"
+- "src/components/SnapshotListSidebar.tsx"
+- "src/components/SnapshotCard.tsx"
+- "src/components/FallbackError.test.tsx"
+- "src/**tests**/e2e-smoke.test.tsx"
   modified:
-    - "src/App.tsx (hero<->sidebar swap; Plan 01 console.warn stub removed; real useSnapshotUpload wired)"
-    - "tsconfig.app.json (exclude *.test.tsx/*.spec.tsx/src/__tests__ from app build)"
-    - "tsconfig.test.json (include *.test.tsx/__tests__ so test type-safety preserved)"
+- "src/App.tsx (hero<->sidebar swap; Plan 01 console.warn stub removed; real useSnapshotUpload wired)"
+- "tsconfig.app.json (exclude _.test.tsx/_.spec.tsx/src/**tests** from app build)"
+- "tsconfig.test.json (include *.test.tsx/**tests** so test type-safety preserved)"
 
 decisions:
-  - "Kept Plan 01's existing i18n errors.parseFailed copy ('Failed to read the file: {{message}}' / 'Impossible de lire le fichier : {{message}}') — functionally equivalent to the plan's suggested string; the plan said 'if not already there from Plan 01' and they were. No churn (KISS)."
-  - "SnapshotCard restructured from the plan's <li role=button> sketch to <li> > real <button> card body + sibling <button> remove — Biome's useSemanticElements a11y rule (error-level) rejects interactive roles on <li> and the plan's nested-button shape is invalid HTML. Behaviour identical (click selects, ✕ removes)."
-  - "JSX.Element return annotations dropped (TS infers; the project's tsconfig does not expose a global JSX namespace under React 19) — KISS over adding a React.JSX import."
+- "Kept Plan 01's existing i18n errors.parseFailed copy ('Failed to read the file: {{message}}' / 'Impossible de lire le fichier : {{message}}') — functionally equivalent to the plan's suggested string; the plan said 'if not already there from Plan 01' and they were. No churn (KISS)."
+- "SnapshotCard restructured from the plan's <li role=button> sketch to <li> > real <button> card body + sibling <button> remove — Biome's useSemanticElements a11y rule (error-level) rejects interactive roles on <li> and the plan's nested-button shape is invalid HTML. Behaviour identical (click selects, ✕ removes)."
+- "JSX.Element return annotations dropped (TS infers; the project's tsconfig does not expose a global JSX namespace under React 19) — KISS over adding a React.JSX import."
 
 metrics:
-  duration: 45min
-  tasks: 3
-  files_created: 8
-  files_modified: 3
-  completed: 2026-05-16
+duration: 45min
+tasks: 3
+files_created: 8
+files_modified: 3
+completed: 2026-05-16
 ---
 
 # Phase 01 Plan 05: Snapshot Store + Sidebar UI + End-to-End Smoke Summary
@@ -95,10 +96,10 @@ metrics:
 
 A true in-browser `performance.now()` around `parseInWorker(file)` requires a running browser; this environment is headless (consistent with Plan 04's node-measured A9). Measured via the **identical pure pipeline** the worker runs (`parseXlsx → parseSnapshot → infer*`), using a throwaway Vitest probe (created, run, deleted — not committed):
 
-| Fixture | Size | Parse wall-clock |
-|---|---|---|
-| `RVTools_export_all_2026-04-17_..._MOM-vCenter.xlsx` (largest available; 249 VM / 84 ESX / 102 ds) | 944 KB | **359.7 ms** |
-| `rvtools-mib-canary.xlsx` | 19 KB | 8.9 ms |
+| Fixture                                                                                            | Size   | Parse wall-clock |
+| -------------------------------------------------------------------------------------------------- | ------ | ---------------- |
+| `RVTools_export_all_2026-04-17_..._MOM-vCenter.xlsx` (largest available; 249 VM / 84 ESX / 102 ds) | 944 KB | **359.7 ms**     |
+| `rvtools-mib-canary.xlsx`                                                                          | 19 KB  | 8.9 ms           |
 
 No ≥30 MB workbook is available on disk (largest 944 KB). Extrapolating ~0.38 ms/KB, a 30 MB workbook projects to **~11.5 s** — grazing the RESEARCH.md A9 10 s threshold. **No measured >10 s ⇒ NOT a Phase 6 backlog trigger yet**, but flagged: the Worker boundary keeps any such parse off the main thread (the `isUploading` flag disables the dropzone; the UI never freezes), so a threshold-grazing file degrades gracefully. Phase 6 should re-measure in-browser with a real ≥30 MB workbook if one becomes available.
 
@@ -128,13 +129,13 @@ Every `Snapshot` carries `viSdkUuid: string | null` (populated by Plan 04 from `
 
 ## Phase 1 end-to-end success (ROADMAP success criteria)
 
-| # | Criterion | Status |
-|---|-----------|--------|
-| 1 | Drop RVTools workbook on a public-URL page → snapshot card with filename + vCenter + capture date + RVTools version, no tab freeze | **Demonstrably true** — e2e smoke drives the canary drop→render through the production pure-parse path; build emits a deployable `/vatlas/` bundle |
-| 2 | Real-workbook metadata renders within ~10 s, UI does not freeze | **True** — largest available real fixture (944 KB) parses in 360 ms; Worker boundary + `isUploading` guard keep the main thread free |
-| 3 | Missing-`vInfo` workbook → sonner toast with structured error, no card | **True** — `useSnapshotUpload` test asserts continue-on-error + message-only toast with `file.name` description; Plan 04's worker throws the structured `ParseError` |
-| 4 | After refresh, sidebar empty (PAR-05) | **True** — DevTools Network = 0 outbound (Plan 02 fetch guard + worker); PAR-05 source-grep test + e2e fresh-store test green |
-| 5 | Engines + privacy + units coverage | **True** — `src/engines/** + src/privacy/**` coverage 93.9 / 83.7 / 98.8 / 94.7, all ≥75% |
+| #   | Criterion                                                                                                                          | Status                                                                                                                                                               |
+| --- | ---------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | Drop RVTools workbook on a public-URL page → snapshot card with filename + vCenter + capture date + RVTools version, no tab freeze | **Demonstrably true** — e2e smoke drives the canary drop→render through the production pure-parse path; build emits a deployable `/vatlas/` bundle                   |
+| 2   | Real-workbook metadata renders within ~10 s, UI does not freeze                                                                    | **True** — largest available real fixture (944 KB) parses in 360 ms; Worker boundary + `isUploading` guard keep the main thread free                                 |
+| 3   | Missing-`vInfo` workbook → sonner toast with structured error, no card                                                             | **True** — `useSnapshotUpload` test asserts continue-on-error + message-only toast with `file.name` description; Plan 04's worker throws the structured `ParseError` |
+| 4   | After refresh, sidebar empty (PAR-05)                                                                                              | **True** — DevTools Network = 0 outbound (Plan 02 fetch guard + worker); PAR-05 source-grep test + e2e fresh-store test green                                        |
+| 5   | Engines + privacy + units coverage                                                                                                 | **True** — `src/engines/** + src/privacy/**` coverage 93.9 / 83.7 / 98.8 / 94.7, all ≥75%                                                                            |
 
 All five Phase 1 ROADMAP success criteria are now demonstrable. Phase 1 is functionally complete (5/5 plans).
 
@@ -215,5 +216,6 @@ Plan frontmatter is `type: execute` (not `type: tdd`); Tasks 1 & 2 are `tdd="tru
 ## Self-Check: PASSED
 
 ---
+
 _Phase: 01-foundation-invariants_
 _Completed: 2026-05-16_

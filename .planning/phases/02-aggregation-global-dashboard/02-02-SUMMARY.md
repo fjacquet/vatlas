@@ -1,61 +1,65 @@
 ---
+
 phase: 02-aggregation-global-dashboard
 plan: 02
 subsystem: engine
 tags: [aggregation, branded-units, accounting-modes, cpu-ready, naa-dedupe, useEstateView, vsizer-port]
 
 # Dependency graph
+
 requires:
-  - phase: 01-foundation-invariants
-    provides: "branded units (mib/mhz/ghz/cores/sockets + mhzToGhz), Snapshot/VInfoRow/VHostRow/VDatastoreRow row types, inputs-only snapshotStore + selectActiveSnapshot, vitest+coverage gate"
-  - phase: 02-aggregation-global-dashboard (02-01)
-    provides: "ECharts SVG infra + <Chart> wrapper + theme (consumed by 02-03, not by this plan)"
-provides:
-  - "Pure buildEstateView(snapshot, mode) → EstateView assembler + frozen EMPTY_VIEW"
-  - "Six ported math engines (ghz/perCluster/vinfoMerge/aggregateClusters/globals/contention) brand-retrofitted"
-  - "Three net-new pure engines: osFamily (3-way classifier), perDatastore (NAA dedupe), perEsx (host rollup)"
-  - "Three accounting modes via a single mode param threaded through vinfoMerge/perEsx (no precompute)"
-  - "Exported readinessStats helper (shared by vinfoMerge + perEsx; reused by future phases)"
-  - "src/utils/format.ts ported locale formatters with GiB/TiB suffixes (ADR-0010)"
-  - "useEstateView(mode) — the project's single sanctioned useMemo store→view bridge"
-  - "src/types/estate.ts — EstateView/ClusterAggregate/GlobalSummary/DatastoreAggregate/EsxAggregate contract"
-affects: [02-03-dashboard-ui, phase-03-inventory, phase-04-trends-multi-snapshot, phase-05-eos, phase-07-exports]
+- phase: 01-foundation-invariants
+  provides: "branded units (mib/mhz/ghz/cores/sockets + mhzToGhz), Snapshot/VInfoRow/VHostRow/VDatastoreRow row types, inputs-only snapshotStore + selectActiveSnapshot, vitest+coverage gate"
+- phase: 02-aggregation-global-dashboard (02-01)
+  provides: "ECharts SVG infra + <Chart> wrapper + theme (consumed by 02-03, not by this plan)"
+  provides:
+- "Pure buildEstateView(snapshot, mode) → EstateView assembler + frozen EMPTY_VIEW"
+- "Six ported math engines (ghz/perCluster/vinfoMerge/aggregateClusters/globals/contention) brand-retrofitted"
+- "Three net-new pure engines: osFamily (3-way classifier), perDatastore (NAA dedupe), perEsx (host rollup)"
+- "Three accounting modes via a single mode param threaded through vinfoMerge/perEsx (no precompute)"
+- "Exported readinessStats helper (shared by vinfoMerge + perEsx; reused by future phases)"
+- "src/utils/format.ts ported locale formatters with GiB/TiB suffixes (ADR-0010)"
+- "useEstateView(mode) — the project's single sanctioned useMemo store→view bridge"
+- "src/types/estate.ts — EstateView/ClusterAggregate/GlobalSummary/DatastoreAggregate/EsxAggregate contract"
+  affects: [02-03-dashboard-ui, phase-03-inventory, phase-04-trends-multi-snapshot, phase-05-eos, phase-07-exports]
 
 # Tech tracking
+
 tech-stack:
-  added: []
-  patterns:
-    - "Brand retrofit: brand on boundary → `x as number` for arithmetic → re-wrap via units constructor"
-    - "Accounting mode = one param recompute (Pitfall 2), never parallel precomputed arrays"
-    - "NAA-keyed dedupe: group by `naa ?? name`, capacity from first row, never summed (Moderate-11)"
-    - "Pure assembler + frozen EMPTY_VIEW constant (modeled on globals.ts:emptySummary)"
-    - "Single useMemo bridge: useEstateView orchestrates+memoizes, engines hold the logic"
+added: []
+patterns:
+- "Brand retrofit: brand on boundary → `x as number` for arithmetic → re-wrap via units constructor"
+- "Accounting mode = one param recompute (Pitfall 2), never parallel precomputed arrays"
+- "NAA-keyed dedupe: group by `naa ?? name`, capacity from first row, never summed (Moderate-11)"
+- "Pure assembler + frozen EMPTY_VIEW constant (modeled on globals.ts:emptySummary)"
+- "Single useMemo bridge: useEstateView orchestrates+memoizes, engines hold the logic"
 
 key-files:
-  created:
-    - src/types/estate.ts
-    - src/utils/format.ts
-    - src/engines/aggregation/{ghz,perCluster,vinfoMerge,aggregateClusters,globals,contention}.ts
-    - src/engines/aggregation/{osFamily,perDatastore,perEsx,estateView,index}.ts
-    - src/hooks/useEstateView.ts
-    - src/test/arrays.ts
+created:
+- src/types/estate.ts
+- src/utils/format.ts
+- src/engines/aggregation/{ghz,perCluster,vinfoMerge,aggregateClusters,globals,contention}.ts
+- src/engines/aggregation/{osFamily,perDatastore,perEsx,estateView,index}.ts
+- src/hooks/useEstateView.ts
+- src/test/arrays.ts
   modified:
-    - src/types/index.ts
+- src/types/index.ts
 
 key-decisions:
-  - "useEstateView added as the ONE new useMemo; pre-existing SnapshotListSidebar useMemo (Phase-1) logged as out-of-scope deferred item"
-  - "Stretched-cluster DR math ported intact but dormant (empty set); covered by direct regression test to keep branch coverage ≥75% and protect math integrity (T-02-06)"
-  - "Test-only `first()` helper placed at src/test/arrays.ts (outside coverage include globs) to satisfy noUncheckedIndexedAccess without non-null assertions"
-  - "A1 implemented: global datastoreCount + totalStorageMib only; ClusterAggregate carries NO per-cluster datastore field (02-03 renders em-dash)"
+- "useEstateView added as the ONE new useMemo; pre-existing SnapshotListSidebar useMemo (Phase-1) logged as out-of-scope deferred item"
+- "Stretched-cluster DR math ported intact but dormant (empty set); covered by direct regression test to keep branch coverage ≥75% and protect math integrity (T-02-06)"
+- "Test-only `first()` helper placed at src/test/arrays.ts (outside coverage include globs) to satisfy noUncheckedIndexedAccess without non-null assertions"
+- "A1 implemented: global datastoreCount + totalStorageMib only; ClusterAggregate carries NO per-cluster datastore field (02-03 renders em-dash)"
 
 patterns-established:
-  - "Brand retrofit mechanical pattern applied across all ported engines"
-  - "Shared readinessStats exported from vinfoMerge, imported by perEsx (DRY, no copied reduce loop)"
-  - "Frozen EMPTY_VIEW / emptySummary empty-but-valid-shape idiom"
+- "Brand retrofit mechanical pattern applied across all ported engines"
+- "Shared readinessStats exported from vinfoMerge, imported by perEsx (DRY, no copied reduce loop)"
+- "Frozen EMPTY_VIEW / emptySummary empty-but-valid-shape idiom"
 
 requirements-completed: [DSH-01, DSH-02, DSH-03, DSH-04, DSH-05, DSH-06]
 
 # Metrics
+
 duration: 60min
 completed: 2026-05-16
 ---
@@ -175,5 +179,6 @@ No new security surface introduced. Engines are pure transforms with zero networ
 All 8 key files verified present on disk; both task commits (`11224ce`, `36e3e88`) verified in git history.
 
 ---
+
 _Phase: 02-aggregation-global-dashboard_
 _Completed: 2026-05-16_

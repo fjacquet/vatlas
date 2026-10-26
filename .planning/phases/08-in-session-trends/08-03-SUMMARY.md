@@ -1,57 +1,58 @@
 ---
+
 phase: 08-in-session-trends
 plan: 03
 subsystem: ui
 tags: [react, echarts, i18n, trends, sparkline, viewtoggle]
 
 requires:
-  - phase: 08-in-session-trends
-    provides: EstateView.trends (08-01) + {done,total}/releaseRawRows/LineChart (08-02)
-provides:
-  - trends ViewToggle segment + App route + TrendsView (time-axis chart, D-05 category fallback)
-  - DeltaPanel (factual consecutive-pair branded deltas)
-  - per-cluster dashboard sparklines (>=2 points)
-  - inline-editable capturedAt (shipped setCapturedAt) + per-snapshot metadata + released note
-  - scoped warm-up "N/M" + inferred-order captions
-  - trends i18n namespace (EN/FR parity) + nav.trends; REQUIREMENTS TRD-01..05 reconciled Phase 6 -> 8
-affects: [09, 10, future trends/export work]
+- phase: 08-in-session-trends
+  provides: EstateView.trends (08-01) + {done,total}/releaseRawRows/LineChart (08-02)
+  provides:
+- trends ViewToggle segment + App route + TrendsView (time-axis chart, D-05 category fallback)
+- DeltaPanel (factual consecutive-pair branded deltas)
+- per-cluster dashboard sparklines (>=2 points)
+- inline-editable capturedAt (shipped setCapturedAt) + per-snapshot metadata + released note
+- scoped warm-up "N/M" + inferred-order captions
+- trends i18n namespace (EN/FR parity) + nav.trends; REQUIREMENTS TRD-01..05 reconciled Phase 6 -> 8
+  affects: [09, 10, future trends/export work]
 
 tech-stack:
-  added: []
-  patterns:
-    - "Trend UI consumes the single memoized EstateView as plain props (no new memo site)"
-    - "D-05 presentation: whole-series xAxis type:'time' OR type:'category'+caption — never mixed"
+added: []
+patterns:
+- "Trend UI consumes the single memoized EstateView as plain props (no new memo site)"
+- "D-05 presentation: whole-series xAxis type:'time' OR type:'category'+caption — never mixed"
 
 key-files:
-  created:
-    - src/components/trends/TrendsView.tsx
-    - src/components/trends/TrendChart.tsx
-    - src/components/trends/TrendSparkline.tsx
-    - src/components/trends/DeltaPanel.tsx
-    - src/components/trends/trendsChartOptions.ts
-    - src/i18n/locales/en/trends.json
-    - src/i18n/locales/fr/trends.json
+created:
+- src/components/trends/TrendsView.tsx
+- src/components/trends/TrendChart.tsx
+- src/components/trends/TrendSparkline.tsx
+- src/components/trends/DeltaPanel.tsx
+- src/components/trends/trendsChartOptions.ts
+- src/i18n/locales/en/trends.json
+- src/i18n/locales/fr/trends.json
   modified:
-    - src/components/ViewToggle.tsx
-    - src/App.tsx
-    - src/components/SnapshotCard.tsx
-    - src/components/SnapshotListSidebar.tsx
-    - src/components/dashboard/ClusterColumn.tsx
-    - src/components/dashboard/PerClusterColumns.tsx
-    - src/components/dashboard/GlobalDashboard.tsx
-    - src/i18n/index.ts
-    - src/i18n/locales/en/inventory.json
-    - src/i18n/locales/fr/inventory.json
-    - .planning/REQUIREMENTS.md
+- src/components/ViewToggle.tsx
+- src/App.tsx
+- src/components/SnapshotCard.tsx
+- src/components/SnapshotListSidebar.tsx
+- src/components/dashboard/ClusterColumn.tsx
+- src/components/dashboard/PerClusterColumns.tsx
+- src/components/dashboard/GlobalDashboard.tsx
+- src/i18n/index.ts
+- src/i18n/locales/en/inventory.json
+- src/i18n/locales/fr/inventory.json
+- .planning/REQUIREMENTS.md
 
 key-decisions:
-  - "D-05 LOCKED: whole-series time-axis OR ordered-category+caption when orderInferred (never mixed)"
-  - "DD-B visible delta set rendered factual/branded/no-verdict; signed by glyph not color"
-  - "D-03: inline date input commits via shipped setCapturedAt — no new mutation, no store-bypassing local truth"
-  - "Released snapshots cannot be picked as active estate (rows gone); factual released note shown"
+- "D-05 LOCKED: whole-series time-axis OR ordered-category+caption when orderInferred (never mixed)"
+- "DD-B visible delta set rendered factual/branded/no-verdict; signed by glyph not color"
+- "D-03: inline date input commits via shipped setCapturedAt — no new mutation, no store-bypassing local truth"
+- "Released snapshots cannot be picked as active estate (rows gone); factual released note shown"
 
 patterns-established:
-  - "TrendsView/DeltaPanel reuse the EosView shell + message-only region error boundary (neutral border — no util status ramp on trend visuals)"
+- "TrendsView/DeltaPanel reuse the EosView shell + message-only region error boundary (neutral border — no util status ramp on trend visuals)"
 
 requirements-completed: [TRD-01, TRD-02, TRD-03, TRD-04, TRD-05]
 

@@ -1,33 +1,35 @@
 ---
+
 phase: 11
 plan: "06"
 subsystem: export
 tags: [html, report, storage, network, planned, treemap, f-2, f-1]
 requires:
-  - "chartBundle shared.storageTreemap (11-01)"
-  - "storage/network/planned i18n keys (11-02)"
-provides:
-  - "HTML report Storage + Network + planned sections + the storage-treemap chart slot (F-2/F-1 HTML side)"
-affects:
-  - src/engines/export/html/renderReport.tsx
-  - src/engines/export/export.worker.ts
-tech-stack:
+- "chartBundle shared.storageTreemap (11-01)"
+- "storage/network/planned i18n keys (11-02)"
+  provides:
+- "HTML report Storage + Network + planned sections + the storage-treemap chart slot (F-2/F-1 HTML side)"
+  affects:
+- src/engines/export/html/renderReport.tsx
+- src/engines/export/export.worker.ts
+  tech-stack:
   added: []
   patterns:
-    - "Section + Metric(flag) + .annex-table + data-chart-slot idiom; TOP_N_CLUSTERS fold reused for P9 tables"
-key-files:
-  created: []
-  modified:
-    - src/engines/export/html/renderReport.tsx
-    - src/engines/export/export.worker.ts
-    - src/engines/export/html/renderReport.test.tsx
-key-decisions:
-  - "Storage+Network inserted after per-cluster / before eos; planned after dr (fixed HTM-04 order)"
-  - "TOP_N_CLUSTERS fold reused for storage by-cluster/by-datastore + planned-delta tables (budget)"
-  - "Worker treemap slot guarded (noUncheckedIndexedAccess) — absent ⇒ empty slot, never fabricated"
-requirements-completed: [STG-01, STG-02, STG-03, STG-04, STG-05, NET-01, NET-02, NET-03, NET-04, NET-05, DTL-01, DTL-02, DTL-03, ALR-01, ALR-02, ALR-03, ALR-04, ALR-05, VSR-01, VSR-02, VSR-03, VSR-04, VSR-05, PLN-03, PLN-04]
-duration: 22 min
-completed: 2026-05-19
+  - "Section + Metric(flag) + .annex-table + data-chart-slot idiom; TOP_N_CLUSTERS fold reused for P9 tables"
+    key-files:
+    created: []
+    modified:
+  - src/engines/export/html/renderReport.tsx
+  - src/engines/export/export.worker.ts
+  - src/engines/export/html/renderReport.test.tsx
+    key-decisions:
+- "Storage+Network inserted after per-cluster / before eos; planned after dr (fixed HTM-04 order)"
+- "TOP_N_CLUSTERS fold reused for storage by-cluster/by-datastore + planned-delta tables (budget)"
+- "Worker treemap slot guarded (noUncheckedIndexedAccess) — absent ⇒ empty slot, never fabricated"
+  requirements-completed: [STG-01, STG-02, STG-03, STG-04, STG-05, NET-01, NET-02, NET-03, NET-04, NET-05, DTL-01, DTL-02, DTL-03, ALR-01, ALR-02, ALR-03, ALR-04, ALR-05, VSR-01, VSR-02, VSR-03, VSR-04, VSR-05, PLN-03, PLN-04]
+  duration: 22 min
+  completed: 2026-05-19
+
 ---
 
 # Phase 11 Plan 06: HTML report P9 + planned sections Summary

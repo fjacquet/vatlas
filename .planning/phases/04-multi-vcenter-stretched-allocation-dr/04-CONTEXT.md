@@ -37,12 +37,12 @@ Re-derived P4 (analytics-core replan). Delivers: the **validated multi-vCenter m
 
 ### Requirements rewording (REQUIREMENTS.md is stale vs G1)
 
-- **D-10:** Collapse STR-03 + STR-04 into a **single factual STR-03**: *"User sees, factually, whether a stretched cluster's per-site split comes from real fault-domain data (Site A/B shown) or an assumed symmetric split — no high/med/low verdict, no warning chip."* **Drop the STR-04 ID entirely** from REQUIREMENTS.md (the warning-chip requirement is retired by G1). MVC-01..04 unchanged. Planner updates REQUIREMENTS.md accordingly.
+- **D-10:** Collapse STR-03 + STR-04 into a **single factual STR-03**: _"User sees, factually, whether a stretched cluster's per-site split comes from real fault-domain data (Site A/B shown) or an assumed symmetric split — no high/med/low verdict, no warning chip."_ **Drop the STR-04 ID entirely** from REQUIREMENTS.md (the warning-chip requirement is retired by G1). MVC-01..04 unchanged. Planner updates REQUIREMENTS.md accordingly.
 
 ### Claude's Discretion
 
 - None material — every gray area was decided by the user. Exact prose of the reworded STR-03 and the neutral caption strings follow the captured intent (factual, no editorial verbs per PROJECT.md line 39 denylist + i18n EN/FR parity).
-</decisions>
+  </decisions>
 
 <canonical_refs>
 
@@ -69,7 +69,7 @@ Re-derived P4 (analytics-core replan). Delivers: the **validated multi-vCenter m
 - `.planning/ROADMAP.md` ### Phase 4 — the redefined boundary banner.
 
 > The original `04-RESEARCH.md` / `04-PATTERNS.md` / `04-UI-SPEC.md` are **pre-replan** artifacts — historical only; the replan brief + this CONTEXT supersede them for the re-derived scope.
-</canonical_refs>
+> </canonical_refs>
 
 <code_context>
 
@@ -92,7 +92,7 @@ Re-derived P4 (analytics-core replan). Delivers: the **validated multi-vCenter m
 ### Integration Points
 
 - The `estate-level "N clusters marked stretched"` line (D-06) reads `stretchedClusters.size` via the single memo / a stable selector — must not introduce a second `useMemo`.
-</code_context>
+  </code_context>
 
 <specifics>
 ## Specific Ideas
@@ -100,7 +100,7 @@ Re-derived P4 (analytics-core replan). Delivers: the **validated multi-vCenter m
 - Captions are exact-intent: "site data: detected" (tagged) / "symmetric split assumed (no site data)" (inferred) — neutral, factual, EN/FR. No "low/poor/confidence".
 - Estate line wording: "N clusters marked stretched" (count echo, neutral).
 - Reference depth target overall: `azure.github.io/RVToolsAnalyzer` (illustrative, not pixel-match) — but the deep catalogue is P5, not P4.
-</specifics>
+  </specifics>
 
 <deferred>
 ## Deferred Ideas (forward to the right phases — do not act in P4)
@@ -114,5 +114,5 @@ Re-derived P4 (analytics-core replan). Delivers: the **validated multi-vCenter m
 
 ---
 
-*Phase: 04-multi-vcenter-stretched-allocation-dr*
-*Context gathered: 2026-05-17*
+_Phase: 04-multi-vcenter-stretched-allocation-dr_
+_Context gathered: 2026-05-17_

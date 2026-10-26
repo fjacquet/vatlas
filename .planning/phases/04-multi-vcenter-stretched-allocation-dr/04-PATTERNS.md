@@ -10,36 +10,36 @@
 
 ## File Classification
 
-| New/Modified File | Role | Data Flow | Closest Analog | Match Quality |
-|-------------------|------|-----------|----------------|---------------|
-| `src/engines/parser/adapters/rvtools.ts` (MOD: `adaptRvtoolsVMetaData` columnar 4.x + `VMETADATA_COLS` + `VDATASTORE_COLS.hosts` + `VHOST_COLS.faultDomain`) | parser | transform | self (existing adapters in same file) | exact (self-extend) |
-| `src/engines/parser/captureDate.ts` (MOD: `inferRvtoolsVersion`/label/date read columnar `vMetaData`) | parser | transform | self (`metaValue` in same file) | exact (self-extend) |
-| `src/types/snapshot.ts` (MOD: `VDatastoreRow.hosts`, `VMetaDataRow` per-vCenter rows) | type | — | self | exact (self-extend) |
-| `src/types/vhost.ts` (MOD: `VHostRow.faultDomain`) | type | — | self | exact (self-extend) |
-| `src/engines/parser/parser.worker.ts` (MOD: surface per-vCenter vMetaData list) | infra | request-response | self | exact (self-extend) |
-| `src/engines/snapshotMerge/mergeSnapshotsToEstate.ts` | engine | transform / batch | vsizer `resolveClusterCollisions.ts` + `perDatastore.ts` (dedupe-by-key shape) | NEW (strong port skeleton) |
-| `src/engines/snapshotMerge/vCenterIndex.ts` | engine | transform | `perDatastore.ts` `datastoreCountByCluster` (Map-accumulate) | role-match |
-| `src/engines/snapshotMerge/index.ts` | infra | — | `engines/aggregation/index.ts` (barrel) | exact |
-| `src/engines/snapshotMerge/*.test.ts` | test | — | `aggregateClusters.test.ts` + `perDatastore` tests | role-match |
-| `src/engines/aggregation/aggregateClusters.ts` (MOD: per-site reservation + confidence) | engine | transform | self (dormant 50% math, lines 59-76) | exact (self-extend) |
-| `src/engines/aggregation/perDatastore.ts` (MOD: Hosts→cluster join in `datastoreCountByCluster`) | engine | transform | self (`datastoreCountByCluster` lines 33-44) | exact (self-extend) |
-| `src/engines/aggregation/estateView.ts` (MOD: consume merged rows + stretched/ratios/scenario) | engine | transform | self (`buildEstateView`) | exact (self-extend) |
-| `src/engines/aggregation/globals.ts` (MOD: `stretchedConfidence` rollup if surfaced) | engine | transform | self | exact (self-extend) |
-| `src/types/estate.ts` (MOD: `ClusterAggregate.stretchedConfidence`/site fields, `EstateView.drSim`/`allocRatios`, `DrSimResult`) | type | — | self | exact (self-extend) |
-| `src/engines/drSim/runScenario.ts` | engine | transform / batch | `estateView.ts` `buildEstateView` (re-run aggregation on a subset) | NEW (composition of shipped engines) |
-| `src/engines/drSim/allocate.ts` | engine | transform | `aggregateClusters.ts` verdict-style derivation | NEW (pure arithmetic) |
-| `src/engines/drSim/index.ts` | infra | — | `engines/aggregation/index.ts` | exact |
-| `src/engines/drSim/*.test.ts` | test | — | `aggregateClusters.test.ts` | role-match |
-| `src/hooks/useEstateView.ts` (MOD: thread selected[]/stretched/scenario/ratios, ONE memo) | hook | request-response | self (the single `useMemo`, lines 17-20) | exact (self-extend) |
-| `src/store/snapshotStore.ts` (MOD: `selectedSnapshotIds` + `stretchedClusters` + `scenario` slices) | store | event-driven | self (existing inputs-only slices + Set-replace idiom) | exact (self-extend) |
-| `src/hooks/useAllocationHash.ts` | hook | event-driven | `src/hooks/useTheme.ts` (localStorage-sync hook) inverted to hash | role-match |
-| `src/components/stretched/StretchedPill.tsx` | component | request-response | `AccountingModeToggle.tsx` (aria-pressed segmented idiom) | role-match (idiom-exact) |
-| `src/components/allocation/AllocationSliders.tsx` | component | request-response | `AccountingModeToggle.tsx` (presets) + native `<input type=range>` | role-match |
-| `src/components/dr/DrSimPanel.tsx` | component | request-response | `CpuReadyPanel.tsx` + `GlobalDashboard.tsx` (panel + selector) | role-match |
-| `src/components/dashboard/ClusterColumn.tsx` (MOD: pill + site rows + confidence chip in footer) | component | request-response | self (footer region reserved line 122) | exact (self-extend) |
-| `src/components/dashboard/GlobalDashboard.tsx` (MOD: allocation toolbar + DrSimPanel + lifted state) | component | request-response | self (lifted `useState` mode line 50, single `useEstateView` caller) | exact (self-extend) |
-| `src/components/SnapshotCard.tsx` (MOD: MVC-04 N-vCenters + RVTools version meta line) | component | request-response | self (meta line lines 39-51) | exact (self-extend) |
-| `src/i18n/index.ts` + `locales/{en,fr}/{mvc,str,alloc,dr}.json` | i18n | — | self (`NAMESPACES` line 26 + existing `dashboard.json`) | exact (self-extend) |
+| New/Modified File                                                                                                                                            | Role      | Data Flow         | Closest Analog                                                                 | Match Quality                        |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------- | ----------------- | ------------------------------------------------------------------------------ | ------------------------------------ |
+| `src/engines/parser/adapters/rvtools.ts` (MOD: `adaptRvtoolsVMetaData` columnar 4.x + `VMETADATA_COLS` + `VDATASTORE_COLS.hosts` + `VHOST_COLS.faultDomain`) | parser    | transform         | self (existing adapters in same file)                                          | exact (self-extend)                  |
+| `src/engines/parser/captureDate.ts` (MOD: `inferRvtoolsVersion`/label/date read columnar `vMetaData`)                                                        | parser    | transform         | self (`metaValue` in same file)                                                | exact (self-extend)                  |
+| `src/types/snapshot.ts` (MOD: `VDatastoreRow.hosts`, `VMetaDataRow` per-vCenter rows)                                                                        | type      | —                 | self                                                                           | exact (self-extend)                  |
+| `src/types/vhost.ts` (MOD: `VHostRow.faultDomain`)                                                                                                           | type      | —                 | self                                                                           | exact (self-extend)                  |
+| `src/engines/parser/parser.worker.ts` (MOD: surface per-vCenter vMetaData list)                                                                              | infra     | request-response  | self                                                                           | exact (self-extend)                  |
+| `src/engines/snapshotMerge/mergeSnapshotsToEstate.ts`                                                                                                        | engine    | transform / batch | vsizer `resolveClusterCollisions.ts` + `perDatastore.ts` (dedupe-by-key shape) | NEW (strong port skeleton)           |
+| `src/engines/snapshotMerge/vCenterIndex.ts`                                                                                                                  | engine    | transform         | `perDatastore.ts` `datastoreCountByCluster` (Map-accumulate)                   | role-match                           |
+| `src/engines/snapshotMerge/index.ts`                                                                                                                         | infra     | —                 | `engines/aggregation/index.ts` (barrel)                                        | exact                                |
+| `src/engines/snapshotMerge/*.test.ts`                                                                                                                        | test      | —                 | `aggregateClusters.test.ts` + `perDatastore` tests                             | role-match                           |
+| `src/engines/aggregation/aggregateClusters.ts` (MOD: per-site reservation + confidence)                                                                      | engine    | transform         | self (dormant 50% math, lines 59-76)                                           | exact (self-extend)                  |
+| `src/engines/aggregation/perDatastore.ts` (MOD: Hosts→cluster join in `datastoreCountByCluster`)                                                             | engine    | transform         | self (`datastoreCountByCluster` lines 33-44)                                   | exact (self-extend)                  |
+| `src/engines/aggregation/estateView.ts` (MOD: consume merged rows + stretched/ratios/scenario)                                                               | engine    | transform         | self (`buildEstateView`)                                                       | exact (self-extend)                  |
+| `src/engines/aggregation/globals.ts` (MOD: `stretchedConfidence` rollup if surfaced)                                                                         | engine    | transform         | self                                                                           | exact (self-extend)                  |
+| `src/types/estate.ts` (MOD: `ClusterAggregate.stretchedConfidence`/site fields, `EstateView.drSim`/`allocRatios`, `DrSimResult`)                             | type      | —                 | self                                                                           | exact (self-extend)                  |
+| `src/engines/drSim/runScenario.ts`                                                                                                                           | engine    | transform / batch | `estateView.ts` `buildEstateView` (re-run aggregation on a subset)             | NEW (composition of shipped engines) |
+| `src/engines/drSim/allocate.ts`                                                                                                                              | engine    | transform         | `aggregateClusters.ts` verdict-style derivation                                | NEW (pure arithmetic)                |
+| `src/engines/drSim/index.ts`                                                                                                                                 | infra     | —                 | `engines/aggregation/index.ts`                                                 | exact                                |
+| `src/engines/drSim/*.test.ts`                                                                                                                                | test      | —                 | `aggregateClusters.test.ts`                                                    | role-match                           |
+| `src/hooks/useEstateView.ts` (MOD: thread selected[]/stretched/scenario/ratios, ONE memo)                                                                    | hook      | request-response  | self (the single `useMemo`, lines 17-20)                                       | exact (self-extend)                  |
+| `src/store/snapshotStore.ts` (MOD: `selectedSnapshotIds` + `stretchedClusters` + `scenario` slices)                                                          | store     | event-driven      | self (existing inputs-only slices + Set-replace idiom)                         | exact (self-extend)                  |
+| `src/hooks/useAllocationHash.ts`                                                                                                                             | hook      | event-driven      | `src/hooks/useTheme.ts` (localStorage-sync hook) inverted to hash              | role-match                           |
+| `src/components/stretched/StretchedPill.tsx`                                                                                                                 | component | request-response  | `AccountingModeToggle.tsx` (aria-pressed segmented idiom)                      | role-match (idiom-exact)             |
+| `src/components/allocation/AllocationSliders.tsx`                                                                                                            | component | request-response  | `AccountingModeToggle.tsx` (presets) + native `<input type=range>`             | role-match                           |
+| `src/components/dr/DrSimPanel.tsx`                                                                                                                           | component | request-response  | `CpuReadyPanel.tsx` + `GlobalDashboard.tsx` (panel + selector)                 | role-match                           |
+| `src/components/dashboard/ClusterColumn.tsx` (MOD: pill + site rows + confidence chip in footer)                                                             | component | request-response  | self (footer region reserved line 122)                                         | exact (self-extend)                  |
+| `src/components/dashboard/GlobalDashboard.tsx` (MOD: allocation toolbar + DrSimPanel + lifted state)                                                         | component | request-response  | self (lifted `useState` mode line 50, single `useEstateView` caller)           | exact (self-extend)                  |
+| `src/components/SnapshotCard.tsx` (MOD: MVC-04 N-vCenters + RVTools version meta line)                                                                       | component | request-response  | self (meta line lines 39-51)                                                   | exact (self-extend)                  |
+| `src/i18n/index.ts` + `locales/{en,fr}/{mvc,str,alloc,dr}.json`                                                                                              | i18n      | —                 | self (`NAMESPACES` line 26 + existing `dashboard.json`)                        | exact (self-extend)                  |
 
 ---
 
@@ -96,7 +96,8 @@ export const datastoreCountByCluster = (vdatastore: VDatastoreRow[]): Map<string
   for (const row of vdatastore) {
     if (row.clusterName === '') continue
     const set = keysByCluster.get(row.clusterName) ?? new Set<string>()
-    set.add(dedupeKey(row)); keysByCluster.set(row.clusterName, set)
+    set.add(dedupeKey(row))
+    keysByCluster.set(row.clusterName, set)
   }
   // ...
 }
@@ -117,7 +118,8 @@ const drReservedRamMib = isStretched ? 0.5 * physicalRamMib : 0
 const availableRamMib = physicalRamMib - consumedRamMib - drReservedRamMib
 const usablePhysicalCores = isStretched ? 0.5 * physicalCores : physicalCores
 const cpuDrFactor = isStretched && physicalGhz > 0 ? physicalGhz / (physicalGhz - drReservedGhz) : 1
-const ramDrFactor = isStretched && physicalRamMib > 0 ? physicalRamMib / (physicalRamMib - drReservedRamMib) : 1
+const ramDrFactor =
+  isStretched && physicalRamMib > 0 ? physicalRamMib / (physicalRamMib - drReservedRamMib) : 1
 ```
 
 This is the exact shape RESEARCH Code-Example "Per-site reservation" generalizes. 02-02-SUMMARY confirms a direct regression test already exercises this branch — extend that test, do not rewrite.
@@ -133,9 +135,9 @@ This is the exact shape RESEARCH Code-Example "Per-site reservation" generalizes
 **Type extension** (`estate.ts:158-161` — the dormant block):
 
 ```typescript
-  // ── Stretched-cluster DR (dormant in Phase 2) ──
-  stretched: boolean
-  drReservedGhz: GHz
+// ── Stretched-cluster DR (dormant in Phase 2) ──
+stretched: boolean
+drReservedGhz: GHz
 ```
 
 Add `stretchedConfidence: 'high'|'medium'|'low'`, per-site capacity figures (`siteACapacityGhz`, `siteBCapacityGhz`, RAM analogues), `reservedFraction: number`. Em-dash sentinel when a site cannot be determined (UI-SPEC §STR-02).
@@ -156,7 +158,13 @@ Add `stretchedConfidence: 'high'|'medium'|'low'`, per-site capacity figures (`si
 
 ```typescript
 // estateView.ts:40-52 — the compose pattern to copy
-const clusters = aggregateClusters({ vinfo: snapshot.vinfo, vhost: snapshot.vhost, mode, stretchedClusters, datastoreCountByCluster: dsByCluster })
+const clusters = aggregateClusters({
+  vinfo: snapshot.vinfo,
+  vhost: snapshot.vhost,
+  mode,
+  stretchedClusters,
+  datastoreCountByCluster: dsByCluster,
+})
 const globals = aggregateGlobals(clusters, datastoreCount, totalStorageMib)
 ```
 
@@ -231,11 +239,18 @@ addSnapshot: (s) => set((state) => {
 
 ```tsx
 // AccountingModeToggle.tsx:65-78 — copy this button skeleton verbatim
-<button type="button" onClick={() => onChange(mode)}
+;<button
+  type="button"
+  onClick={() => onChange(mode)}
   className={`flex h-10 items-center rounded px-3 font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 ${
-    active ? 'bg-primary-600 text-white'
-           : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'}`}
-  aria-pressed={active}>{optLabel}</button>
+    active
+      ? 'bg-primary-600 text-white'
+      : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
+  }`}
+  aria-pressed={active}
+>
+  {optLabel}
+</button>
 ```
 
 Also reuse `ThemeToggle.tsx:6-68` inline-SVG `stroke="currentColor"` glyph pattern for the low-confidence info chip.
@@ -265,7 +280,9 @@ Also reuse `ThemeToggle.tsx:6-68` inline-SVG `stroke="currentColor"` glyph patte
 **Analog:** SELF — the reserved footer band, `ClusterColumn.tsx:122`:
 
 ```tsx
-{/* Phase-6 per-cluster sparkline lands here (trends is null Phase 2). */}
+{
+  /* Phase-6 per-cluster sparkline lands here (trends is null Phase 2). */
+}
 ```
 
 **Required deviation:** Above that reserved band, render `<StretchedPill>` + per-site `Row`s + confidence tag + (conditional) low-confidence chip. Column stays `min-w-[200px]` (UI-SPEC §Spacing — pill+chip must fit, no widening). Suffixed colliding cluster name renders verbatim in the existing `<h3>{cluster.cluster}</h3>` (`ClusterColumn.tsx:49-51`) — text child, XSS-safe (MVC-02 is a data transform, no new component).
@@ -292,8 +309,10 @@ const view = useEstateView(mode)
 **Analog:** SELF — the meta line, `SnapshotCard.tsx:39-51`:
 
 ```tsx
-<p className="mt-1 text-slate-500 dark:text-slate-400">
-  <span>{t('snapshots.card.rvtoolsVersion')}: {snapshot.rvtoolsVersion}</span>
+;<p className="mt-1 text-slate-500 dark:text-slate-400">
+  <span>
+    {t('snapshots.card.rvtoolsVersion')}: {snapshot.rvtoolsVersion}
+  </span>
 </p>
 ```
 
@@ -308,7 +327,7 @@ const view = useEstateView(mode)
 Current (Property/Value only — BROKEN for RVTools 4.x columnar, RESEARCH Pitfall 3):
 
 ```typescript
-const VMETADATA_COLS = { property: ['property','name','key'], value: ['value','val'] } as const
+const VMETADATA_COLS = { property: ['property', 'name', 'key'], value: ['value', 'val'] } as const
 export const adaptRvtoolsVMetaData = (sheet: ParsedSheet): VMetaDataRow => {
   for (const row of sheet.rows) {
     const prop = readString(readCol(row, cols.property)).toLowerCase()
@@ -320,9 +339,9 @@ export const adaptRvtoolsVMetaData = (sheet: ParsedSheet): VMetaDataRow => {
 ```typescript
 // captureDate.ts:80-90 — falls back to marker sniffing → reports "3.11+" for a 4.7 file
 export const inferRvtoolsVersion = (sheets) => {
-  const version = metaValue(sheets, p => p.includes('rvtools') && p.includes('version'))
+  const version = metaValue(sheets, (p) => p.includes('rvtools') && p.includes('version'))
   if (version != null) return version
-  if (headers.includes('creation date')) return '3.11+'   // wrong for 4.7
+  if (headers.includes('creation date')) return '3.11+' // wrong for 4.7
 }
 ```
 
@@ -353,7 +372,7 @@ export const NAMESPACES = ['common', 'upload', 'dashboard', 'inventory'] as cons
 **Source:** `/Users/fjacquet/Projects/rvtui/src/components/dashboard/AccountingModeToggle.tsx:52-82` (+ `ThemeToggle.tsx:80-107` for the uncontrolled variant).
 
 - `<fieldset role="group" aria-label> + <legend className="sr-only"> + MODES.map(button aria-pressed)`. Active = `bg-primary-600 text-white`; inactive = `text-slate-500 hover:text-slate-700 dark:...`. Focus ring `focus-visible:ring-2 focus-visible:ring-primary-500`. Arrow-key `onKeyDown` (`AccountingModeToggle.tsx:42-50`) for the mode/preset groups. The `biome-ignore lint/a11y/noRedundantRoles` + literal `role="group"` is asserted by a CI grep gate — keep it.
-**Never** build a bespoke toggle (CLAUDE.md, RESEARCH Don't-Hand-Roll).
+  **Never** build a bespoke toggle (CLAUDE.md, RESEARCH Don't-Hand-Roll).
 
 ### Branded-unit arithmetic retrofit (applies to: aggregateClusters mod, drSim, allocate)
 
@@ -382,11 +401,11 @@ Never do raw arithmetic on a brand without unwrap/rewrap (CLAUDE.md). `@/engines
 
 No file is truly unprecedented. The three NEW engine modules each have a strong skeleton analog:
 
-| File | Role | Data Flow | Skeleton Source (planner uses this, not RESEARCH-only) |
-|------|------|-----------|--------------------------------------------------------|
+| File                                      | Role   | Data Flow | Skeleton Source (planner uses this, not RESEARCH-only)                                                                          |
+| ----------------------------------------- | ------ | --------- | ------------------------------------------------------------------------------------------------------------------------------- |
 | `snapshotMerge/mergeSnapshotsToEstate.ts` | engine | transform | vsizer `resolveClusterCollisions.ts:41-74` (port + generalize key filename→viSdkUuid) + `perDatastore.ts:21-44` (dedupe-by-key) |
-| `drSim/runScenario.ts` | engine | transform | `estateView.ts:33-92` (compose `aggregateClusters`+`aggregateGlobals` on a row subset) |
-| `drSim/allocate.ts` | engine | transform | `aggregateClusters.ts:59-76` derivation style + RESEARCH headroom-verdict example |
+| `drSim/runScenario.ts`                    | engine | transform | `estateView.ts:33-92` (compose `aggregateClusters`+`aggregateGlobals` on a row subset)                                          |
+| `drSim/allocate.ts`                       | engine | transform | `aggregateClusters.ts:59-76` derivation style + RESEARCH headroom-verdict example                                               |
 
 `useAllocationHash.ts` inverts the project's only state-sync hook (`src/hooks/useTheme.ts`, localStorage) to `window.location.hash` — planner should read `useTheme.ts` for the sync skeleton (not loaded here; it is small and the localStorage idiom is the inversion target).
 

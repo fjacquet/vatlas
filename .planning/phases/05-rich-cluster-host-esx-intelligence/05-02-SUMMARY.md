@@ -1,48 +1,49 @@
 ---
+
 phase: 05-rich-cluster-host-esx-intelligence
 plan: 02
 subsystem: ui
 tags: [view-toggle, hosts-view, operational-insights, cluster-detail, drill, i18n]
 
 requires:
-  - phase: 05-01
-    provides: EstateView.operationalInsights/clusterInsights/clusterDetail + EsxAggregate fields
-provides:
-  - "ViewToggle 'Hosts' segment (3-way) + App wiring"
-  - "HostsView — estate host-rollup + expandable per-cluster host tables (factual model/vendor/ESXi)"
-  - "OperationalInsights estate tile row (alongside kept GlobalSummaryCard)"
-  - "Cluster-card drill → one-screen-fit ClusterDetail (export-ready for P10) + back"
-  - "rci i18n namespace (EN/FR parity); REQUIREMENTS RCI-01..05"
-affects: [07, 10]
+- phase: 05-01
+  provides: EstateView.operationalInsights/clusterInsights/clusterDetail + EsxAggregate fields
+  provides:
+- "ViewToggle 'Hosts' segment (3-way) + App wiring"
+- "HostsView — estate host-rollup + expandable per-cluster host tables (factual model/vendor/ESXi)"
+- "OperationalInsights estate tile row (alongside kept GlobalSummaryCard)"
+- "Cluster-card drill → one-screen-fit ClusterDetail (export-ready for P10) + back"
+- "rci i18n namespace (EN/FR parity); REQUIREMENTS RCI-01..05"
+  affects: [07, 10]
 
 tech-stack:
-  added: []
-  patterns:
-    - "Drill = lifted in-app view state (like `mode`) — no router, no 2nd useMemo"
-    - "ViewToggle/idiom reuse for the 3rd segment (no new nav component)"
+added: []
+patterns:
+- "Drill = lifted in-app view state (like `mode`) — no router, no 2nd useMemo"
+- "ViewToggle/idiom reuse for the 3rd segment (no new nav component)"
 
 key-files:
-  created:
-    - src/components/hosts/HostsView.tsx
-    - src/components/dashboard/OperationalInsights.tsx
-    - src/components/cluster/ClusterDetail.tsx
-    - src/i18n/locales/en/rci.json
-    - src/i18n/locales/fr/rci.json
+created:
+- src/components/hosts/HostsView.tsx
+- src/components/dashboard/OperationalInsights.tsx
+- src/components/cluster/ClusterDetail.tsx
+- src/i18n/locales/en/rci.json
+- src/i18n/locales/fr/rci.json
   modified:
-    - src/components/ViewToggle.tsx (+ 'hosts')
-    - src/App.tsx (hosts branch)
-    - src/components/dashboard/ClusterColumn.tsx + PerClusterColumns.tsx (onSelectCluster drill)
-    - src/components/dashboard/GlobalDashboard.tsx (insights row + drill state)
-    - src/engines/aggregation/perEsx.ts + src/types/estate.ts (EsxAggregate factual host fields)
-    - src/i18n/index.ts + locales/{en,fr}/inventory.json (nav.hosts) + rci registration
-    - .planning/REQUIREMENTS.md (RCI-01..05)
+- src/components/ViewToggle.tsx (+ 'hosts')
+- src/App.tsx (hosts branch)
+- src/components/dashboard/ClusterColumn.tsx + PerClusterColumns.tsx (onSelectCluster drill)
+- src/components/dashboard/GlobalDashboard.tsx (insights row + drill state)
+- src/engines/aggregation/perEsx.ts + src/types/estate.ts (EsxAggregate factual host fields)
+- src/i18n/index.ts + locales/{en,fr}/inventory.json (nav.hosts) + rci registration
+- .planning/REQUIREMENTS.md (RCI-01..05)
 
 key-decisions:
-  - "EsxAggregate extended (faultDomain/model/vendor/esxVersion/poweredOnVms) — additive, pure, needed by the Hosts view"
-  - "Drill replaces the dashboard body in-place (lifted state); ClusterDetail is overflow-hidden one-screen-fit for P10 snapshot"
+- "EsxAggregate extended (faultDomain/model/vendor/esxVersion/poweredOnVms) — additive, pure, needed by the Hosts view"
+- "Drill replaces the dashboard body in-place (lifted state); ClusterDetail is overflow-hidden one-screen-fit for P10 snapshot"
 
 patterns-established:
-  - "One-screen-fit detail view = the Phase-10 PPTX slide unit"
+- "One-screen-fit detail view = the Phase-10 PPTX slide unit"
 
 requirements-completed: [RCI-01, RCI-02, RCI-03, RCI-04, RCI-05]
 

@@ -1,44 +1,45 @@
 ---
+
 phase: 04-multi-vcenter-stretched-allocation-dr
 plan: 05
 subsystem: aggregation
 tags: [stretched, factual-site-data, g1, i18n, requirements, replan]
 
 requires:
-  - phase: 04-01
-    provides: validated multi-vCenter merge engine spine + per-site reservation math (kept unchanged)
-provides:
-  - "factual ClusterAggregate.siteData ('detected'|'assumed') replacing the rejected stretchedConfidence verdict"
-  - "neutral ClusterColumn caption (no confidence verdict, no chip); per-site rows only when detected"
-  - "estate-level 'N clusters marked stretched' factual line"
-  - "REQUIREMENTS.md: one factual STR-03, STR-04 retired; vSAN/networks→P9 forward note"
-affects: [05-rich-intelligence, 06-allocation-dr, 09-storage-network]
+- phase: 04-01
+  provides: validated multi-vCenter merge engine spine + per-site reservation math (kept unchanged)
+  provides:
+- "factual ClusterAggregate.siteData ('detected'|'assumed') replacing the rejected stretchedConfidence verdict"
+- "neutral ClusterColumn caption (no confidence verdict, no chip); per-site rows only when detected"
+- "estate-level 'N clusters marked stretched' factual line"
+- "REQUIREMENTS.md: one factual STR-03, STR-04 retired; vSAN/networks→P9 forward note"
+  affects: [05-rich-intelligence, 06-allocation-dr, 09-storage-network]
 
 tech-stack:
-  added: []
-  patterns:
-    - "Stretched = user declaration; engine reports site provenance FACTUALLY, never a high/med/low judgement (UAT G1)"
-    - "Relabel-only refactor: reservation fraction math byte-identical, proven by the unchanged matrix numbers"
+added: []
+patterns:
+- "Stretched = user declaration; engine reports site provenance FACTUALLY, never a high/med/low judgement (UAT G1)"
+- "Relabel-only refactor: reservation fraction math byte-identical, proven by the unchanged matrix numbers"
 
 key-files:
-  created: []
-  modified:
-    - src/types/estate.ts (drop StretchedConfidence; add siteData 'detected'|'assumed')
-    - src/engines/aggregation/aggregateClusters.ts (reservationFor returns siteData; math unchanged)
-    - src/engines/aggregation/aggregateClusters.test.ts (matrix asserts siteData; numbers unchanged)
-    - src/engines/aggregation/globals.test.ts (fixture field)
-    - src/components/stretched/StretchedPill.tsx (LowConfidenceChip deleted)
-    - src/components/dashboard/ClusterColumn.tsx (factual caption; rows only when detected)
-    - src/components/dashboard/GlobalDashboard.tsx (estate "N clusters marked stretched")
-    - src/i18n/locales/en/str.json, src/i18n/locales/fr/str.json (siteData.*/stretched.estateCount; parity 8/8)
-    - .planning/REQUIREMENTS.md (STR-03 reworded; STR-04 removed; P9 forward note)
+created: []
+modified:
+- src/types/estate.ts (drop StretchedConfidence; add siteData 'detected'|'assumed')
+- src/engines/aggregation/aggregateClusters.ts (reservationFor returns siteData; math unchanged)
+- src/engines/aggregation/aggregateClusters.test.ts (matrix asserts siteData; numbers unchanged)
+- src/engines/aggregation/globals.test.ts (fixture field)
+- src/components/stretched/StretchedPill.tsx (LowConfidenceChip deleted)
+- src/components/dashboard/ClusterColumn.tsx (factual caption; rows only when detected)
+- src/components/dashboard/GlobalDashboard.tsx (estate "N clusters marked stretched")
+- src/i18n/locales/en/str.json, src/i18n/locales/fr/str.json (siteData.*/stretched.estateCount; parity 8/8)
+- .planning/REQUIREMENTS.md (STR-03 reworded; STR-04 removed; P9 forward note)
 
 key-decisions:
-  - "siteData enum: 'detected' = all hosts tagged + ≥2 fault domains (real split); 'assumed' = partial OR none (symmetric 0.5). partial/none distinction dropped per G1 (no judgement)"
-  - "Reservation math NOT touched — only the discriminator label changed; matrix numbers identical"
+- "siteData enum: 'detected' = all hosts tagged + ≥2 fault domains (real split); 'assumed' = partial OR none (symmetric 0.5). partial/none distinction dropped per G1 (no judgement)"
+- "Reservation math NOT touched — only the discriminator label changed; matrix numbers identical"
 
 patterns-established:
-  - "Factual provenance over judgement: the engine states where a value came from, never rates the user's declaration"
+- "Factual provenance over judgement: the engine states where a value came from, never rates the user's declaration"
 
 requirements-completed: [STR-01, STR-02, STR-03]
 

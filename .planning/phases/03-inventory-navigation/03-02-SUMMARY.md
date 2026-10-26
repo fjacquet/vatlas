@@ -1,49 +1,51 @@
 ---
+
 phase: 03-inventory-navigation
 plan: 02
 subsystem: inventory
 tags: [columndef, datatable, vm-table, esx-table, datastore-table, inv-02, inv-03, inv-04, inv-05, inv-06, naa-dedupe]
 requires:
-  - DataTable<T> / ColumnPicker generic primitives (03-01)
-  - VmDisplayRow interface + EstateView.vmRows pure projection (03-01, in src/types/estate.ts + src/engines/aggregation/estateView.ts)
-  - EstateView.hosts (EsxAggregate) / EstateView.datastores (DatastoreAggregate) verbatim Phase-2 output
-  - format.ts display formatters / csv.ts raw RFC-4180 serializer (Phase 1 / 03-01)
-  - AccountingModeToggle.test.tsx component-test idiom (Phase 2)
-provides:
-  - "vmColumns: ColumnDef<VmDisplayRow>[] (INV-02) — accessors ⊂ VmDisplayRow, zero OsBreakdown"
-  - "esxColumns: ColumnDef<EsxAggregate>[] + esxDefaultVisible (INV-03) — EstateView.hosts verbatim"
-  - "datastoreColumns: ColumnDef<DatastoreAggregate>[] + datastoreDefaultVisible (INV-04) — no cluster column, NAA dedupe consumed verbatim"
-  - "VmTable/EsxTable/DatastoreTable — thin props-from-view wrappers (no hook, no memo, no @/engines)"
-  - CSV-of-filtered×visible-view contract proven end-to-end (INV-05 × INV-06)
-affects:
-  - 03-03 (InventoryView shell mounts these wrappers as the single useEstateView caller; registers the inventory i18n namespace; first production importer → activates the @tanstack 60 KiB gz gate)
-tech-stack:
+- DataTable<T> / ColumnPicker generic primitives (03-01)
+- VmDisplayRow interface + EstateView.vmRows pure projection (03-01, in src/types/estate.ts + src/engines/aggregation/estateView.ts)
+- EstateView.hosts (EsxAggregate) / EstateView.datastores (DatastoreAggregate) verbatim Phase-2 output
+- format.ts display formatters / csv.ts raw RFC-4180 serializer (Phase 1 / 03-01)
+- AccountingModeToggle.test.tsx component-test idiom (Phase 2)
+  provides:
+- "vmColumns: ColumnDef<VmDisplayRow>[] (INV-02) — accessors ⊂ VmDisplayRow, zero OsBreakdown"
+- "esxColumns: ColumnDef<EsxAggregate>[] + esxDefaultVisible (INV-03) — EstateView.hosts verbatim"
+- "datastoreColumns: ColumnDef<DatastoreAggregate>[] + datastoreDefaultVisible (INV-04) — no cluster column, NAA dedupe consumed verbatim"
+- "VmTable/EsxTable/DatastoreTable — thin props-from-view wrappers (no hook, no memo, no @/engines)"
+- CSV-of-filtered×visible-view contract proven end-to-end (INV-05 × INV-06)
+  affects:
+- 03-03 (InventoryView shell mounts these wrappers as the single useEstateView caller; registers the inventory i18n namespace; first production importer → activates the @tanstack 60 KiB gz gate)
+  tech-stack:
   added: []
   patterns:
-    - ColumnDef modules are pure config (zero React / useMemo / @/engines); identity column enableHiding:false
-    - Default-visibility seed = module-scope constant derived from an exported id list (KISS, not meta.defaultHidden)
-    - Wrappers receive their EstateView slice as a prop (GlobalDashboard single-caller lift discipline)
-    - Datastore table binds EstateView.datastores verbatim — Phase-2 NAA dedupe never re-derived (Moderate-11)
-key-files:
-  created:
-    - src/components/inventory/columns/vmColumns.ts
-    - src/components/inventory/columns/esxColumns.ts
-    - src/components/inventory/columns/datastoreColumns.ts
-    - src/components/inventory/VmTable.tsx
-    - src/components/inventory/EsxTable.tsx
-    - src/components/inventory/DatastoreTable.tsx
-    - src/components/inventory/columns/columns.test.ts
-    - src/components/inventory/DataTable.csv.test.tsx
-  modified: []
-decisions:
-  - "INV-02/03/04 ColumnDefs + wrappers fully implement the table behaviour; the shell mount that makes them user-visible is 03-03 plumbing (same staged pattern as 03-01 DataTable)"
-  - "@tanstack 60 KiB gz bundle gate remains a graceful no-op: no production entrypoint imports the inventory tables yet (wiring is 03-03), so TanStack is tree-shaken out of the production graph — gate activates in 03-03, NOT widened"
-  - "VmDisplayRow projection REUSED from 03-01 (src/types/estate.ts + estateView.ts) — vmColumns binds its 8 fields directly; zero second projection, zero new useMemo, zero @/engines import in any component"
-metrics:
+  - ColumnDef modules are pure config (zero React / useMemo / @/engines); identity column enableHiding:false
+  - Default-visibility seed = module-scope constant derived from an exported id list (KISS, not meta.defaultHidden)
+  - Wrappers receive their EstateView slice as a prop (GlobalDashboard single-caller lift discipline)
+  - Datastore table binds EstateView.datastores verbatim — Phase-2 NAA dedupe never re-derived (Moderate-11)
+    key-files:
+    created:
+  - src/components/inventory/columns/vmColumns.ts
+  - src/components/inventory/columns/esxColumns.ts
+  - src/components/inventory/columns/datastoreColumns.ts
+  - src/components/inventory/VmTable.tsx
+  - src/components/inventory/EsxTable.tsx
+  - src/components/inventory/DatastoreTable.tsx
+  - src/components/inventory/columns/columns.test.ts
+  - src/components/inventory/DataTable.csv.test.tsx
+    modified: []
+    decisions:
+- "INV-02/03/04 ColumnDefs + wrappers fully implement the table behaviour; the shell mount that makes them user-visible is 03-03 plumbing (same staged pattern as 03-01 DataTable)"
+- "@tanstack 60 KiB gz bundle gate remains a graceful no-op: no production entrypoint imports the inventory tables yet (wiring is 03-03), so TanStack is tree-shaken out of the production graph — gate activates in 03-03, NOT widened"
+- "VmDisplayRow projection REUSED from 03-01 (src/types/estate.ts + estateView.ts) — vmColumns binds its 8 fields directly; zero second projection, zero new useMemo, zero @/engines import in any component"
+  metrics:
   duration: "~30min (continuation: closeout + Task 3 DataTable.csv.test.tsx this session)"
   completed: 2026-05-16
   tasks: 3
   files: 8
+
 ---
 
 # Phase 3 Plan 2: Three Object Tables Summary
@@ -66,20 +68,20 @@ None. The plan was executed as written. Per the timed-out continuation: Tasks 1�
 
 ## Gate Results
 
-| Gate | Result |
-|------|--------|
-| `npm run typecheck` | PASS |
-| `npx @biomejs/biome check .` | PASS (127 files, 0 errors) |
-| `npm run test:run` | PASS (35 files, 225 tests) |
-| `npm run build` | PASS |
-| `npm run check:supply-chain` | PASS |
-| `npm run check:bundle-size` | PASS — main chunk 202.7 KiB gz ≤ 300 KiB |
-| single-useMemo grep gate | PASS (0 real `useMemo(` outside allowlist) |
-| grep: no OsBreakdown in vmColumns / no cluster in datastoreColumns | PASS |
-| grep: no @/engines/useEstateView/useMemo in wrappers+columns | PASS |
-| semgrep (CLI fallback `--config=auto --error`, 8 new files) | PASS — 0 findings, 378 rules |
+| Gate                                                               | Result                                     |
+| ------------------------------------------------------------------ | ------------------------------------------ |
+| `npm run typecheck`                                                | PASS                                       |
+| `npx @biomejs/biome check .`                                       | PASS (127 files, 0 errors)                 |
+| `npm run test:run`                                                 | PASS (35 files, 225 tests)                 |
+| `npm run build`                                                    | PASS                                       |
+| `npm run check:supply-chain`                                       | PASS                                       |
+| `npm run check:bundle-size`                                        | PASS — main chunk 202.7 KiB gz ≤ 300 KiB   |
+| single-useMemo grep gate                                           | PASS (0 real `useMemo(` outside allowlist) |
+| grep: no OsBreakdown in vmColumns / no cluster in datastoreColumns | PASS                                       |
+| grep: no @/engines/useEstateView/useMemo in wrappers+columns       | PASS                                       |
+| semgrep (CLI fallback `--config=auto --error`, 8 new files)        | PASS — 0 findings, 378 rules               |
 
-**@tanstack bundle chunk:** No `@tanstack` chunk emitted yet — `check-bundle-size` reports *"OK (no @tanstack chunk found — nothing to gate yet)"*. This is correct and by design: no production entrypoint imports the inventory tables yet (grep-confirmed: zero non-test importers outside `src/components/inventory/`), so TanStack is tree-shaken out of the production graph. The tables being module-level "real importers" does not pull TanStack into the bundle until a production consumer mounts `<DataTable>` — that is the 03-03 `InventoryView`/App wiring. The 60 KiB gz gate activates in 03-03; it was **not** widened or bypassed.
+**@tanstack bundle chunk:** No `@tanstack` chunk emitted yet — `check-bundle-size` reports _"OK (no @tanstack chunk found — nothing to gate yet)"_. This is correct and by design: no production entrypoint imports the inventory tables yet (grep-confirmed: zero non-test importers outside `src/components/inventory/`), so TanStack is tree-shaken out of the production graph. The tables being module-level "real importers" does not pull TanStack into the bundle until a production consumer mounts `<DataTable>` — that is the 03-03 `InventoryView`/App wiring. The 60 KiB gz gate activates in 03-03; it was **not** widened or bypassed.
 
 > Semgrep MCP tool was unavailable in this environment; used the CLI fallback `semgrep --config=auto --error` (acceptable per prior plans). 0 findings.
 

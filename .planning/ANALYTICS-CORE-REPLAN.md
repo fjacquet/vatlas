@@ -4,20 +4,20 @@
 
 **Trigger:** Phase-4 UAT surfaced 3 spec divergences + a "far richer per-cluster intelligence" gap. User call: "we are at a failure point — return to planning completely." Scope chosen: **rework the analytics-core scope across the roadmap**, **keep the shipped Phase-4 engine spine as a baseline and evolve it** (do not discard).
 
-**Reference model:** `azure.github.io/RVToolsAnalyzer` — illustrative of the *depth* wanted (a good example, not a pixel/fidelity target). Canonical scope = the RVTools Analyser function list below.
+**Reference model:** `azure.github.io/RVToolsAnalyzer` — illustrative of the _depth_ wanted (a good example, not a pixel/fidelity target). Canonical scope = the RVTools Analyser function list below.
 
 ---
 
 ## Hard constraints (carry into every phase)
 
-- **Privacy / architecture invariant is NON-negotiable** (PROJECT.md): vatlas stays **100% client-side, in-memory, no upload, no database, no localStorage of dataset rows**. RVTools Analyser persists to a DB — we adopt its *analytical surface*, NOT its storage model. "Refresh = data gone" stays.
+- **Privacy / architecture invariant is NON-negotiable** (PROJECT.md): vatlas stays **100% client-side, in-memory, no upload, no database, no localStorage of dataset rows**. RVTools Analyser persists to a DB — we adopt its _analytical surface_, NOT its storage model. "Refresh = data gone" stays.
 - **Keep the validated Phase-4 engine spine** (real-file-validated): `engines/snapshotMerge` (multi-vCenter merge), per-site stretched math in `aggregateClusters`, `engines/drSim`. Evolve; don't rewrite from zero.
 - Stack unchanged (React 19 / TS strict / Vite / Tailwind v4 / Zustand / ECharts SVG / pptxgenjs). Single-`useMemo` invariant (`useEstateView`) stays. Branded units. EN/FR i18n parity.
 
 ## Locked UAT decisions (must be honored by the replan)
 
 - **G1 — Stretched is the user's declaration.** Drop the auto `stretchedConfidence` high/med/low verdict + the low-confidence chip (no judgement of the user's call). Show site-data **factually** (present vs inferred). No fault-domain metadata ⇒ assume symmetric 50% reservation; real per-site split when data present. (memory: stretched-is-user-decision-no-confidence-judgement)
-- **G2 — Realized consolidation ratio is CALCULATED & displayed**, not a user-selected what-if: `vCPU allocated ÷ usable physical cores` (+ `vRAM ÷ physical RAM`). Remove the ALC slider/preset/URL-hash *as the realized-ratio mechanism*. (memory: allocation-ratio-calculated-not-selected) — **see OPEN-1, conflicts with reference #8.**
+- **G2 — Realized consolidation ratio is CALCULATED & displayed**, not a user-selected what-if: `vCPU allocated ÷ usable physical cores` (+ `vRAM ÷ physical RAM`). Remove the ALC slider/preset/URL-hash _as the realized-ratio mechanism_. (memory: allocation-ratio-calculated-not-selected) — **see OPEN-1, conflicts with reference #8.**
 - **G3 — DR modes = Server loss + Site loss only.** Drop cluster-loss & vCenter-loss. Site = fault-domain value of clusters the user declared stretched; non-stretched workload at a lost site = **lost** (no DR target). Impact metric = **physical CPU (GHz/cores) + physical RAM** removed, not vCPU. Reversible/neutral failed-selection UI is correct — keep. (memory: dr-modes-server-site-physical-impact)
 - **Process:** never assert domain ground truth in UAT/discussion (which clusters are stretched/tagged) — user owns it. (memory: no-domain-guesses-in-uat)
 
@@ -29,22 +29,22 @@
 
 ## RVTools Analyser functions → state → target ROADMAP home
 
-| # | Function | Current state | Target |
-|---|----------|---------------|--------|
-| 1 | Global vCenter display (clusters/ESX/VMs Win/Linux), table per-cluster | Shipped P2/P3 but SHALLOW | **Rework P4**: far richer per-cluster card (see Gap below) |
-| 2 | Complete inventory: tree views, tables, graphs | Tree+tables P3; graphs thin | Evolve P3/P4 (add per-entity graphs) |
-| 3 | Multiple vCenter aggregation | **Shipped P4-01 (baseline-keep)** | Keep; evolve labels per G1 |
-| 4 | Detailed asset inventory by OS | OS donut P2; partial | Evolve (dedicated OS asset view) |
-| 5 | OS End-of-Support (Linux/Win/ESX) 3/6/9/12mo | Planned P5, not built | **P5** (unchanged intent) |
-| 6 | vCenter Trends (clusters/ESX/DS/VMs/vCPU/vRAM/Disks evolution) | Planned P6, not built | **P6** (unchanged intent) |
-| 7 | ESX Summary — all ESX in one window | **MISSING** | **New phase / P4-adjacent** dedicated Hosts/ESX view |
-| 8 | Allocated Resources w/ Personal Ratios + Custom Failovers | P4-03 built then **rejected (G2)** | **OPEN-1** — re-derive |
-| 9 | DR Simulations, 1+ vCenters | **Shipped P4-04 (baseline-keep)**; modes wrong | Rework per **G3**; keep engine |
-| 10 | Storage Views: disk sizes by Cluster/ESX/VM/Datastore | Datastore table P3; partial | **New / evolve** storage view |
-| 11 | Statistics Reports for ESX & VMs | **MISSING** | **New** stats view |
-| 12 | Detailed views Clusters/ESX/VM/Datastore + Disk/Partition **threshold alerting** + Ports/Switches | **MISSING** (no network, no alerting) | **New** — depends OPEN-3 |
-| 13 | HTML Report generation | Planned P7, not built | **P7** (unchanged intent) |
-| 14 | Personal config: thresholds, viewers, screen/graph colors | theme/lang only | **OPEN-3** — config surface scope |
+| #   | Function                                                                                          | Current state                                  | Target                                                     |
+| --- | ------------------------------------------------------------------------------------------------- | ---------------------------------------------- | ---------------------------------------------------------- |
+| 1   | Global vCenter display (clusters/ESX/VMs Win/Linux), table per-cluster                            | Shipped P2/P3 but SHALLOW                      | **Rework P4**: far richer per-cluster card (see Gap below) |
+| 2   | Complete inventory: tree views, tables, graphs                                                    | Tree+tables P3; graphs thin                    | Evolve P3/P4 (add per-entity graphs)                       |
+| 3   | Multiple vCenter aggregation                                                                      | **Shipped P4-01 (baseline-keep)**              | Keep; evolve labels per G1                                 |
+| 4   | Detailed asset inventory by OS                                                                    | OS donut P2; partial                           | Evolve (dedicated OS asset view)                           |
+| 5   | OS End-of-Support (Linux/Win/ESX) 3/6/9/12mo                                                      | Planned P5, not built                          | **P5** (unchanged intent)                                  |
+| 6   | vCenter Trends (clusters/ESX/DS/VMs/vCPU/vRAM/Disks evolution)                                    | Planned P6, not built                          | **P6** (unchanged intent)                                  |
+| 7   | ESX Summary — all ESX in one window                                                               | **MISSING**                                    | **New phase / P4-adjacent** dedicated Hosts/ESX view       |
+| 8   | Allocated Resources w/ Personal Ratios + Custom Failovers                                         | P4-03 built then **rejected (G2)**             | **OPEN-1** — re-derive                                     |
+| 9   | DR Simulations, 1+ vCenters                                                                       | **Shipped P4-04 (baseline-keep)**; modes wrong | Rework per **G3**; keep engine                             |
+| 10  | Storage Views: disk sizes by Cluster/ESX/VM/Datastore                                             | Datastore table P3; partial                    | **New / evolve** storage view                              |
+| 11  | Statistics Reports for ESX & VMs                                                                  | **MISSING**                                    | **New** stats view                                         |
+| 12  | Detailed views Clusters/ESX/VM/Datastore + Disk/Partition **threshold alerting** + Ports/Switches | **MISSING** (no network, no alerting)          | **New** — depends OPEN-3                                   |
+| 13  | HTML Report generation                                                                            | Planned P7, not built                          | **P7** (unchanged intent)                                  |
+| 14  | Personal config: thresholds, viewers, screen/graph colors                                         | theme/lang only                                | **OPEN-3** — config surface scope                          |
 
 ## The richer per-cluster gap (the new requirement, concretely)
 

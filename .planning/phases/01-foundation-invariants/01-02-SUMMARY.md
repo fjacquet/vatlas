@@ -1,58 +1,59 @@
 ---
+
 phase: 01-foundation-invariants
 plan: 02
 subsystem: privacy
 tags: [privacy, security, csp, supply-chain, monkey-patch, cwe-319, tdd, vitest]
 
 requires:
-  - phase: 01-foundation-invariants
-    plan: 01
-    provides: "deployable shell; src/main.tsx privacy-guard import slot; biome noConsole; CI workflow"
-provides:
-  - "src/privacy/fetchGuard.ts — side-effect runtime guard (no exports)"
-  - "PrivacyViolation thrown synchronously on non-same-origin fetch/XHR/sendBeacon/WebSocket"
-  - "InsecureTransportViolation thrown on any non-wss WebSocket scheme (CWE-319)"
-  - "fetchGuard wired as the FIRST import of src/main.tsx"
-  - "index.html CSP meta: connect-src 'self' + full directive set"
-  - "scripts/check-supply-chain.mjs — telemetry denylist + SheetJS pin gate"
-  - "npm scripts check:supply-chain + prebuild"
-  - "CI runs supply-chain check BEFORE npm ci"
-  - "docs/adr/0001-privacy-invariant.md (Nygard)"
-affects: [01-04-parser, 01-05-snapshot-store]
+- phase: 01-foundation-invariants
+  plan: 01
+  provides: "deployable shell; src/main.tsx privacy-guard import slot; biome noConsole; CI workflow"
+  provides:
+- "src/privacy/fetchGuard.ts — side-effect runtime guard (no exports)"
+- "PrivacyViolation thrown synchronously on non-same-origin fetch/XHR/sendBeacon/WebSocket"
+- "InsecureTransportViolation thrown on any non-wss WebSocket scheme (CWE-319)"
+- "fetchGuard wired as the FIRST import of src/main.tsx"
+- "index.html CSP meta: connect-src 'self' + full directive set"
+- "scripts/check-supply-chain.mjs — telemetry denylist + SheetJS pin gate"
+- "npm scripts check:supply-chain + prebuild"
+- "CI runs supply-chain check BEFORE npm ci"
+- "docs/adr/0001-privacy-invariant.md (Nygard)"
+  affects: [01-04-parser, 01-05-snapshot-store]
 
 tech-stack:
-  added: []
-  patterns:
-    - "Side-effect-only privacy module imported first in every entry point"
-    - "WebSocket transport-security check ordered BEFORE origin check so cleartext is always InsecureTransportViolation"
-    - "Single folded supply-chain script (KISS — 01-PATTERNS.md L613) over two split scripts"
-    - "CI denylist gate placed before npm ci so a tainted package.json never installs"
+added: []
+patterns:
+- "Side-effect-only privacy module imported first in every entry point"
+- "WebSocket transport-security check ordered BEFORE origin check so cleartext is always InsecureTransportViolation"
+- "Single folded supply-chain script (KISS — 01-PATTERNS.md L613) over two split scripts"
+- "CI denylist gate placed before npm ci so a tainted package.json never installs"
 
 key-files:
-  created:
-    - "src/privacy/fetchGuard.ts"
-    - "src/privacy/fetchGuard.test.ts"
-    - "scripts/check-supply-chain.mjs"
-    - "docs/adr/0001-privacy-invariant.md"
+created:
+- "src/privacy/fetchGuard.ts"
+- "src/privacy/fetchGuard.test.ts"
+- "scripts/check-supply-chain.mjs"
+- "docs/adr/0001-privacy-invariant.md"
   modified:
-    - "src/main.tsx (fetchGuard now FIRST import)"
-    - "index.html (CSP meta tag)"
-    - "package.json (check:supply-chain + prebuild scripts)"
-    - ".github/workflows/static.yml (supply-chain step before npm ci)"
+- "src/main.tsx (fetchGuard now FIRST import)"
+- "index.html (CSP meta tag)"
+- "package.json (check:supply-chain + prebuild scripts)"
+- ".github/workflows/static.yml (supply-chain step before npm ci)"
 
 decisions:
-  - "Folded telemetry-denylist + SheetJS-pin into ONE scripts/check-supply-chain.mjs (plan/PATTERNS.md L613 KISS) instead of the two separate scripts named in critical_reminders — the PLAN.md is authoritative and explicitly directs the fold."
-  - "WebSocket guard checks transport security (wss-only) BEFORE same-origin so a cleartext ws://localhost dev socket reports InsecureTransportViolation, not a mislabelled PrivacyViolation (ws://localhost and http://localhost are different origins)."
-  - "sendBeacon guard installs even when jsdom lacks a native impl; same-origin calls return true (nothing to send, nothing leaked) — needed so the cross-origin throw is testable under jsdom 29."
-  - "parser.worker.ts NOT pre-created — plan 01-02 owns only the contract for plan 01-04 (documented below). Option (b) of the critical_reminders chosen because the PLAN.md task body explicitly says 'We do NOT pre-create the file here'."
-  - "fetch wrapper drops the receiver (fetch is a free function); XHR.open wrapper carries an explicit `this: XMLHttpRequest` — tsc -b under tsconfig.app.json is stricter than tsc --noEmit (noImplicitThis)."
+- "Folded telemetry-denylist + SheetJS-pin into ONE scripts/check-supply-chain.mjs (plan/PATTERNS.md L613 KISS) instead of the two separate scripts named in critical_reminders — the PLAN.md is authoritative and explicitly directs the fold."
+- "WebSocket guard checks transport security (wss-only) BEFORE same-origin so a cleartext ws://localhost dev socket reports InsecureTransportViolation, not a mislabelled PrivacyViolation (ws://localhost and http://localhost are different origins)."
+- "sendBeacon guard installs even when jsdom lacks a native impl; same-origin calls return true (nothing to send, nothing leaked) — needed so the cross-origin throw is testable under jsdom 29."
+- "parser.worker.ts NOT pre-created — plan 01-02 owns only the contract for plan 01-04 (documented below). Option (b) of the critical_reminders chosen because the PLAN.md task body explicitly says 'We do NOT pre-create the file here'."
+- "fetch wrapper drops the receiver (fetch is a free function); XHR.open wrapper carries an explicit `this: XMLHttpRequest` — tsc -b under tsconfig.app.json is stricter than tsc --noEmit (noImplicitThis)."
 
 metrics:
-  duration: 24min
-  tasks: 3
-  files_created: 4
-  files_modified: 4
-  completed: 2026-05-15
+duration: 24min
+tasks: 3
+files_created: 4
+files_modified: 4
+completed: 2026-05-15
 ---
 
 # Phase 01 Plan 02: Privacy Guard Layer Summary
@@ -88,7 +89,7 @@ metrics:
 - **`npm run dev` HMR under CSP + guard:** Dev server boots cleanly in ~210 ms at `http://localhost:5173/vatlas/` with the CSP meta and runtime guard active, no console/CSP errors. Interactive browser HMR-roundtrip was not exercised (autonomous run, no browser). Per 01-RESEARCH.md A2, Vite's HMR uses its own internal runtime (not `globalThis.WebSocket`), so the guard never intercepts it — the guard only fires on application-code `new WebSocket(url)` calls. No `vite.config.ts` dev-CSP fallback was needed.
 - **`worker-src 'self' blob:` sufficiency:** No hello-world Worker was instantiated during this plan (plan 01-04 owns the real `parser.worker.ts`). The directive is present in the CSP for plan 01-04 to validate against. The production build emits the CSP into `dist/index.html` (1 occurrence) and builds clean.
 - **Final forbidden patterns in `scripts/check-supply-chain.mjs`:** `@sentry/`, `posthog-`, `@posthog/`, `posthog`, `@amplitude/`, `amplitude-`, `mixpanel`, `@datadog/`, `logrocket`, `@bugsnag/`, `heap-analytics`, `segment-analytics`, `@segment/`, `fullstory`, `@fullstory/`, `@hotjar/`, `hotjar` — plus a `service-worker` substring guard (PITFALLS.md Critical-2) and the exact SheetJS tarball pin check.
-- **CI insertion line:** The supply-chain step is at **line 34–35** of `.github/workflows/static.yml** (`- name: Check supply chain ...` / `run: node scripts/check-supply-chain.mjs`), directly before`- name: Install dependencies` / `run: npm ci` at lines 37–38. Plan 04 can add a worker-bundle-size budget step nearby (after `Build`, line ~89).
+- **CI insertion line:** The supply-chain step is at **line 34–35** of `.github/workflows/static.yml** (`- name: Check supply chain ...`/`run: node scripts/check-supply-chain.mjs`), directly before`- name: Install dependencies`/`run: npm ci`at lines 37–38. Plan 04 can add a worker-bundle-size budget step nearby (after`Build`, line ~89).
 - **Contract for Plan 04:** `src/engines/parser/parser.worker.ts` MUST have `import '../../privacy/fetchGuard'` as its first executable line (after any `/// <reference lib="webworker" />` pragma if used). The worker has its own global scope, so the main-thread patch in `src/main.tsx` does NOT cover it. The guard module is side-effect-only — import for effect, no symbols to bind.
 
 ## Deviations from Plan
@@ -171,5 +172,6 @@ None introduced. `src/engines/parser/parser.worker.ts` is intentionally NOT crea
 ## Self-Check: PASSED
 
 ---
-*Phase: 01-foundation-invariants*
-*Completed: 2026-05-15*
+
+_Phase: 01-foundation-invariants_
+_Completed: 2026-05-15_

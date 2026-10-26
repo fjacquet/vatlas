@@ -1,34 +1,36 @@
 ---
+
 phase: 11
 plan: "05"
 subsystem: export
 tags: [pptx, storage, network, planned, slides, f-2, f-1]
 requires:
-  - "chartBundle shared.storageTreemap (11-01)"
-  - "storage/network/planned i18n keys (11-02)"
-provides:
-  - "PPTX deck Storage + Network + Planned slides (F-2 deck side + F-1 deck side)"
-affects:
-  - src/engines/export/pptx/builder.ts
-tech-stack:
+- "chartBundle shared.storageTreemap (11-01)"
+- "storage/network/planned i18n keys (11-02)"
+  provides:
+- "PPTX deck Storage + Network + Planned slides (F-2 deck side + F-1 deck side)"
+  affects:
+- src/engines/export/pptx/builder.ts
+  tech-stack:
   added: []
   patterns:
-    - "_layout-only slide modules (eosSlide/drSimSlide analog); builder fixed-order insertion at D-05 positions"
-key-files:
-  created:
-    - src/engines/export/pptx/slides/storageSlide.ts
-    - src/engines/export/pptx/slides/networkSlide.ts
-    - src/engines/export/pptx/slides/plannedSlide.ts
-  modified:
-    - src/engines/export/pptx/builder.ts
-    - src/engines/export/pptx/builder.test.ts
-key-decisions:
-  - "Storage+Network inserted after the per-cluster loop, before the conditional annex (D-05); Planned after addDrSimSlide with the other re-aggregation"
-  - "Network = KPI-only, no chart (D-08); Storage flagged KPI = counts.ds+counts.lu, gold addHeader rule only (D-06, no verdict)"
-  - "Worker untouched — png('storageTreemap') resolves the 11-01 shared key via the existing generic raster loop"
-requirements-completed: [STG-01, STG-02, STG-03, STG-04, STG-05, NET-01, NET-02, NET-03, NET-04, NET-05, ALR-01, ALR-02, ALR-03, ALR-04, ALR-05, VSR-01, VSR-02, VSR-03, VSR-04, VSR-05, PLN-03, PLN-04]
-duration: 16 min
-completed: 2026-05-19
+  - "_layout-only slide modules (eosSlide/drSimSlide analog); builder fixed-order insertion at D-05 positions"
+    key-files:
+    created:
+  - src/engines/export/pptx/slides/storageSlide.ts
+  - src/engines/export/pptx/slides/networkSlide.ts
+  - src/engines/export/pptx/slides/plannedSlide.ts
+    modified:
+  - src/engines/export/pptx/builder.ts
+  - src/engines/export/pptx/builder.test.ts
+    key-decisions:
+- "Storage+Network inserted after the per-cluster loop, before the conditional annex (D-05); Planned after addDrSimSlide with the other re-aggregation"
+- "Network = KPI-only, no chart (D-08); Storage flagged KPI = counts.ds+counts.lu, gold addHeader rule only (D-06, no verdict)"
+- "Worker untouched — png('storageTreemap') resolves the 11-01 shared key via the existing generic raster loop"
+  requirements-completed: [STG-01, STG-02, STG-03, STG-04, STG-05, NET-01, NET-02, NET-03, NET-04, NET-05, ALR-01, ALR-02, ALR-03, ALR-04, ALR-05, VSR-01, VSR-02, VSR-03, VSR-04, VSR-05, PLN-03, PLN-04]
+  duration: 16 min
+  completed: 2026-05-19
+
 ---
 
 # Phase 11 Plan 05: PPTX Storage/Network/Planned slides Summary

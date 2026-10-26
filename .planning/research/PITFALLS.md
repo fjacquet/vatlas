@@ -43,7 +43,7 @@ These cause wrong numbers, privacy violations, or rewrites. Wrong numbers in an 
 
 ### Critical-2: Privacy invariant leak via dependency telemetry
 
-**What goes wrong:** A dependency — analytics SDK, Sentry, LogRocket, posthog-js, a source-map upload service, or a fetch-polyfill with a "phone home" first-load — exfiltrates workbook bytes, parsed rows, or error payloads containing VM names / hostnames / IP addresses. The product invariant ("nothing leaves the browser") is silently broken. This is a reputation-killer for a tool that is *defined* by client-side privacy.
+**What goes wrong:** A dependency — analytics SDK, Sentry, LogRocket, posthog-js, a source-map upload service, or a fetch-polyfill with a "phone home" first-load — exfiltrates workbook bytes, parsed rows, or error payloads containing VM names / hostnames / IP addresses. The product invariant ("nothing leaves the browser") is silently broken. This is a reputation-killer for a tool that is _defined_ by client-side privacy.
 
 **Warning signs:**
 
@@ -55,21 +55,21 @@ These cause wrong numbers, privacy violations, or rewrites. Wrong numbers in an 
 
 **Prevention (concrete enumerated leak vectors):**
 
-| Leak Vector | Mitigation |
-|-------------|------------|
-| Sentry / error-tracking SDK | Don't ship one. If you must, configure `beforeSend: () => null` for parsed-data namespaces and a denylist that drops `breadcrumbs`. Default Sentry config sends URL, query string, and console breadcrumbs — all dangerous when workbook content appears there. |
-| Analytics SDKs (GA, Plausible, posthog, Amplitude, Mixpanel) | Forbidden. Add to `package.json` an explicit `// FORBIDDEN: telemetry SDKs` comment and a CI grep gate (`engines.forbidden = ['@sentry/*', 'posthog-*', '@amplitude/*', 'mixpanel*', '@datadog/*', 'logrocket*']`). |
-| Source-map upload services (Sentry, Bugsnag, Datadog) | Build pipeline must NOT include a sourcemap upload step. Generate sourcemaps only for local debugging (`build:debug`), never the public deploy. |
-| Error boundary serializing payload | `FallbackError` may only read `error.message` and `error.name`, never `error.cause` or any context-carried object that may contain rows. Test: pass an error with `{cause: {vms: [...]}}` and assert nothing from `cause` appears in the rendered fallback. |
-| `console.error` / `console.log` left in prod | Biome rule `noConsole` is **error** in non-test files. CI fails on a console call. |
-| Devtools-style "debug" overlays in prod | A `if (import.meta.env.DEV)` gate around every debug panel; never `process.env.NODE_ENV` (Vite). |
-| fetch / XHR / WebSocket / sendBeacon | A runtime guard: in `src/main.tsx` install a wrapper that overrides `window.fetch`, `XMLHttpRequest.prototype.open`, `navigator.sendBeacon`, and `WebSocket` to throw if the URL host is NOT the document origin. Throwing is the right behavior; a silent block is hard to detect. |
-| CSP header / meta tag | Ship a `<meta http-equiv="Content-Security-Policy">` with `connect-src 'self'` (no `*`, no third-party hosts). This is belt-and-suspenders to the runtime guard. |
-| Service Worker registering and POSTing payloads | **v1.0:** none allowed. **v2.0 (ADR-0001 Amendment):** permitted ONLY under the bounded envelope — `vite-plugin-pwa` `injectManifest`, audited `src/sw.ts` whose first executable statement imports `./privacy/fetchGuard`, precache-only (no `runtimeCaching`), same-origin, prompt-style update. Enforced by `scripts/check-supply-chain.mjs` (allowlist `vite-plugin-pwa`+`workbox-*`; assert guard-first `src/sw.ts`). Any `runtimeCaching`, dropped guard import, or cross-origin cache re-opens this vector and is a violation. |
-| Web font fetched from Google Fonts / CDN | Self-host all fonts; `font-src 'self' data:` in CSP. (Also fixes Critical-7.) |
-| Resource hints (`<link rel="prefetch">`) to third-party | None. CI grep `<link rel="preconnect"|prefetch"` for non-self URLs. |
-| Iframe to third party | None. `frame-src 'none'` in CSP. |
-| Sub-resource integrity bypass on a CDN script | Same: no CDN scripts in `index.html`; everything bundled. |
+| Leak Vector                                                  | Mitigation                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| ------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Sentry / error-tracking SDK                                  | Don't ship one. If you must, configure `beforeSend: () => null` for parsed-data namespaces and a denylist that drops `breadcrumbs`. Default Sentry config sends URL, query string, and console breadcrumbs — all dangerous when workbook content appears there.                                                                                                                                                                                                                                                                       |
+| Analytics SDKs (GA, Plausible, posthog, Amplitude, Mixpanel) | Forbidden. Add to `package.json` an explicit `// FORBIDDEN: telemetry SDKs` comment and a CI grep gate (`engines.forbidden = ['@sentry/*', 'posthog-*', '@amplitude/*', 'mixpanel*', '@datadog/*', 'logrocket*']`).                                                                                                                                                                                                                                                                                                                   |
+| Source-map upload services (Sentry, Bugsnag, Datadog)        | Build pipeline must NOT include a sourcemap upload step. Generate sourcemaps only for local debugging (`build:debug`), never the public deploy.                                                                                                                                                                                                                                                                                                                                                                                       |
+| Error boundary serializing payload                           | `FallbackError` may only read `error.message` and `error.name`, never `error.cause` or any context-carried object that may contain rows. Test: pass an error with `{cause: {vms: [...]}}` and assert nothing from `cause` appears in the rendered fallback.                                                                                                                                                                                                                                                                           |
+| `console.error` / `console.log` left in prod                 | Biome rule `noConsole` is **error** in non-test files. CI fails on a console call.                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| Devtools-style "debug" overlays in prod                      | A `if (import.meta.env.DEV)` gate around every debug panel; never `process.env.NODE_ENV` (Vite).                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| fetch / XHR / WebSocket / sendBeacon                         | A runtime guard: in `src/main.tsx` install a wrapper that overrides `window.fetch`, `XMLHttpRequest.prototype.open`, `navigator.sendBeacon`, and `WebSocket` to throw if the URL host is NOT the document origin. Throwing is the right behavior; a silent block is hard to detect.                                                                                                                                                                                                                                                   |
+| CSP header / meta tag                                        | Ship a `<meta http-equiv="Content-Security-Policy">` with `connect-src 'self'` (no `*`, no third-party hosts). This is belt-and-suspenders to the runtime guard.                                                                                                                                                                                                                                                                                                                                                                      |
+| Service Worker registering and POSTing payloads              | **v1.0:** none allowed. **v2.0 (ADR-0001 Amendment):** permitted ONLY under the bounded envelope — `vite-plugin-pwa` `injectManifest`, audited `src/sw.ts` whose first executable statement imports `./privacy/fetchGuard`, precache-only (no `runtimeCaching`), same-origin, prompt-style update. Enforced by `scripts/check-supply-chain.mjs` (allowlist `vite-plugin-pwa`+`workbox-*`; assert guard-first `src/sw.ts`). Any `runtimeCaching`, dropped guard import, or cross-origin cache re-opens this vector and is a violation. |
+| Web font fetched from Google Fonts / CDN                     | Self-host all fonts; `font-src 'self' data:` in CSP. (Also fixes Critical-7.)                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| Resource hints (`<link rel="prefetch">`) to third-party      | None. CI grep `<link rel="preconnect"                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | prefetch"` for non-self URLs. |
+| Iframe to third party                                        | None. `frame-src 'none'` in CSP.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| Sub-resource integrity bypass on a CDN script                | Same: no CDN scripts in `index.html`; everything bundled.                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
 
 **Phase:** Privacy (cross-cutting; the fetch-wrapper + CI denylist must land in Phase 1 before any analytics-tempted feature ships).
 
@@ -77,7 +77,7 @@ These cause wrong numbers, privacy violations, or rewrites. Wrong numbers in an 
 
 ### Critical-3: Stretched-cluster DR reservation math — the 50% rule is conditional, not universal
 
-**What goes wrong:** The naive interpretation "stretched cluster = reserve 50%" is *only* right when the cluster is symmetric (equal host count and equal capacity per site) AND running active/active across both sites. Asymmetric stretched clusters (e.g., 6+4) reserve more than 50% on the bigger site. Single-site failover-only stretched clusters are different again. vsizer's ADR-0007 settled on "N/2 hosts of CPU+RAM headroom" — that is the symmetric simplification, which is correct *for the common case* but a footgun if presented as universal truth.
+**What goes wrong:** The naive interpretation "stretched cluster = reserve 50%" is _only_ right when the cluster is symmetric (equal host count and equal capacity per site) AND running active/active across both sites. Asymmetric stretched clusters (e.g., 6+4) reserve more than 50% on the bigger site. Single-site failover-only stretched clusters are different again. vsizer's ADR-0007 settled on "N/2 hosts of CPU+RAM headroom" — that is the symmetric simplification, which is correct _for the common case_ but a footgun if presented as universal truth.
 
 **Warning signs:**
 
@@ -152,7 +152,7 @@ These cause wrong numbers, privacy violations, or rewrites. Wrong numbers in an 
 
 ### Critical-6: Powered-off VMs in capacity math
 
-**What goes wrong:** RVTools reports vCPU, RAM, and provisioned storage for *all* VMs including powered-off ones. Naïve "total vCPU = sum(VInfo.CPUs)" inflates the consolidation ratio by including 2,000 zombie VMs that haven't booted in 3 years. The customer's "real" vCPU:pCPU ratio is 4:1; the report says 7:1. Conversely, *excluding* powered-off VMs from storage sizing under-counts capacity needs because thin-provisioned, powered-off VMs still occupy space.
+**What goes wrong:** RVTools reports vCPU, RAM, and provisioned storage for _all_ VMs including powered-off ones. Naïve "total vCPU = sum(VInfo.CPUs)" inflates the consolidation ratio by including 2,000 zombie VMs that haven't booted in 3 years. The customer's "real" vCPU:pCPU ratio is 4:1; the report says 7:1. Conversely, _excluding_ powered-off VMs from storage sizing under-counts capacity needs because thin-provisioned, powered-off VMs still occupy space.
 
 **Warning signs:**
 
@@ -162,7 +162,7 @@ These cause wrong numbers, privacy violations, or rewrites. Wrong numbers in an 
 
 **Prevention (concrete):**
 
-- Three accounting modes, *explicitly surfaced in the UI*:
+- Three accounting modes, _explicitly surfaced in the UI_:
   - **Configured** (everything, powered on or off) — the "what's defined" view.
   - **Active** (only `powerState === 'poweredOn'`) — the "what's running today" view.
   - **Storage-realistic** (configured for storage/disk math, active for CPU/RAM) — the "honest sizing" view.
@@ -186,16 +186,16 @@ Won't cause a rewrite but will cause an embarrassing report, an angry operator, 
 
 **Known column changes** (per RVTools release notes):
 
-| Version | Sheet | Change |
-|---------|-------|--------|
-| 4.0 | vInfo | + `Virtual machine tags`, `min Required EVC mode key`; − `Config Checksum` (Base64Binary caused XML errors) |
-| 4.0 | vCluster | + `Cluster tags`, custom attributes, `object ID` |
-| 4.0 | vHost | + Host tags in maintenance/quarantine mode |
-| 3.11 | vInfo | + `Creation date`, `Primary IP Address`, `vmx Config Checksum`, log/snapshot/suspend directories |
-| 3.11 | vHost | + `Serial number`, `BIOS vendor` |
-| 3.10 | vInfo | + latency-sensitivity, CBT, `disk.EnableUUID` |
-| 3.10 | vHost | + Assigned License(s), ATS heartbeat/locking, Host Power Policy, CPU power |
-| 3.7 | many | + `VM Folder` on vCPU/vMemory/vDisk/vPartition/vNetwork/vFloppy/vCD/vSnapshot/vTools |
+| Version | Sheet    | Change                                                                                                      |
+| ------- | -------- | ----------------------------------------------------------------------------------------------------------- |
+| 4.0     | vInfo    | + `Virtual machine tags`, `min Required EVC mode key`; − `Config Checksum` (Base64Binary caused XML errors) |
+| 4.0     | vCluster | + `Cluster tags`, custom attributes, `object ID`                                                            |
+| 4.0     | vHost    | + Host tags in maintenance/quarantine mode                                                                  |
+| 3.11    | vInfo    | + `Creation date`, `Primary IP Address`, `vmx Config Checksum`, log/snapshot/suspend directories            |
+| 3.11    | vHost    | + `Serial number`, `BIOS vendor`                                                                            |
+| 3.10    | vInfo    | + latency-sensitivity, CBT, `disk.EnableUUID`                                                               |
+| 3.10    | vHost    | + Assigned License(s), ATS heartbeat/locking, Host Power Policy, CPU power                                  |
+| 3.7     | many     | + `VM Folder` on vCPU/vMemory/vDisk/vPartition/vNetwork/vFloppy/vCD/vSnapshot/vTools                        |
 
 **Warning signs:**
 
@@ -237,7 +237,7 @@ Won't cause a rewrite but will cause an embarrassing report, an angry operator, 
 
 ### Moderate-3: CPU Ready % interpretation — the per-vCPU vs summation trap
 
-**What goes wrong:** RVTools doesn't export performance counters (no CPU Ready data) — but the user *might* paste counters in alongside, or vatlas might in future ingest a perf overlay. The trap: vCenter's "CPU Ready" is a *summation* in milliseconds across all vCPUs. A 4-vCPU VM with 10% CPU Ready summation is *actually* 2.5% per vCPU — under VMware's 5% threshold. Reporting the raw summation as a single percentage misleads operators into thinking the VM is contended when it isn't.
+**What goes wrong:** RVTools doesn't export performance counters (no CPU Ready data) — but the user _might_ paste counters in alongside, or vatlas might in future ingest a perf overlay. The trap: vCenter's "CPU Ready" is a _summation_ in milliseconds across all vCPUs. A 4-vCPU VM with 10% CPU Ready summation is _actually_ 2.5% per vCPU — under VMware's 5% threshold. Reporting the raw summation as a single percentage misleads operators into thinking the VM is contended when it isn't.
 
 **Warning signs:**
 
@@ -255,7 +255,7 @@ Won't cause a rewrite but will cause an embarrassing report, an angry operator, 
 
 ### Moderate-4: Hyperthreading double-count in vCPU:pCPU ratio
 
-**What goes wrong:** RVTools `vHost` reports both `# CPU` (sockets), `# Cores` (physical cores), and `# CPU Threads` (logical, i.e., HT-enabled count). A consolidation-ratio calculation that uses *threads* claims a 2:1 ratio is actually 4:1 in physical-core terms. Operators read 2:1 and conclude "low utilization"; the host is in fact over-committed.
+**What goes wrong:** RVTools `vHost` reports both `# CPU` (sockets), `# Cores` (physical cores), and `# CPU Threads` (logical, i.e., HT-enabled count). A consolidation-ratio calculation that uses _threads_ claims a 2:1 ratio is actually 4:1 in physical-core terms. Operators read 2:1 and conclude "low utilization"; the host is in fact over-committed.
 
 **Warning signs:**
 
@@ -275,7 +275,7 @@ Won't cause a rewrite but will cause an embarrassing report, an angry operator, 
 
 ### Moderate-5: MHz vs GHz conversion + reserved vs configured RAM
 
-**What goes wrong:** RVTools reports CPU speed in **MHz** (`CPU MHz`), not GHz. A copy-paste into a "GHz" field shows 2600 GHz per host (a hilarious teraflop estate). RAM has a similar trap: `Memory` (MiB) is *configured* RAM; `Reservation` (MiB) is reserved (guaranteed) RAM. Summing configurations exceeds host physical RAM (oversubscription is fine and expected); summing reservations *also* exceeds host RAM is a real configuration error that vatlas should surface.
+**What goes wrong:** RVTools reports CPU speed in **MHz** (`CPU MHz`), not GHz. A copy-paste into a "GHz" field shows 2600 GHz per host (a hilarious teraflop estate). RAM has a similar trap: `Memory` (MiB) is _configured_ RAM; `Reservation` (MiB) is reserved (guaranteed) RAM. Summing configurations exceeds host physical RAM (oversubscription is fine and expected); summing reservations _also_ exceeds host RAM is a real configuration error that vatlas should surface.
 
 **Warning signs:**
 
@@ -300,7 +300,7 @@ Won't cause a rewrite but will cause an embarrassing report, an angry operator, 
 - `Red Hat Enterprise Linux 8.10` (VMware Tools-detected, granular)
 - `Red Hat Enterprise Linux Server release 8.10 (Ootpa)` (old format)
 - `rhel8_64Guest` (the API enum name)
-And Oracle Linux:
+  And Oracle Linux:
 - `Oracle Linux Server 8.10`
 - `OEL 8.10`
 - `oracleLinux8_64Guest`
@@ -309,18 +309,18 @@ The EOS catalogue keyed on `'RHEL 8'` matches none of them. Result: 4,000 RHEL V
 
 **Known EOS landmarks** (verify before v1 ships; the catalogue must be a maintained JSON, not hardcoded):
 
-| OS | EOS / End of Maintenance |
-|----|--------------------------|
-| RHEL 7 | 30 June 2024 (already passed — every RHEL 7 VM is overdue) |
-| RHEL 8.10 (final minor) | 31 May 2029 (maintenance) |
-| RHEL 9.4 (EUS) | EUS available |
-| Windows Server 2012 R2 | 10 October 2023 (passed) |
-| Windows Server 2016 | Extended Support ends 12 January 2027 |
-| Windows Server 2019 | Extended Support ends 9 January 2029 |
-| Windows Server 2022 | Mainstream support ends 13 October 2026 |
-| Windows Server Annual 23H2 | 24 October 2025 (passed) |
-| ESXi 7.0 | General Support ends 2 October 2025 (passed), Tech Guidance 2 October 2027 |
-| ESXi 8.0 | General Support ends 11 October 2027, Tech Guidance 11 October 2029 |
+| OS                         | EOS / End of Maintenance                                                   |
+| -------------------------- | -------------------------------------------------------------------------- |
+| RHEL 7                     | 30 June 2024 (already passed — every RHEL 7 VM is overdue)                 |
+| RHEL 8.10 (final minor)    | 31 May 2029 (maintenance)                                                  |
+| RHEL 9.4 (EUS)             | EUS available                                                              |
+| Windows Server 2012 R2     | 10 October 2023 (passed)                                                   |
+| Windows Server 2016        | Extended Support ends 12 January 2027                                      |
+| Windows Server 2019        | Extended Support ends 9 January 2029                                       |
+| Windows Server 2022        | Mainstream support ends 13 October 2026                                    |
+| Windows Server Annual 23H2 | 24 October 2025 (passed)                                                   |
+| ESXi 7.0                   | General Support ends 2 October 2025 (passed), Tech Guidance 2 October 2027 |
+| ESXi 8.0                   | General Support ends 11 October 2027, Tech Guidance 11 October 2029        |
 
 **Warning signs:**
 
@@ -332,7 +332,7 @@ The EOS catalogue keyed on `'RHEL 8'` matches none of them. Result: 4,000 RHEL V
 
 - An **OS normalizer** module with a regex-based classifier and a normalized canonical key (`{ family: 'rhel', major: 8, minor: 10, arch: 'x86_64' }`). Test against a fixture of 50 real OS strings (harvest from existing exports).
 - The EOS catalogue is `src/data/os-eos.json`, keyed on `family + major + minor`, with `eosDate`, `extendedSupportDate?` (LTSS/ESU), and a `source` URL (Red Hat lifecycle page, MS lifecycle page).
-- A **lifecycle phase bucketing** function: `phase(eosDate, now) → 'overdue' | '3mo' | '6mo' | '9mo' | '12mo' | 'safe'`. The "overdue" bucket exists because RHEL 7 and Win Server 2012 R2 are already past and *must not* be hidden.
+- A **lifecycle phase bucketing** function: `phase(eosDate, now) → 'overdue' | '3mo' | '6mo' | '9mo' | '12mo' | 'safe'`. The "overdue" bucket exists because RHEL 7 and Win Server 2012 R2 are already past and _must not_ be hidden.
 - Extended support tiers: surface separately. RHEL ELS (Extended Life Cycle Support) and Windows ESU (Extended Security Updates) are paid; an asterisk in the UI clarifies.
 - "Unknown OS" must be a real bucket in the dashboard — not silently dropped — and clicking it shows the unrecognized strings so the user (or the maintainer) can extend the normalizer.
 - The catalogue carries a `lastVerified` date; CI warns when the date is >90 days old.
@@ -370,20 +370,20 @@ The EOS catalogue keyed on `'RHEL 8'` matches none of them. Result: 4,000 RHEL V
 
 **What goes wrong:**
 
-| Symptom | Cause |
-|---------|-------|
-| Long text spills outside the text box | `autoFit: true` in pptxgenjs means "Resize shape to fit text" (PowerPoint option 3), NOT "Shrink text on overflow" (option 2). The "shrink" option is poorly supported; some versions removed it (`shrinkText`) in favor of a new `fit` property. |
-| "Shrink text" works in PowerPoint but text overflow in LibreOffice / OpenOffice | The shrink-text rendering depends on a select/deselect cycle that LibreOffice doesn't trigger. |
-| Numbers in slides show `1,234.56` instead of `1 234,56` for FR users | pptxgenjs doesn't auto-localize; numbers are baked in at write-time. |
-| Custom Tailwind colors don't match in PPTX | pptxgenjs takes hex strings; if you pass `bg-primary-500` (a CSS class), it ends up as a literal. |
-| Chart fidelity poor compared to native | pptxgenjs's built-in chart types are limited; complex visualizations (treemaps, heatmaps) aren't supported and must be rendered as images. |
-| "Repair errors" when opening the PPTX | Often a text box with text that's too long or contains illegal XML characters (control chars from VM names). |
-| Tables exceed slide width with many columns | No built-in auto-fit; column widths are author's job. |
+| Symptom                                                                         | Cause                                                                                                                                                                                                                                             |
+| ------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Long text spills outside the text box                                           | `autoFit: true` in pptxgenjs means "Resize shape to fit text" (PowerPoint option 3), NOT "Shrink text on overflow" (option 2). The "shrink" option is poorly supported; some versions removed it (`shrinkText`) in favor of a new `fit` property. |
+| "Shrink text" works in PowerPoint but text overflow in LibreOffice / OpenOffice | The shrink-text rendering depends on a select/deselect cycle that LibreOffice doesn't trigger.                                                                                                                                                    |
+| Numbers in slides show `1,234.56` instead of `1 234,56` for FR users            | pptxgenjs doesn't auto-localize; numbers are baked in at write-time.                                                                                                                                                                              |
+| Custom Tailwind colors don't match in PPTX                                      | pptxgenjs takes hex strings; if you pass `bg-primary-500` (a CSS class), it ends up as a literal.                                                                                                                                                 |
+| Chart fidelity poor compared to native                                          | pptxgenjs's built-in chart types are limited; complex visualizations (treemaps, heatmaps) aren't supported and must be rendered as images.                                                                                                        |
+| "Repair errors" when opening the PPTX                                           | Often a text box with text that's too long or contains illegal XML characters (control chars from VM names).                                                                                                                                      |
+| Tables exceed slide width with many columns                                     | No built-in auto-fit; column widths are author's job.                                                                                                                                                                                             |
 
 **Prevention (concrete):**
 
 - A `pptxText(text, opts)` wrapper that: truncates with ellipsis at a known character budget for the given font size; strips control characters (`text.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, '')`); and uses the `fit: 'shrink'` syntax (newer pptxgenjs) with a fallback to manual sizing.
-- For numbers: pre-format on the JS side using the locale-aware formatter from `utils/format`, then pass the *string* to pptxgenjs. Apply the U+202F → U+00A0 substitution for PPTX context (Moderate-2).
+- For numbers: pre-format on the JS side using the locale-aware formatter from `utils/format`, then pass the _string_ to pptxgenjs. Apply the U+202F → U+00A0 substitution for PPTX context (Moderate-2).
 - Color tokens: maintain a `src/theme/pptxPalette.ts` module that exports hex strings (`PALETTE.primary500 = '#1e40af'`) used by both Tailwind's CSS vars (via `index.css` `:root`) and the PPTX builder, keeping them in lockstep (vsizer's "Midnight Executive" pattern).
 - For complex charts (treemap, heatmap): render the chart in the DOM, serialize the SVG to PNG via `html-to-image` or canvas, and embed as `addImage()`. Test at multiple zoom levels; SVG `<foreignObject>` content (CSS-styled HTML inside SVG) often doesn't survive this serialization, so charts must use pure SVG primitives (`<text>`, `<rect>`, not HTML divs styled with Tailwind).
 - A "golden PPTX" snapshot test: build one with a known fixture, open with `python-pptx` in a CI step, assert text-box overflow, color, and slide count. This catches regressions without manual visual review.
@@ -523,7 +523,7 @@ These won't ruin the report but will cost an afternoon if encountered cold.
 
 **What goes wrong:** User loads `2026-01.xlsx`, `2026-02.xlsx`, `2026-03.xlsx`. The trend X-axis shows three evenly-spaced points. In reality the workbooks were exported on 2026-01-31, 2026-02-15, and 2026-03-30 — non-uniform intervals. Trend slopes are misleading.
 
-**Prevention:** Snapshot timestamp captured from each workbook (file mtime as fallback; export-timestamp metadata if RVTools writes it). Trend X-axis is *temporal*, not categorical. Surface the actual dates on hover.
+**Prevention:** Snapshot timestamp captured from each workbook (file mtime as fallback; export-timestamp metadata if RVTools writes it). Trend X-axis is _temporal_, not categorical. Surface the actual dates on hover.
 
 **Phase:** Trends.
 
@@ -553,18 +553,18 @@ These won't ruin the report but will cost an afternoon if encountered cold.
 
 A condensed cross-reference: which pitfalls bite each roadmap phase.
 
-| Phase | Likely pitfalls | Mitigation summary |
-|-------|----------------|--------------------|
-| Parser | Critical-1, Critical-5, Moderate-1, Minor-1, Minor-3, Minor-5 | Inherit MB-as-MiB ADR; ship Web Worker on day one; alias dictionary for columns; preprocessors for empty cells |
-| Aggregation | Critical-3, Critical-4, Critical-6, Moderate-4, Moderate-5, Moderate-11 | Per-site stretched math; (vcenter_uuid, moref) keys; configured/active accounting modes; physical-core ratios; branded GHz type; NAA-keyed datastore |
-| EOS | Moderate-6, Minor-4 | OS normalizer regex bank; JSON catalogue with `lastVerified`; "overdue" bucket; unknown-OS surfaced |
-| DR-sim | Critical-3, Moderate-10 | Assumptions panel; reservations math (not just capacity); confidence levels per cluster |
-| Trends | Moderate-1, Minor-6 | Per-snapshot RVTools version surfaced; temporal X-axis |
-| HTML-export | Moderate-2, Moderate-7 | Single-file invariant; subset self-hosted fonts; CSP meta tag; inline SVG charts; anchor namespacing per snapshot |
-| PPTX-export | Moderate-2, Moderate-8 | `pptxText` wrapper; locale-aware pre-formatting; control-char stripping; golden snapshot CI test |
-| i18n | Moderate-2, Minor-7 | Centralized formatters; U+202F handling; CI key-diff gate |
-| Performance | Critical-5, Moderate-9 | Web Worker parsing; dense mode; chart memoization; Canvas for large datasets |
-| Privacy | Critical-2 | Runtime fetch/XHR/WS/Beacon guard; CSP `connect-src 'self'`; CI denylist on telemetry packages; no source-map upload; v2.0 SW only under the ADR-0001 Amendment envelope (guard-first, precache-only, same-origin), CI-enforced |
+| Phase       | Likely pitfalls                                                         | Mitigation summary                                                                                                                                                                                                              |
+| ----------- | ----------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Parser      | Critical-1, Critical-5, Moderate-1, Minor-1, Minor-3, Minor-5           | Inherit MB-as-MiB ADR; ship Web Worker on day one; alias dictionary for columns; preprocessors for empty cells                                                                                                                  |
+| Aggregation | Critical-3, Critical-4, Critical-6, Moderate-4, Moderate-5, Moderate-11 | Per-site stretched math; (vcenter_uuid, moref) keys; configured/active accounting modes; physical-core ratios; branded GHz type; NAA-keyed datastore                                                                            |
+| EOS         | Moderate-6, Minor-4                                                     | OS normalizer regex bank; JSON catalogue with `lastVerified`; "overdue" bucket; unknown-OS surfaced                                                                                                                             |
+| DR-sim      | Critical-3, Moderate-10                                                 | Assumptions panel; reservations math (not just capacity); confidence levels per cluster                                                                                                                                         |
+| Trends      | Moderate-1, Minor-6                                                     | Per-snapshot RVTools version surfaced; temporal X-axis                                                                                                                                                                          |
+| HTML-export | Moderate-2, Moderate-7                                                  | Single-file invariant; subset self-hosted fonts; CSP meta tag; inline SVG charts; anchor namespacing per snapshot                                                                                                               |
+| PPTX-export | Moderate-2, Moderate-8                                                  | `pptxText` wrapper; locale-aware pre-formatting; control-char stripping; golden snapshot CI test                                                                                                                                |
+| i18n        | Moderate-2, Minor-7                                                     | Centralized formatters; U+202F handling; CI key-diff gate                                                                                                                                                                       |
+| Performance | Critical-5, Moderate-9                                                  | Web Worker parsing; dense mode; chart memoization; Canvas for large datasets                                                                                                                                                    |
+| Privacy     | Critical-2                                                              | Runtime fetch/XHR/WS/Beacon guard; CSP `connect-src 'self'`; CI denylist on telemetry packages; no source-map upload; v2.0 SW only under the ADR-0001 Amendment envelope (guard-first, precache-only, same-origin), CI-enforced |
 
 ---
 

@@ -4,27 +4,27 @@
 **Files analyzed:** 13 (8 modified, 5 new)
 **Analogs found:** 13 / 13 (every file evolves a shipped, real-file-validated analog — zero greenfield)
 
-> This phase EVOLVES the shipped P4/P5 spine. Every "analog" below is the *current state of the file being reworked itself* (the strongest possible analog). The planner copies the exact change-points named here. Do NOT rewrite from zero — ROADMAP `vsizer reuse` + replan brief mandate keep-and-evolve.
+> This phase EVOLVES the shipped P4/P5 spine. Every "analog" below is the _current state of the file being reworked itself_ (the strongest possible analog). The planner copies the exact change-points named here. Do NOT rewrite from zero — ROADMAP `vsizer reuse` + replan brief mandate keep-and-evolve.
 
 ---
 
 ## File Classification
 
-| New/Modified File | Role | Data Flow | Closest Analog | Match Quality |
-|-------------------|------|-----------|----------------|---------------|
-| `src/engines/drSim/runScenario.ts` | engine | transform | itself (current shipped) | self / exact |
-| `src/engines/drSim/allocate.ts` | engine | transform | itself (current shipped) | self / exact |
-| `src/engines/drSim/index.ts` | engine (barrel) | — | itself | self / exact |
-| `src/types/estate.ts` (`DrMode`/`DrSimResult`/`DrScenario`/`EstateView`) | model/types | — | itself | self / exact |
-| `src/engines/aggregation/aggregateClusters.ts` | engine | transform | itself (ratio-bake point) | self / exact |
-| `src/engines/aggregation/estateView.ts` | engine (assembler) | transform | itself (P5 added insights here) | self / exact |
-| `src/components/ViewToggle.tsx` | component (nav) | event-driven | itself + P5 `hosts`-segment commit `123ecb2` | exact (precedent) |
-| `src/components/dr/DrSimPanel.tsx` | component | request-response (presenter) | itself (current shipped) | self / exact |
-| Planned-ratios control (NEW) | component | event-driven | `src/components/allocation/AllocationSliders.tsx` (preset group) | role+flow match |
-| Planning view shell (NEW) | component (view branch) | event-driven | `GlobalDashboard.tsx` DR-block region + `App.tsx` view switch | role+flow match |
-| Zustand planned-ratios slice (NEW, in `snapshotStore.ts`) | store | event-driven | `snapshotStore.ts` `stretchedClusters`/`scenario` slices | exact |
-| `useEstateView.ts` + `buildEstateView` planned projection | hook + engine | transform | `useEstateView.ts` (P4/P5 added `ratios`/`scenario`/insights through it) | exact (precedent) |
-| i18n: `dr.json` / `alloc.json` / `inventory.json` (EN+FR) | config | — | shipped `dr.json`/`alloc.json` EN/FR pair | exact |
+| New/Modified File                                                        | Role                    | Data Flow                    | Closest Analog                                                           | Match Quality     |
+| ------------------------------------------------------------------------ | ----------------------- | ---------------------------- | ------------------------------------------------------------------------ | ----------------- |
+| `src/engines/drSim/runScenario.ts`                                       | engine                  | transform                    | itself (current shipped)                                                 | self / exact      |
+| `src/engines/drSim/allocate.ts`                                          | engine                  | transform                    | itself (current shipped)                                                 | self / exact      |
+| `src/engines/drSim/index.ts`                                             | engine (barrel)         | —                            | itself                                                                   | self / exact      |
+| `src/types/estate.ts` (`DrMode`/`DrSimResult`/`DrScenario`/`EstateView`) | model/types             | —                            | itself                                                                   | self / exact      |
+| `src/engines/aggregation/aggregateClusters.ts`                           | engine                  | transform                    | itself (ratio-bake point)                                                | self / exact      |
+| `src/engines/aggregation/estateView.ts`                                  | engine (assembler)      | transform                    | itself (P5 added insights here)                                          | self / exact      |
+| `src/components/ViewToggle.tsx`                                          | component (nav)         | event-driven                 | itself + P5 `hosts`-segment commit `123ecb2`                             | exact (precedent) |
+| `src/components/dr/DrSimPanel.tsx`                                       | component               | request-response (presenter) | itself (current shipped)                                                 | self / exact      |
+| Planned-ratios control (NEW)                                             | component               | event-driven                 | `src/components/allocation/AllocationSliders.tsx` (preset group)         | role+flow match   |
+| Planning view shell (NEW)                                                | component (view branch) | event-driven                 | `GlobalDashboard.tsx` DR-block region + `App.tsx` view switch            | role+flow match   |
+| Zustand planned-ratios slice (NEW, in `snapshotStore.ts`)                | store                   | event-driven                 | `snapshotStore.ts` `stretchedClusters`/`scenario` slices                 | exact             |
+| `useEstateView.ts` + `buildEstateView` planned projection                | hook + engine           | transform                    | `useEstateView.ts` (P4/P5 added `ratios`/`scenario`/insights through it) | exact (precedent) |
+| i18n: `dr.json` / `alloc.json` / `inventory.json` (EN+FR)                | config                  | —                            | shipped `dr.json`/`alloc.json` EN/FR pair                                | exact             |
 
 ---
 
@@ -51,8 +51,13 @@ Lines 42-61 (`vcLostClusters`, `clusterFailed`, the vCenter/cluster survivor fil
 
 ```typescript
 const aggregate = (vinfo: typeof merged.vinfo, vhost: typeof merged.vhost) =>
-  aggregateClusters({ vinfo, vhost, mode: opts.mode,
-    stretchedClusters: opts.stretchedClusters, allocRatios: opts.allocRatios })
+  aggregateClusters({
+    vinfo,
+    vhost,
+    mode: opts.mode,
+    stretchedClusters: opts.stretchedClusters,
+    allocRatios: opts.allocRatios,
+  })
 const beforeClusters = aggregate(merged.vinfo, merged.vhost)
 const afterClusters = aggregate(survivorVinfo, survivorVhost)
 const before = aggregateGlobals(beforeClusters)
@@ -78,11 +83,14 @@ New: derive from `before.physicalGhz/physicalCores/physicalRamMib − after.*` (
 // DELETE these lines (D-10):
 const verdicts = perSurvivor.map((p) => p.verdict)
 const confidence: DrSimResult['confidence'] = verdicts.includes('overflows')
-  ? 'low' : verdicts.includes('tight') ? 'medium' : 'high'
+  ? 'low'
+  : verdicts.includes('tight')
+    ? 'medium'
+    : 'high'
 // ...and `confidence,` from the return object (line 117).
 ```
 
-**Custom-Failover wiring (D-11):** no new primitive — `opts.allocRatios` is *already* the injection point. Custom Failover = call `runScenario` with the planned ratios instead of measured ratios. The minimal-blast-radius change is in `buildEstateView` / `useEstateView` (which `allocRatios` it passes), NOT in `runScenario` itself.
+**Custom-Failover wiring (D-11):** no new primitive — `opts.allocRatios` is _already_ the injection point. Custom Failover = call `runScenario` with the planned ratios instead of measured ratios. The minimal-blast-radius change is in `buildEstateView` / `useEstateView` (which `allocRatios` it passes), NOT in `runScenario` itself.
 
 ---
 
@@ -90,11 +98,14 @@ const confidence: DrSimResult['confidence'] = verdicts.includes('overflows')
 
 **Analog:** itself (`src/engines/drSim/allocate.ts:1-48`).
 
-`Verdict` / `band` / `worse` / `survivorVerdict` are reused **unchanged** (factual-by-design, denylist comment in-file lines 3-9 — already D-09-compliant). The **only** change point is *what capacity is fed in*. Current (lines 39-48):
+`Verdict` / `band` / `worse` / `survivorVerdict` are reused **unchanged** (factual-by-design, denylist comment in-file lines 3-9 — already D-09-compliant). The **only** change point is _what capacity is fed in_. Current (lines 39-48):
 
 ```typescript
 export const survivorVerdict = (
-  c: Pick<ClusterAggregate, 'vcpuAllocated' | 'vramAllocatedMib' | 'capacityVcpu' | 'capacityRamMib'>,
+  c: Pick<
+    ClusterAggregate,
+    'vcpuAllocated' | 'vramAllocatedMib' | 'capacityVcpu' | 'capacityRamMib'
+  >,
 ): Verdict => {
   const cpu = band(c.vcpuAllocated as number, c.capacityVcpu as number)
   const ram = band(c.vramAllocatedMib as number, c.capacityRamMib as number)
@@ -102,7 +113,7 @@ export const survivorVerdict = (
 }
 ```
 
-For the *physical* survivor verdict (D-09), feed physical capacity-vs-load. Note `capacityVcpu`/`capacityRamMib` are produced by `aggregateClusters.ts:248-249` as `usablePhysicalCores * cpuRatio` / `physicalRamMib * ramRatio` — i.e. the ratio is *already baked there*. Planner decides whether to add a physical-basis verdict variant or feed physical fields through this same signature. Do NOT re-derive the ratio here (the `aggregateClusters` DRY contract — comment lines 33-37).
+For the _physical_ survivor verdict (D-09), feed physical capacity-vs-load. Note `capacityVcpu`/`capacityRamMib` are produced by `aggregateClusters.ts:248-249` as `usablePhysicalCores * cpuRatio` / `physicalRamMib * ramRatio` — i.e. the ratio is _already baked there_. Planner decides whether to add a physical-basis verdict variant or feed physical fields through this same signature. Do NOT re-derive the ratio here (the `aggregateClusters` DRY contract — comment lines 33-37).
 
 ---
 
@@ -150,12 +161,12 @@ Current contract to REWORK:
 
 ```typescript
 /** The dominant DR loss mode of a scenario (UI selector state echo). */
-export type DrMode = 'host' | 'cluster' | 'vcenter'       // → 'server' | 'site'
+export type DrMode = 'host' | 'cluster' | 'vcenter' // → 'server' | 'site'
 
 export interface DrScenario {
   failedHosts: Set<string>
-  failedClusters: Set<string>     // remove (cluster-loss dropped)
-  failedVCenters: Set<string>     // remove (vCenter-loss dropped)
+  failedClusters: Set<string> // remove (cluster-loss dropped)
+  failedVCenters: Set<string> // remove (vCenter-loss dropped)
   // add: failedSites: Set<string> (fault-domain values of declared-stretched clusters)
 }
 
@@ -163,11 +174,11 @@ export interface DrSimResult {
   mode: DrMode
   before: GlobalSummary
   after: GlobalSummary
-  evacueeVcpu: Cores              // → physical CPU removed (GHz + cores)
-  evacueeVramMib: MiB             // → physical RAM removed (keep MiB brand)
-  perSurvivor: { cluster: string; verdict: Verdict }[]   // KEEP (Verdict reused)
-  confidence: 'high' | 'medium' | 'low'                  // DELETE (D-10)
-  caveats: string[]               // KEEP (i18n key suffixes — D-10)
+  evacueeVcpu: Cores // → physical CPU removed (GHz + cores)
+  evacueeVramMib: MiB // → physical RAM removed (keep MiB brand)
+  perSurvivor: { cluster: string; verdict: Verdict }[] // KEEP (Verdict reused)
+  confidence: 'high' | 'medium' | 'low' // DELETE (D-10)
+  caveats: string[] // KEEP (i18n key suffixes — D-10)
 }
 ```
 
@@ -177,13 +188,13 @@ export interface DrSimResult {
 
 ### `src/components/ViewToggle.tsx` (component, event-driven) — EXTEND (precedent: P5 commit `123ecb2`)
 
-**Analog:** itself + the P5 `hosts`-segment commit `123ecb2` (a 4-line `ViewToggle.tsx` change + 1 i18n key — the *exact* precedent for adding `'planning'`).
+**Analog:** itself + the P5 `hosts`-segment commit `123ecb2` (a 4-line `ViewToggle.tsx` change + 1 i18n key — the _exact_ precedent for adding `'planning'`).
 
 Add `'planning'` to the union + array (lines 3-5), nothing else changes — the `fieldset`/`legend`/`aria-pressed`/Arrow-key/wraparound idiom is generic over `VIEWS`:
 
 ```typescript
-export type AppView = 'dashboard' | 'inventory' | 'hosts'         // + | 'planning'
-const VIEWS = ['dashboard', 'inventory', 'hosts'] as const          // + 'planning'
+export type AppView = 'dashboard' | 'inventory' | 'hosts' // + | 'planning'
+const VIEWS = ['dashboard', 'inventory', 'hosts'] as const // + 'planning'
 ```
 
 KEEP verbatim (lines 47-74) — the active-segment accent-gold styling (`bg-accent-500 text-surface-900`, line 65) and the **`biome-ignore` + literal `role="group"`** (lines 49-50) which the CI grep gate asserts. Add `nav.planning` to `inventory.json` EN+FR (the namespace used at line 28: `useTranslation('inventory')`, key rendered at line 70 `t(\`nav.${view}\`)`).
@@ -210,17 +221,17 @@ KEEP verbatim (lines 47-74) — the active-segment accent-gold styling (`bg-acce
 **Single gold figure to re-point** (lines 184-192) — from vCPU to physical CPU+RAM (D-09). Currently:
 
 ```tsx
-<p className="font-mono text-2xl font-semibold tabular-nums text-accent-500">
+;<p className="font-mono text-2xl font-semibold tabular-nums text-accent-500">
   {fmtInt(drSim.evacueeVcpu as number, loc)} vCPU
 </p>
 ```
 
-Re-label to "Physical CPU removed" ({GHz}/{cores}) + "Physical RAM removed" ({MiB}); keep `text-accent-500` as the *one* gold figure. Use `fmtGhzValue`/`fmtInt` (already imported line 4).
+Re-label to "Physical CPU removed" ({GHz}/{cores}) + "Physical RAM removed" ({MiB}); keep `text-accent-500` as the _one_ gold figure. Use `fmtGhzValue`/`fmtInt` (already imported line 4).
 
 **Confidence block to DELETE** (lines 209-212):
 
 ```tsx
-<div className="flex items-baseline gap-2 text-xs text-slate-600 dark:text-slate-400">
+;<div className="flex items-baseline gap-2 text-xs text-slate-600 dark:text-slate-400">
   <span className="font-semibold">{t('confidence.label')}</span>
   <span>{t(`confidence.${drSim.confidence}`)}</span>
 </div>
@@ -241,7 +252,7 @@ Re-label to "Physical CPU removed" ({GHz}/{cores}) + "Physical RAM removed" ({Mi
 ```typescript
 const PRESETS: readonly Preset[] = [
   { key: '1to1', ratios: { cpu: 1, ram: 1 } },
-  { key: '4to1', ratios: { cpu: 4, ram: 1 } },   // default (D-05: CPU 4:1 / RAM 1:1)
+  { key: '4to1', ratios: { cpu: 4, ram: 1 } }, // default (D-05: CPU 4:1 / RAM 1:1)
   { key: '8to1', ratios: { cpu: 8, ram: 1 } },
   { key: 'vdi10to1', ratios: { cpu: 10, ram: 1 } },
 ]
@@ -251,7 +262,7 @@ const matchesPreset = (r: AllocRatios, p: Preset): boolean =>
 
 **DROP** the two `<input type="range">` sliders (lines 47-78) — replace with `<input type="number">` (D-05; preset click fills the numeric field, off-preset typing clears the active preset = the existing `matchesPreset`→no-active behavior, factual, no error). Preset button height `h-8` (line 94) and the factual echo caption pattern (lines 108-110, `t('echo', { cpu, ram })`) are kept verbatim per UI-SPEC.
 
-**CRITICAL — DROP the URL-hash mechanism entirely.** `AllocationSliders` currently sources state from `useAllocationHash` (`src/hooks/useAllocationHash.ts:1-81`). The new control is **in-memory only via a Zustand inputs slice** (D-06): NO `useAllocationHash`, NO `history.replaceState`, NO `parseAllocHash`, NO URL-hash codec. `useAllocationHash.ts` is the *anti-pattern* here — it is the killed mechanism, present only to show what NOT to reuse. (`AllocRatios`/`DEFAULT_RATIOS` *types* may be re-homed, but the hash hook itself is not used.)
+**CRITICAL — DROP the URL-hash mechanism entirely.** `AllocationSliders` currently sources state from `useAllocationHash` (`src/hooks/useAllocationHash.ts:1-81`). The new control is **in-memory only via a Zustand inputs slice** (D-06): NO `useAllocationHash`, NO `history.replaceState`, NO `parseAllocHash`, NO URL-hash codec. `useAllocationHash.ts` is the _anti-pattern_ here — it is the killed mechanism, present only to show what NOT to reuse. (`AllocRatios`/`DEFAULT_RATIOS` _types_ may be re-homed, but the hash hook itself is not used.)
 
 ---
 
@@ -284,7 +295,10 @@ The store-level header comment (lines 11-30, esp. PAR-05 "no browser-storage wri
 **Precedent — how P4 added `ratios`/`scenario` through the one memo** (lines 37-54):
 
 ```typescript
-export function useEstateView(mode: AccountingMode, ratios: AllocRatios = DEFAULT_RATIOS): EstateView {
+export function useEstateView(
+  mode: AccountingMode,
+  ratios: AllocRatios = DEFAULT_RATIOS,
+): EstateView {
   const stretchedClusters = useSnapshotStore(selectStretchedClusters)
   const scenario = useSnapshotStore(selectScenario)
   return useMemo(() => {

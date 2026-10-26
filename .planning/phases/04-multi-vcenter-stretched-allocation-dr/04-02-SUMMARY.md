@@ -1,52 +1,53 @@
 ---
+
 phase: 04-multi-vcenter-stretched-allocation-dr
 plan: 02
 subsystem: aggregation
 tags: [stretched-cluster, dr-reservation, confidence, datastore-attribution, zustand, i18n]
 
 requires:
-  - phase: 04-01
-    provides: faultDomain parsed column, MergedEstate contract, selectedSnapshotIds memo path
-provides:
-  - "per-site, per-resource stretched reservation (replaces flat 0.5) + factual stretchedConfidence"
-  - "ClusterAggregate stretched fields (confidence, reservedFraction, per-site GHz/RAM, em-dash null)"
-  - "stretchedClusters store slice threaded through the single useEstateView memo"
-  - "StretchedPill (aria-pressed idiom reuse) + neutral LowConfidenceChip + ClusterColumn wiring"
-  - "str i18n namespace (EN/FR parity)"
-  - "datastoreCountByCluster optional Hosts→cluster join (CORRECT but inert on real RVTools — see Deviations)"
-affects: [04-04-dr, 05-eos, 06-trends, 07-exports]
+- phase: 04-01
+  provides: faultDomain parsed column, MergedEstate contract, selectedSnapshotIds memo path
+  provides:
+- "per-site, per-resource stretched reservation (replaces flat 0.5) + factual stretchedConfidence"
+- "ClusterAggregate stretched fields (confidence, reservedFraction, per-site GHz/RAM, em-dash null)"
+- "stretchedClusters store slice threaded through the single useEstateView memo"
+- "StretchedPill (aria-pressed idiom reuse) + neutral LowConfidenceChip + ClusterColumn wiring"
+- "str i18n namespace (EN/FR parity)"
+- "datastoreCountByCluster optional Hosts→cluster join (CORRECT but inert on real RVTools — see Deviations)"
+  affects: [04-04-dr, 05-eos, 06-trends, 07-exports]
 
 tech-stack:
-  added: []
-  patterns:
-    - "ADR-0007-EXT: per-resource reservation f=maxSiteCap/totalCap, factor=1/(1-f); confidence never collapses absence to high"
-    - "Stretched UI elements colocated in components/stretched/; pill reuses the segmented aria-pressed idiom verbatim"
+added: []
+patterns:
+- "ADR-0007-EXT: per-resource reservation f=maxSiteCap/totalCap, factor=1/(1-f); confidence never collapses absence to high"
+- "Stretched UI elements colocated in components/stretched/; pill reuses the segmented aria-pressed idiom verbatim"
 
 key-files:
-  created:
-    - src/components/stretched/StretchedPill.tsx
-    - src/i18n/locales/en/str.json
-    - src/i18n/locales/fr/str.json
+created:
+- src/components/stretched/StretchedPill.tsx
+- src/i18n/locales/en/str.json
+- src/i18n/locales/fr/str.json
   modified:
-    - src/engines/aggregation/aggregateClusters.ts
-    - src/types/estate.ts
-    - src/engines/aggregation/perDatastore.ts
-    - src/engines/aggregation/estateView.ts
-    - src/store/snapshotStore.ts
-    - src/hooks/useEstateView.ts
-    - src/components/dashboard/ClusterColumn.tsx
-    - src/components/dashboard/PerClusterColumns.tsx
-    - src/components/dashboard/GlobalDashboard.tsx
-    - src/i18n/index.ts
+- src/engines/aggregation/aggregateClusters.ts
+- src/types/estate.ts
+- src/engines/aggregation/perDatastore.ts
+- src/engines/aggregation/estateView.ts
+- src/store/snapshotStore.ts
+- src/hooks/useEstateView.ts
+- src/components/dashboard/ClusterColumn.tsx
+- src/components/dashboard/PerClusterColumns.tsx
+- src/components/dashboard/GlobalDashboard.tsx
+- src/i18n/index.ts
 
 key-decisions:
-  - "perCluster.ts/globals.ts left untouched (plan-sanctioned KISS — reservation computed from raw vhost rows in aggregateClusters)"
-  - "Confidence model: all hosts tagged + ≥2 domains → high; partial → medium; none → low (binding test matrix)"
-  - "RVTools vDatastore `Hosts` column is a host COUNT, not a name list — the Pitfall-6 join is correct code but inert on real exports (see Deviations / RESEARCH A3)"
+- "perCluster.ts/globals.ts left untouched (plan-sanctioned KISS — reservation computed from raw vhost rows in aggregateClusters)"
+- "Confidence model: all hosts tagged + ≥2 domains → high; partial → medium; none → low (binding test matrix)"
+- "RVTools vDatastore `Hosts` column is a host COUNT, not a name list — the Pitfall-6 join is correct code but inert on real exports (see Deviations / RESEARCH A3)"
 
 patterns-established:
-  - "Per-site reservation pinned in an ADR-0007-EXT comment block at the helper"
-  - "Stretched store slice = inputs-only Set, replace-never-mutate, no persist (T-04-06)"
+- "Per-site reservation pinned in an ADR-0007-EXT comment block at the helper"
+- "Stretched store slice = inputs-only Set, replace-never-mutate, no persist (T-04-06)"
 
 requirements-completed: [STR-01, STR-02, STR-03]
 

@@ -1,47 +1,49 @@
 ---
+
 phase: 06-allocation-dr-re-derived
 plan: 01
 subsystem: dr-engine + planned-projection spine
 tags: [dr-sim, allocation, zustand-slice, single-memo, branded-units, two-mode]
 requires:
-  - "shipped P4/P5 drSim/allocate/aggregateClusters/estateView/snapshotStore/useEstateView spine"
-provides:
-  - "DrMode = 'server' | 'site' (cluster/vCenter loss retired)"
-  - "DrSimResult physical-impact (GHz+cores+MiB) + no confidence + caveats kept"
-  - "DrScenario { failedHosts, failedSites }"
-  - "in-memory plannedRatios Zustand inputs slice + selectors"
-  - "EstateView.plannedView + EstateView.plannedDrSim composed in the single buildEstateView pass"
-  - "survivorPhysicalVerdict (physical-headroom verdict sibling)"
-affects:
-  - "Plans 06-02/06-03 (Planning view, DrSimPanel full rework, ViewToggle 4th segment)"
-tech-stack:
+- "shipped P4/P5 drSim/allocate/aggregateClusters/estateView/snapshotStore/useEstateView spine"
+  provides:
+- "DrMode = 'server' | 'site' (cluster/vCenter loss retired)"
+- "DrSimResult physical-impact (GHz+cores+MiB) + no confidence + caveats kept"
+- "DrScenario { failedHosts, failedSites }"
+- "in-memory plannedRatios Zustand inputs slice + selectors"
+- "EstateView.plannedView + EstateView.plannedDrSim composed in the single buildEstateView pass"
+- "survivorPhysicalVerdict (physical-headroom verdict sibling)"
+  affects:
+- "Plans 06-02/06-03 (Planning view, DrSimPanel full rework, ViewToggle 4th segment)"
+  tech-stack:
   added: []
   patterns:
-    - "sibling-function over signature-change for minimal blast radius (survivorPhysicalVerdict)"
-    - "second aggregateClusters/runScenario pass inside the one buildEstateView (no 2nd useMemo)"
-key-files:
-  created: []
-  modified:
-    - src/types/estate.ts
-    - src/engines/drSim/runScenario.ts
-    - src/engines/drSim/allocate.ts
-    - src/engines/drSim/index.ts
-    - src/store/snapshotStore.ts
-    - src/engines/aggregation/estateView.ts
-    - src/hooks/useEstateView.ts
-    - src/engines/drSim/runScenario.test.ts
-    - src/components/dr/DrSimPanel.tsx
-    - src/components/dashboard/GlobalDashboard.tsx
-    - src/i18n/locales/en/dr.json
-    - src/i18n/locales/fr/dr.json
-decisions:
-  - "survivorPhysicalVerdict added as a SIBLING (not a signature change) so measured consumers are untouched — minimal blast radius (Task 1 action gave this discretion)"
-  - "Physical survivor verdict feeds consumedGhz/consumedRamMib vs (physicalGhz/RamMib − drReserved*) — physical headroom net of the stretched reservation, ratio not re-derived (aggregateClusters DRY contract)"
-  - "applyPlannedToDr defaults true in opts (the in-app toggle is lifted into Plan 02/03's PlanningView per the plan)"
-  - "DrSimPanel/GlobalDashboard given minimal-blast-radius spine-compat edits to keep tsc green; the full Server-loss stepper / Site 'lost — no DR target' line / apply-planned affordance / Planning view shell are explicitly Plan 02/03 scope per 06-CONTEXT D-04/D-07 and 06-PATTERNS"
-metrics:
+  - "sibling-function over signature-change for minimal blast radius (survivorPhysicalVerdict)"
+  - "second aggregateClusters/runScenario pass inside the one buildEstateView (no 2nd useMemo)"
+    key-files:
+    created: []
+    modified:
+  - src/types/estate.ts
+  - src/engines/drSim/runScenario.ts
+  - src/engines/drSim/allocate.ts
+  - src/engines/drSim/index.ts
+  - src/store/snapshotStore.ts
+  - src/engines/aggregation/estateView.ts
+  - src/hooks/useEstateView.ts
+  - src/engines/drSim/runScenario.test.ts
+  - src/components/dr/DrSimPanel.tsx
+  - src/components/dashboard/GlobalDashboard.tsx
+  - src/i18n/locales/en/dr.json
+  - src/i18n/locales/fr/dr.json
+    decisions:
+- "survivorPhysicalVerdict added as a SIBLING (not a signature change) so measured consumers are untouched — minimal blast radius (Task 1 action gave this discretion)"
+- "Physical survivor verdict feeds consumedGhz/consumedRamMib vs (physicalGhz/RamMib − drReserved*) — physical headroom net of the stretched reservation, ratio not re-derived (aggregateClusters DRY contract)"
+- "applyPlannedToDr defaults true in opts (the in-app toggle is lifted into Plan 02/03's PlanningView per the plan)"
+- "DrSimPanel/GlobalDashboard given minimal-blast-radius spine-compat edits to keep tsc green; the full Server-loss stepper / Site 'lost — no DR target' line / apply-planned affordance / Planning view shell are explicitly Plan 02/03 scope per 06-CONTEXT D-04/D-07 and 06-PATTERNS"
+  metrics:
   duration: ~22min
   completed: 2026-05-17
+
 ---
 
 # Phase 6 Plan 01: DR-Engine + Planned-Projection Spine Summary
@@ -58,8 +60,8 @@ rewrites.
   `DrSimResult` now exposes `physicalCpuRemovedGhz`/`physicalCpuRemovedCores`/
   `physicalRamRemovedMib` (branded, before−after physical), `confidence` removed, `caveats`
   - `perSurvivor` kept. `runScenario` strips the cluster/vCenter paths, adds the
-  fault-domain site filter, and computes the per-survivor verdict against physical headroom
-  via the new `survivorPhysicalVerdict` sibling in `allocate.ts`.
+    fault-domain site filter, and computes the per-survivor verdict against physical headroom
+    via the new `survivorPhysicalVerdict` sibling in `allocate.ts`.
 - **Task 2** — `plannedRatios: { cpu, ram }` in-memory Zustand slice (default 4:1/1:1),
   `setPlannedRatios` REPLACE-never-mutate, reset in `clearAll`, `selectPlannedRatios` /
   `selectSetPlannedRatios` stable-ref selectors, zero persistence.

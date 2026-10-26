@@ -1,40 +1,41 @@
 ---
+
 phase: 08-in-session-trends
 plan: 02
 subsystem: ui
 tags: [zustand, web-worker, echarts, warm-up, memory-release]
 
 requires:
-  - phase: 08-in-session-trends
-    provides: TrendHeadline/ReleasedTrendAggregate types + aggregateTrendGroup (plan 08-01)
-provides:
-  - releaseRawRows(id) inputs-only store mutation (DD-C)
-  - Latest-first non-blocking background warm-up drain + {done,total}
-  - LineChart registered in the shipped <Chart> ECharts registry
-affects: [08-03, trends UI warm-up indicator, dashboard sparklines, delta panel]
+- phase: 08-in-session-trends
+  provides: TrendHeadline/ReleasedTrendAggregate types + aggregateTrendGroup (plan 08-01)
+  provides:
+- releaseRawRows(id) inputs-only store mutation (DD-C)
+- Latest-first non-blocking background warm-up drain + {done,total}
+- LineChart registered in the shipped <Chart> ECharts registry
+  affects: [08-03, trends UI warm-up indicator, dashboard sparklines, delta panel]
 
 tech-stack:
-  added: []
-  patterns:
-    - "Non-blocking background drain: parse latest first, fire-and-forget sequential continuation (singleton Worker preserved)"
-    - "DD-C release: aggregate captured BEFORE rows emptied (Pitfall 4 ordering)"
+added: []
+patterns:
+- "Non-blocking background drain: parse latest first, fire-and-forget sequential continuation (singleton Worker preserved)"
+- "DD-C release: aggregate captured BEFORE rows emptied (Pitfall 4 ordering)"
 
 key-files:
-  created: []
-  modified:
-    - src/store/snapshotStore.ts
-    - src/hooks/useSnapshotUpload.ts
-    - src/components/Chart.tsx
-    - src/engines/trends/buildTrendSeries.ts
-    - src/engines/trends/index.ts
+created: []
+modified:
+- src/store/snapshotStore.ts
+- src/hooks/useSnapshotUpload.ts
+- src/components/Chart.tsx
+- src/engines/trends/buildTrendSeries.ts
+- src/engines/trends/index.ts
 
 key-decisions:
-  - "DD-C threshold fixed at 4 (HYDRATED_BUDGET); release oldest-by-capturedAt non-active; never the active/latest"
-  - "Release-time aggregate uses mode 'active' + default ratios — frozen at release (inherent DD-C trade-off; documented)"
-  - "aggregateTrendGroup exported from trends engine (DRY) — release path reuses the same math as buildTrendSeries"
+- "DD-C threshold fixed at 4 (HYDRATED_BUDGET); release oldest-by-capturedAt non-active; never the active/latest"
+- "Release-time aggregate uses mode 'active' + default ratios — frozen at release (inherent DD-C trade-off; documented)"
+- "aggregateTrendGroup exported from trends engine (DRY) — release path reuses the same math as buildTrendSeries"
 
 patterns-established:
-  - "Warm-up {done,total} state source for the scoped 'trends preparing — N/M' indicator (no blocking overlay)"
+- "Warm-up {done,total} state source for the scoped 'trends preparing — N/M' indicator (no blocking overlay)"
 
 requirements-completed: [TRD-01, TRD-02, TRD-05]
 

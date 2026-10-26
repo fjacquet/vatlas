@@ -1,13 +1,15 @@
 ---
+
 status: complete
 phase: 04-multi-vcenter-stretched-allocation-dr
 source:
-  - 04-01-SUMMARY.md
-  - 04-02-SUMMARY.md
-  - 04-03-SUMMARY.md
-  - 04-04-SUMMARY.md
-started: 2026-05-16T00:00:00Z
-updated: 2026-05-16T00:00:00Z
+- 04-01-SUMMARY.md
+- 04-02-SUMMARY.md
+- 04-03-SUMMARY.md
+- 04-04-SUMMARY.md
+  started: 2026-05-16T00:00:00Z
+  updated: 2026-05-16T00:00:00Z
+
 ---
 
 ## Current Test
@@ -113,10 +115,10 @@ skipped: 4
   - src/engines/aggregation/aggregateClusters.ts (reservationFor → factual tagged/inferred, same fraction math)
   - src/components/stretched/StretchedPill.tsx (remove LowConfidenceChip)
   - src/components/dashboard/ClusterColumn.tsx (Confidence row + chip → neutral site-data caption)
-  - src/i18n/locales/en/str.json + fr/str.json (confidence.*/ lowConfidence.chip → siteData.* factual keys, EN/FR parity)
+  - src/i18n/locales/en/str.json + fr/str.json (confidence._/ lowConfidence.chip → siteData._ factual keys, EN/FR parity)
   - src/engines/aggregation/aggregateClusters.test.ts (rework matrix: factual indicator + reservation, not high/med/low)
   - src/engines/aggregation/globals.test.ts (ClusterAggregate fixture field rename)
-  missing:
+    missing:
   - factual site-data indicator (tagged vs inferred) replacing the confidence verdict
 
 - truth: "The allocation/consolidation ratio is CALCULATED from the data (vCPU allocated ÷ physical cores) and displayed — never invented/selected by the user."
@@ -136,7 +138,7 @@ skipped: 4
   - src/i18n/{en,fr}/alloc.json + i18n/index.ts (remove alloc namespace)
   - src/engines/drSim/allocate.ts + runScenario.ts (verdict capacity baseline redefinition — OPEN)
   - aggregateClusters.test.ts / drSim tests (rework)
-  missing:
+    missing:
   - displayed calculated consolidation ratio (vCPU÷pCPU, vRAM÷physRAM) as a measured output
   - redefined DR survivor-verdict capacity baseline (RESOLVED by DR-modes gap below → physical headroom)
 
@@ -153,7 +155,7 @@ skipped: 4
   - src/components/dr/DrSimPanel.tsx (2 modes; fail-select by host/by site; physical-impact display; keep reversible/neutral UI)
   - src/i18n/locales/{en,fr}/dr.json + i18n/index.ts (mode keys server/site; relabel evacuee → physical lost; EN/FR parity)
   - src/engines/drSim/*.test.ts + estateView.test.ts (rework for server/site + physical metric)
-  missing:
+    missing:
   - server-loss + site-loss modes with fault-domain site grouping
   - non-stretched-at-lost-site "lost" accounting (no DR target)
   - physical CPU+RAM impact metric replacing vCPU evacuee

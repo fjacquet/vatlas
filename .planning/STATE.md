@@ -1,4 +1,5 @@
 ---
+
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Offline-Capable, Redesigned, Better Deck
@@ -7,11 +8,11 @@ stopped_at: v2.0 milestone CLOSED — archived (ROADMAP/REQUIREMENTS/audit → m
 last_updated: "2026-05-20T12:20:00.000Z"
 last_activity: 2026-05-20 — Milestone v2.0 completed and archived
 progress:
-  total_phases: 7
-  completed_phases: 7
-  total_plans: 7
-  completed_plans: 7
-  percent: 100
+total_phases: 7
+completed_phases: 7
+total_plans: 7
+completed_plans: 7
+percent: 100
 ---
 
 # Project State
@@ -52,15 +53,15 @@ Last activity: 2026-05-25 — out-of-milestone Right-sizing + Monster-VM extract
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
-|-------|-------|-------|----------|
-| — | — | — | — |
+| ----- | ----- | ----- | -------- |
+| —     | —     | —     | —        |
 
 **Recent Trend:**
 
 - Last 5 plans: —
 - Trend: —
 
-*Updated after each plan completion*
+_Updated after each plan completion_
 | Phase 01 P01 | 26min | 3 tasks | 30 files |
 | Phase 01 P02 | 24min | 3 tasks | 8 files |
 | Phase 01 P03 | 22min | 3 tasks | 12 files |
@@ -117,20 +118,20 @@ None yet.
 
 ### Quick Tasks Completed
 
-| # | Description | Date | Commit | Directory |
-|---|-------------|------|--------|-----------|
-| 260517-sdq | Fix 4 CodeRabbit PR#1 review findings: engine purity, EOS month math, fmtDate TZ, STATE.md | 2026-05-17 | 47422e4..6a0c7ec | [260517-sdq-fix-4-coderabbit-pr-1-review-findings-en](./quick/260517-sdq-fix-4-coderabbit-pr-1-review-findings-en/) |
-| 260526-vj0 | Headline "used storage" → in-guest used (LiveOptics parity) + fallback to committed; keep inUseMib for storage treemap | 2026-05-26 | a11d963 | [260526-vj0-used-storage-guest-used-headline-kpi-to-](./quick/260526-vj0-used-storage-guest-used-headline-kpi-to-/) |
+| #          | Description                                                                                                            | Date       | Commit           | Directory                                                                                                           |
+| ---------- | ---------------------------------------------------------------------------------------------------------------------- | ---------- | ---------------- | ------------------------------------------------------------------------------------------------------------------- |
+| 260517-sdq | Fix 4 CodeRabbit PR#1 review findings: engine purity, EOS month math, fmtDate TZ, STATE.md                             | 2026-05-17 | 47422e4..6a0c7ec | [260517-sdq-fix-4-coderabbit-pr-1-review-findings-en](./quick/260517-sdq-fix-4-coderabbit-pr-1-review-findings-en/) |
+| 260526-vj0 | Headline "used storage" → in-guest used (LiveOptics parity) + fallback to committed; keep inUseMib for storage treemap | 2026-05-26 | a11d963          | [260526-vj0-used-storage-guest-used-headline-kpi-to-](./quick/260526-vj0-used-storage-guest-used-headline-kpi-to-/) |
 
 ## Deferred Items
 
 Items acknowledged and deferred at milestone close:
 
-| Category | Item | Status | Deferred At |
-|----------|------|--------|-------------|
-| uat | Consolidated Playwright browser UAT — PWA offline cold-boot (PWA-02) + web-layout visuals (installability already browser-confirmed) | open | v2.0 (2026-05-20) |
-| pptx | DR slide bare when no scenario — optional stretched-cluster reservation summary | open | v2.0 (2026-05-20) |
-| ui | UIX-03 icons are hand-authored placeholders — swap for the icons-project render_icon exact set once that MCP is enabled | open | v2.0 (2026-05-20) |
+| Category | Item                                                                                                                                 | Status | Deferred At       |
+| -------- | ------------------------------------------------------------------------------------------------------------------------------------ | ------ | ----------------- |
+| uat      | Consolidated Playwright browser UAT — PWA offline cold-boot (PWA-02) + web-layout visuals (installability already browser-confirmed) | open   | v2.0 (2026-05-20) |
+| pptx     | DR slide bare when no scenario — optional stretched-cluster reservation summary                                                      | open   | v2.0 (2026-05-20) |
+| ui       | UIX-03 icons are hand-authored placeholders — swap for the icons-project render_icon exact set once that MCP is enabled              | open   | v2.0 (2026-05-20) |
 
 ## Session Continuity
 

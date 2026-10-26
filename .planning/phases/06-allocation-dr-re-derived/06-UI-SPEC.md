@@ -1,4 +1,5 @@
 ---
+
 phase: 6
 slug: allocation-dr-re-derived
 status: approved
@@ -19,13 +20,13 @@ reviewed_at: 2026-05-17T00:00:00Z
 
 ## Design System
 
-| Property | Value |
-|----------|-------|
-| Tool | none (manual, established) — no `components.json`; Tailwind v4 `@theme` in `src/index.css` |
-| Preset | not applicable |
-| Component library | none (hand-rolled primitives; native `<fieldset>`/`<button>`/`<input>` + Tailwind utilities) |
-| Icon library | none (no icons in this phase — text + numeric only, per no-alarm-icon DR constraint D-10/G3) |
-| Font | UI: `system-ui, -apple-system, "Segoe UI", Roboto, sans-serif`. Numerics: `--font-mono` (JetBrains Mono / Fira Code) with `tabular-nums` |
+| Property          | Value                                                                                                                                    |
+| ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| Tool              | none (manual, established) — no `components.json`; Tailwind v4 `@theme` in `src/index.css`                                               |
+| Preset            | not applicable                                                                                                                           |
+| Component library | none (hand-rolled primitives; native `<fieldset>`/`<button>`/`<input>` + Tailwind utilities)                                             |
+| Icon library      | none (no icons in this phase — text + numeric only, per no-alarm-icon DR constraint D-10/G3)                                             |
+| Font              | UI: `system-ui, -apple-system, "Segoe UI", Roboto, sans-serif`. Numerics: `--font-mono` (JetBrains Mono / Fira Code) with `tabular-nums` |
 
 **shadcn gate:** not executed — an established manual design system already exists (Midnight Executive palette, `.panel`/`.label` component layer, shipped segmented-toggle idiom). Introducing shadcn would violate the keep-and-evolve constraint and the locked stack. Registry safety: not applicable (no registry).
 
@@ -35,15 +36,15 @@ reviewed_at: 2026-05-17T00:00:00Z
 
 Declared values (multiples of 4; matches the shipped components verbatim — do not introduce new spacing tokens):
 
-| Token | Value | Usage |
-|-------|-------|-------|
-| xs | 4px | `gap-1` segmented-control inner gap; `p-0.5` toggle frame padding |
-| sm | 8px | `gap-2` checkbox↔label, stat label↔value; `mb-2` sub-headings |
-| md | 16px | `panel` padding (`p-4`); `gap-4` panel-internal section stack |
-| lg | 24px | `gap-x-6` insight/stat-grid column gap; `gap-y-3` grid row gap |
-| xl | 32px | `gap-8` before/after DR column pair gap |
-| 2xl | 48px | Reserved — major Planning-screen section breaks (ratios block ↔ DR block) |
-| 3xl | 64px | Reserved — page-level only; not used inside Planning panels |
+| Token | Value | Usage                                                                     |
+| ----- | ----- | ------------------------------------------------------------------------- |
+| xs    | 4px   | `gap-1` segmented-control inner gap; `p-0.5` toggle frame padding         |
+| sm    | 8px   | `gap-2` checkbox↔label, stat label↔value; `mb-2` sub-headings             |
+| md    | 16px  | `panel` padding (`p-4`); `gap-4` panel-internal section stack             |
+| lg    | 24px  | `gap-x-6` insight/stat-grid column gap; `gap-y-3` grid row gap            |
+| xl    | 32px  | `gap-8` before/after DR column pair gap                                   |
+| 2xl   | 48px  | Reserved — major Planning-screen section breaks (ratios block ↔ DR block) |
+| 3xl   | 64px  | Reserved — page-level only; not used inside Planning panels               |
 
 Exceptions:
 
@@ -56,12 +57,12 @@ Exceptions:
 
 Matches shipped vatlas type usage exactly (sizes are Tailwind defaults already in use across `DrSimPanel`/`OperationalInsights`/`AllocationSliders`; 2 weights only):
 
-| Role | Size | Weight | Line Height |
-|------|------|--------|-------------|
-| Body / caption | 12px (`text-xs`) | 400 (normal) | 1.5 |
-| Label / stat / control | 14px (`text-sm`) | 600 (semibold) for labels, 400 for values | 1.5 |
-| Panel heading | 20px (`text-xl`) | 600 (semibold) | 1.2 |
-| Display (evacuee / headline figure) | 24px (`text-2xl`) | 600 (semibold) | 1.2 |
+| Role                                | Size              | Weight                                    | Line Height |
+| ----------------------------------- | ----------------- | ----------------------------------------- | ----------- |
+| Body / caption                      | 12px (`text-xs`)  | 400 (normal)                              | 1.5         |
+| Label / stat / control              | 14px (`text-sm`)  | 600 (semibold) for labels, 400 for values | 1.5         |
+| Panel heading                       | 20px (`text-xl`)  | 600 (semibold)                            | 1.2         |
+| Display (evacuee / headline figure) | 24px (`text-2xl`) | 600 (semibold)                            | 1.2         |
 
 Rules:
 
@@ -75,12 +76,12 @@ Rules:
 
 Midnight Executive palette (locked in `src/index.css @theme`; do NOT add colors). 60/30/10 split holds verbatim from shipped surfaces:
 
-| Role | Value | Usage |
-|------|-------|-------|
-| Dominant (60%) | `bg-slate-50` / dark `bg-surface-900` | Page background, Planning-screen canvas |
-| Secondary (30%) | `.panel` = `bg-white` / dark `bg-surface-800`, `border-slate-200` / dark `border-surface-700` | Planning-ratios panel, DR-sim panel, before/after sub-panels, assumptions panel (`bg-slate-50`/dark `bg-surface-900`) |
-| Accent (10%) | `--color-accent-500` gold (`text-accent-500` / active-segment `bg-accent-500`) | See reserved list below |
-| Destructive | none — **deliberately absent in this phase** | DR failed-selection is **neutral & reversible** (D-10/G3): grey strike-through + neutral chip, NEVER red, NEVER an alarm icon, NEVER a confirmation dialog. There are no destructive actions in this phase (see Copywriting). |
+| Role            | Value                                                                                         | Usage                                                                                                                                                                                                                         |
+| --------------- | --------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Dominant (60%)  | `bg-slate-50` / dark `bg-surface-900`                                                         | Page background, Planning-screen canvas                                                                                                                                                                                       |
+| Secondary (30%) | `.panel` = `bg-white` / dark `bg-surface-800`, `border-slate-200` / dark `border-surface-700` | Planning-ratios panel, DR-sim panel, before/after sub-panels, assumptions panel (`bg-slate-50`/dark `bg-surface-900`)                                                                                                         |
+| Accent (10%)    | `--color-accent-500` gold (`text-accent-500` / active-segment `bg-accent-500`)                | See reserved list below                                                                                                                                                                                                       |
+| Destructive     | none — **deliberately absent in this phase**                                                  | DR failed-selection is **neutral & reversible** (D-10/G3): grey strike-through + neutral chip, NEVER red, NEVER an alarm icon, NEVER a confirmation dialog. There are no destructive actions in this phase (see Copywriting). |
 
 Accent (gold `accent-500`) reserved **only** for:
 
@@ -97,41 +98,41 @@ Status colors (`--color-util-*` green/orange/red) are **NOT** used anywhere in t
 
 All strings land in BOTH `en/` and `fr/` namespaces (EN/FR parity is a hard constraint). No editorial verbs anywhere — the project denylist (`recommend` / `should` / `poor` / `good` / `better` / `worse-as-judgement` / high-med-low confidence words) is enforced. Numbers never embedded pre-formatted in strings (use `fmt*` + i18n interpolation count). Em-dash (`—`) is the "not derivable / not determinable" sentinel, verbatim with the shipped sentinel idiom.
 
-| Element | Copy (EN — FR parity required) |
-|---------|------|
-| Primary control: ratio presets | CPU preset buttons: `1:1`, `4:1`, `8:1`, `VDI 10:1`. RAM preset buttons follow the same set/pattern. Buttons are factual numeric labels (no verbs). Default state: CPU `4:1`, RAM `1:1` pre-filled into the editable field. |
-| Primary control: editable field | Field labels: "Planned CPU ratio (vCPU : pCPU)" / "Planned RAM ratio". Helper caption (factual echo, verbatim-pattern with shipped `AllocationSliders` echo line): "Planned lens — applies {cpu} CPU / {ram} RAM. Not the measured value." |
-| Section labelling (D-03 structural separation) | Planned block heading: "Capacity planning — what-if". Every value in this block carries an inline "planned" qualifier in its label. The realized read-only reference carries a "measured" qualifier and a one-line factual link/caption: "Measured ratio — calculated from this snapshot (see Dashboard › Operational Insights)." The two qualifiers are different words on different surfaces; never the same tile. |
-| DR mode selector | Exactly two segments: "Server loss" and "Site loss". No third segment. |
-| DR Server-loss selection | Individual host multi-select legend: "Simulate these hosts failed". Per-cluster quick control label: "Hosts failed in {cluster}" with a numeric stepper "{n} of {m}". Neutral, reversible. |
-| DR Site-loss selection | Site picker label: "Simulate this site failed". Options = the declared-stretched fault-domain values ("Site A" / "Site B"). Lost-non-stretched line (factual, explicit): "Workload physically at {site} with no stretched DR target — lost: {n} VMs · {cpu} · {ram}". |
-| DR failed-selection chip | Neutral chip text: "simulated failed" (verbatim from shipped `failed.chip`; grey, reversible, no red, no icon). |
-| Custom Failover affordance (D-11) | A single labelled toggle/checkbox INSIDE the DR panel (NOT a 3rd mode tab): "Apply planned ratios to this scenario". Caption when on: "This DR result uses the planned lens ratios ({cpu} CPU / {ram} RAM), not the measured ratios." When off: the DR result uses measured/real allocation (default). |
-| DR impact metric labels | "Physical CPU removed" ({GHz} / {cores}), "Physical RAM removed" ({MiB}). Never "vCPU" in the DR impact figures (D-09 — replaces the shipped `evacueeVcpu` label). |
-| DR survivor verdict | Factual enum word + numbers: "{cluster} — {verdict} ({headroom numbers})" where `{verdict}` ∈ `absorbs` / `tight` / `overflows` (shipped `Verdict` enum, reused). No color, no traffic-light. See Open-Item Recommendation 2. |
-| DR assumptions panel (KEEP — D-10) | Heading "What this models". Body two factual lines: "Models: {…}" / "Does not model: {…}". Verbatim-pattern with shipped `assumptions.*` keys; content updated to the two-mode/physical-impact model. |
-| DR caveats (KEEP — D-10) | Heading "Caveats". Factual bulleted `caveats[]` array, verbatim presentation from shipped `caveats.*`. |
-| DR confidence indicator | **REMOVED ENTIRELY** (D-10). No "confidence" label, no high/med/low word anywhere. Delete the shipped `confidence.*` block and its strings. |
-| Empty state heading | "No scenario simulated" |
-| Empty state body | "Select hosts (Server loss) or a site (Site loss) to simulate." (verbatim-pattern with shipped `empty.noSelection`) |
-| Empty state — no stretched clusters (Site loss) | "Site loss needs at least one cluster you have declared stretched. None are declared in this snapshot." (factual, no verb) — see Open-Item Recommendation 1. |
-| Not-determinable sentinel | Em-dash `—` for any physical figure not computable from parsed RVTools columns (calc-from-real-data; never a fabricated 0). |
-| Error state | No new error surface in this phase. Parse/load errors are owned by the existing app-shell error boundary + `sonner` toast — unchanged. |
-| Destructive confirmation | None — there are NO destructive actions in this phase. DR failed-selection and ratio changes are reversible in-memory what-if inputs (D-06/D-10/G3); no confirmation dialogs, no red, no irreversible state. |
+| Element                                         | Copy (EN — FR parity required)                                                                                                                                                                                                                                                                                                                                                                                       |
+| ----------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Primary control: ratio presets                  | CPU preset buttons: `1:1`, `4:1`, `8:1`, `VDI 10:1`. RAM preset buttons follow the same set/pattern. Buttons are factual numeric labels (no verbs). Default state: CPU `4:1`, RAM `1:1` pre-filled into the editable field.                                                                                                                                                                                          |
+| Primary control: editable field                 | Field labels: "Planned CPU ratio (vCPU : pCPU)" / "Planned RAM ratio". Helper caption (factual echo, verbatim-pattern with shipped `AllocationSliders` echo line): "Planned lens — applies {cpu} CPU / {ram} RAM. Not the measured value."                                                                                                                                                                           |
+| Section labelling (D-03 structural separation)  | Planned block heading: "Capacity planning — what-if". Every value in this block carries an inline "planned" qualifier in its label. The realized read-only reference carries a "measured" qualifier and a one-line factual link/caption: "Measured ratio — calculated from this snapshot (see Dashboard › Operational Insights)." The two qualifiers are different words on different surfaces; never the same tile. |
+| DR mode selector                                | Exactly two segments: "Server loss" and "Site loss". No third segment.                                                                                                                                                                                                                                                                                                                                               |
+| DR Server-loss selection                        | Individual host multi-select legend: "Simulate these hosts failed". Per-cluster quick control label: "Hosts failed in {cluster}" with a numeric stepper "{n} of {m}". Neutral, reversible.                                                                                                                                                                                                                           |
+| DR Site-loss selection                          | Site picker label: "Simulate this site failed". Options = the declared-stretched fault-domain values ("Site A" / "Site B"). Lost-non-stretched line (factual, explicit): "Workload physically at {site} with no stretched DR target — lost: {n} VMs · {cpu} · {ram}".                                                                                                                                                |
+| DR failed-selection chip                        | Neutral chip text: "simulated failed" (verbatim from shipped `failed.chip`; grey, reversible, no red, no icon).                                                                                                                                                                                                                                                                                                      |
+| Custom Failover affordance (D-11)               | A single labelled toggle/checkbox INSIDE the DR panel (NOT a 3rd mode tab): "Apply planned ratios to this scenario". Caption when on: "This DR result uses the planned lens ratios ({cpu} CPU / {ram} RAM), not the measured ratios." When off: the DR result uses measured/real allocation (default).                                                                                                               |
+| DR impact metric labels                         | "Physical CPU removed" ({GHz} / {cores}), "Physical RAM removed" ({MiB}). Never "vCPU" in the DR impact figures (D-09 — replaces the shipped `evacueeVcpu` label).                                                                                                                                                                                                                                                   |
+| DR survivor verdict                             | Factual enum word + numbers: "{cluster} — {verdict} ({headroom numbers})" where `{verdict}` ∈ `absorbs` / `tight` / `overflows` (shipped `Verdict` enum, reused). No color, no traffic-light. See Open-Item Recommendation 2.                                                                                                                                                                                        |
+| DR assumptions panel (KEEP — D-10)              | Heading "What this models". Body two factual lines: "Models: {…}" / "Does not model: {…}". Verbatim-pattern with shipped `assumptions.*` keys; content updated to the two-mode/physical-impact model.                                                                                                                                                                                                                |
+| DR caveats (KEEP — D-10)                        | Heading "Caveats". Factual bulleted `caveats[]` array, verbatim presentation from shipped `caveats.*`.                                                                                                                                                                                                                                                                                                               |
+| DR confidence indicator                         | **REMOVED ENTIRELY** (D-10). No "confidence" label, no high/med/low word anywhere. Delete the shipped `confidence.*` block and its strings.                                                                                                                                                                                                                                                                          |
+| Empty state heading                             | "No scenario simulated"                                                                                                                                                                                                                                                                                                                                                                                              |
+| Empty state body                                | "Select hosts (Server loss) or a site (Site loss) to simulate." (verbatim-pattern with shipped `empty.noSelection`)                                                                                                                                                                                                                                                                                                  |
+| Empty state — no stretched clusters (Site loss) | "Site loss needs at least one cluster you have declared stretched. None are declared in this snapshot." (factual, no verb) — see Open-Item Recommendation 1.                                                                                                                                                                                                                                                         |
+| Not-determinable sentinel                       | Em-dash `—` for any physical figure not computable from parsed RVTools columns (calc-from-real-data; never a fabricated 0).                                                                                                                                                                                                                                                                                          |
+| Error state                                     | No new error surface in this phase. Parse/load errors are owned by the existing app-shell error boundary + `sonner` toast — unchanged.                                                                                                                                                                                                                                                                               |
+| Destructive confirmation                        | None — there are NO destructive actions in this phase. DR failed-selection and ratio changes are reversible in-memory what-if inputs (D-06/D-10/G3); no confirmation dialogs, no red, no irreversible state.                                                                                                                                                                                                         |
 
 ---
 
 ## Component Inventory (reuse / evolve — do NOT redesign)
 
-| Component | Path | Action |
-|-----------|------|--------|
-| `ViewToggle` | `src/components/ViewToggle.tsx` | EXTEND: add 4th segment `'planning'`. `AppView` union → `'dashboard' \| 'inventory' \| 'hosts' \| 'planning'`; `VIEWS` array gets `'planning'`. Keep the `<fieldset role="group">` + `<legend className="sr-only">` + `aria-pressed` + Arrow Left/Right/Up/Down wraparound idiom verbatim. Active segment keeps the accent-gold styling (already coded). Add `nav.planning` i18n key (EN/FR). Do NOT build a new nav component. |
-| Planning view shell | NEW (in-app view-state branch, like P5 Hosts/cluster-detail; no router) | Hosts BOTH the planned-ratios control AND the reworked DR-sim panel on one screen, separated by the `2xl` vertical break. View-state lifted in the App/Dashboard shell (component state, like P5 `mode`/cluster-detail). Not a 2nd `useMemo`. |
-| Planned-ratios control | NEW; REPLACES the slider mechanism in `src/components/allocation/AllocationSliders.tsx` | Preset buttons + editable numeric `<input type="number">`. Reuse the shipped `<fieldset role="group">` + `aria-pressed` segmented idiom for the preset group VERBATIM (keep the `biome-ignore` + literal `role="group"` — CI grep gate asserts it). Preset values from the shipped `PRESETS` const (`1:1`/`4:1`/`8:1`/VDI `10:1`). Clicking a preset fills the numeric field; typing a value off-preset clears the active preset (factual, no error — verbatim with shipped behavior). Slider widgets are removed. State = Zustand inputs slice, in-memory only (D-06; no `useAllocationHash`, no URL-hash, no localStorage). |
-| `DrSimPanel` | `src/components/dr/DrSimPanel.tsx` | REWORK (do not rebuild): mode list `['host','cluster','vcenter']` → `['server','site']` (exactly two). Keep the mode `<fieldset role="group">`+`aria-pressed`+Arrow-key selector idiom verbatim (`bg-primary-600 text-white` active — unchanged). Keep the reversible/neutral checkbox + grey strike + "simulated failed" chip. ADD per-cluster host-count stepper for Server loss. ADD site picker for Site loss + the explicit "lost — no DR target" line. REMOVE the `confidence` block + strings. KEEP assumptions + caveats blocks. Re-point the single gold figure from vCPU to physical CPU+RAM. ADD the "Apply planned ratios to this scenario" affordance (not a 3rd tab). |
-| Measured reference | `src/components/dashboard/OperationalInsights.tsx` (P5, shipped) | READ-ONLY reference only. P6 does NOT restyle, duplicate, or move it. The Planning screen may show a small "measured" caption that points at it; the realized ratio value itself stays exactly where P5 put it. |
-| `Verdict` enum + `survivorVerdict` | `src/engines/drSim/allocate.ts` | REUSE for the physical survivor verdict (feed physical capacity vs surviving load). Factual-only by design — no UI restyle. |
-| Palette / `.panel` / sentinel | `src/index.css` | REUSE verbatim. No new tokens, no new component classes. |
+| Component                          | Path                                                                                    | Action                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| ---------------------------------- | --------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ViewToggle`                       | `src/components/ViewToggle.tsx`                                                         | EXTEND: add 4th segment `'planning'`.`AppView` union → `'dashboard' \| 'inventory' \| 'hosts' \| 'planning'`; `VIEWS` array gets `'planning'`. Keep the `<fieldset role="group">` + `<legend className="sr-only">` + `aria-pressed` + Arrow Left/Right/Up/Down wraparound idiom verbatim. Active segment keeps the accent-gold styling (already coded). Add `nav.planning` i18n key (EN/FR). Do NOT build a new nav component.                                                                                                                                                                                                                                                      |
+| Planning view shell                | NEW (in-app view-state branch, like P5 Hosts/cluster-detail; no router)                 | Hosts BOTH the planned-ratios control AND the reworked DR-sim panel on one screen, separated by the `2xl` vertical break. View-state lifted in the App/Dashboard shell (component state, like P5 `mode`/cluster-detail). Not a 2nd `useMemo`.                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| Planned-ratios control             | NEW; REPLACES the slider mechanism in `src/components/allocation/AllocationSliders.tsx` | Preset buttons + editable numeric `<input type="number">`. Reuse the shipped `<fieldset role="group">` + `aria-pressed` segmented idiom for the preset group VERBATIM (keep the `biome-ignore` + literal `role="group"` — CI grep gate asserts it). Preset values from the shipped `PRESETS` const (`1:1`/`4:1`/`8:1`/VDI `10:1`). Clicking a preset fills the numeric field; typing a value off-preset clears the active preset (factual, no error — verbatim with shipped behavior). Slider widgets are removed. State = Zustand inputs slice, in-memory only (D-06; no `useAllocationHash`, no URL-hash, no localStorage).                                                       |
+| `DrSimPanel`                       | `src/components/dr/DrSimPanel.tsx`                                                      | REWORK (do not rebuild): mode list `['host','cluster','vcenter']` → `['server','site']` (exactly two). Keep the mode `<fieldset role="group">`+`aria-pressed`+Arrow-key selector idiom verbatim (`bg-primary-600 text-white` active — unchanged). Keep the reversible/neutral checkbox + grey strike + "simulated failed" chip. ADD per-cluster host-count stepper for Server loss. ADD site picker for Site loss + the explicit "lost — no DR target" line. REMOVE the `confidence` block + strings. KEEP assumptions + caveats blocks. Re-point the single gold figure from vCPU to physical CPU+RAM. ADD the "Apply planned ratios to this scenario" affordance (not a 3rd tab). |
+| Measured reference                 | `src/components/dashboard/OperationalInsights.tsx` (P5, shipped)                        | READ-ONLY reference only. P6 does NOT restyle, duplicate, or move it. The Planning screen may show a small "measured" caption that points at it; the realized ratio value itself stays exactly where P5 put it.                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| `Verdict` enum + `survivorVerdict` | `src/engines/drSim/allocate.ts`                                                         | REUSE for the physical survivor verdict (feed physical capacity vs surviving load). Factual-only by design — no UI restyle.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| Palette / `.panel` / sentinel      | `src/index.css`                                                                         | REUSE verbatim. No new tokens, no new component classes.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 
 **Planning-screen focal hierarchy (screen-level):** On the single Planning screen the planned-ratios block sits ABOVE the reworked DR-sim panel, separated by the `2xl` vertical break — the user reads/sets inputs first (top), then sees the consequence (bottom). The DR result's single gold physical-impact headline figure (the evacuated/removed physical CPU+RAM total, Color reserved-item 2) is the primary visual reward after input — it is the one element the eye lands on in the result region. This stays consistent with the locked 60/30/10 + single-gold-figure rule: no second gold element is introduced (the active Planning ViewToggle segment is the only other accent use and lives in the top-level nav, not on this screen body).
 
@@ -160,9 +161,9 @@ RECOMMENDATION: **Show the `Verdict` enum WORD alongside the physical numbers** 
 
 ## Registry Safety
 
-| Registry | Blocks Used | Safety Gate |
-|----------|-------------|-------------|
-| none | none | not applicable — no `components.json`, no shadcn, no third-party registry. All components are hand-rolled from native elements + the locked Tailwind v4 palette. |
+| Registry | Blocks Used | Safety Gate                                                                                                                                                      |
+| -------- | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| none     | none        | not applicable — no `components.json`, no shadcn, no third-party registry. All components are hand-rolled from native elements + the locked Tailwind v4 palette. |
 
 ---
 

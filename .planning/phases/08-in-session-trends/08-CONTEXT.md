@@ -8,7 +8,7 @@
 
 Deliver the multi-snapshot temporal-trends capability: load 2–12 monthly RVTools
 snapshots together; aggregate **each snapshot separately** into a time series
-keyed on its real `capturedAt` date (a *temporal* X-axis, not categorical);
+keyed on its real `capturedAt` date (a _temporal_ X-axis, not categorical);
 render line charts of headline metrics, per-cluster sparklines on the dashboard
 cards, and a delta panel of what changed between consecutive snapshots; show
 per-timeline-point snapshot metadata (vCenter label + RVTools version).
@@ -21,7 +21,7 @@ only the aggregated series for those.
 **Explicitly OUT of P8:**
 
 - Any cross-session persistence of trends — refresh wipes everything; no
-  `localStorage` of dataset rows (this *is* TRD-05, not a side constraint).
+  `localStorage` of dataset rows (this _is_ TRD-05, not a side constraint).
 - HTML/PPTX export of the trends view (→ P10; P8 makes the view, not the export).
 - New chart infrastructure — reuse the Phase-2 `<Chart>` (SVG ECharts); no new
   charting component or renderer.
@@ -29,7 +29,7 @@ only the aggregated series for those.
 - Re-deciding cross-snapshot VM identity — Phase-4 `(VI SDK UUID,
   vm_bios_uuid)` keys + canonical collision-suffixed cluster names are the
   fixed identity basis (declared `Depends on: Phase 4`).
-</domain>
+  </domain>
 
 <decisions>
 ## Implementation Decisions
@@ -113,7 +113,7 @@ discretionary:
   Minor part); the **active estate (D-01) must never be released** while active;
   released snapshots lose drill/re-merge for that point — surface this factually
   if it changes available UI; still in-memory only (no spill to storage).
-</decisions>
+  </decisions>
 
 <canonical_refs>
 
@@ -160,7 +160,7 @@ discretionary:
 
 - None. P8 introduces **no** external data source — no runtime network (the
   privacy guard throws); all series values derive from parsed RVTools columns.
-</canonical_refs>
+  </canonical_refs>
 
 <code_context>
 
@@ -193,7 +193,7 @@ discretionary:
 - `SnapshotListSidebar` (callsite of `selectSortedSnapshots`-style derivation) —
   host for inline-editable `capturedAt` (D-03) and per-snapshot metadata; per
   store comment, sorted-snapshot derivations live at the callsite behind its
-  own `useMemo` — confirm this is the *list* memo, distinct from the
+  own `useMemo` — confirm this is the _list_ memo, distinct from the
   grep-gated single estate memo (not a violation).
 - `src/types/snapshot.ts` — `Snapshot.capturedAt/vCenterLabel/rvtoolsVersion`
   already exist (per-timeline-point metadata, criterion 6, is data already
@@ -222,7 +222,7 @@ discretionary:
   when ≥2 snapshots are loaded (TRD-03).
 - Snapshot list gains inline `capturedAt` edit (D-03) + factual
   inferred-order caption (D-05) + warm-up indicator (D-02).
-</code_context>
+  </code_context>
 
 <specifics>
 ## Specific Ideas
@@ -235,7 +235,7 @@ discretionary:
   latest month is the dashboard; older months are the trend tail.
 - Temporal axis must visibly show non-uniform spacing for real example dates
   (e.g. 2026-01-31, 2026-02-15, 2026-03-30) per success criterion 2.
-</specifics>
+  </specifics>
 
 <deferred>
 ## Deferred Ideas
@@ -255,5 +255,5 @@ None of the above are acted on in P8.
 
 ---
 
-*Phase: 08-in-session-trends*
-*Context gathered: 2026-05-17*
+_Phase: 08-in-session-trends_
+_Context gathered: 2026-05-17_

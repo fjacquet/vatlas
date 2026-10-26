@@ -1,49 +1,50 @@
 ---
+
 phase: 04-multi-vcenter-stretched-allocation-dr
 plan: 03
 subsystem: aggregation
 tags: [allocation-sliders, url-hash, codec, react-hook, i18n, security]
 
 requires:
-  - phase: 04-01
-    provides: merged estate + single-useMemo contract
-  - phase: 04-02
-    provides: extended ClusterAggregate / aggregateClusters param shape
-provides:
-  - "useAllocationHash — URL-hash-only ratio codec (bounded regex, clamp, replaceState, no localStorage)"
-  - "allocRatios threaded like `mode` through the single memo → buildEstateView → aggregateClusters"
-  - "ClusterAggregate.capacityVcpu / capacityRamMib (headroom verdict; vcpuPerPcpu untouched — ALC-04)"
-  - "AllocationSliders toolbar (native ranges + preset aria-pressed group) wired into GlobalDashboard"
-  - "alloc i18n namespace (EN/FR parity)"
-affects: [04-04-dr, 07-exports]
+- phase: 04-01
+  provides: merged estate + single-useMemo contract
+- phase: 04-02
+  provides: extended ClusterAggregate / aggregateClusters param shape
+  provides:
+- "useAllocationHash — URL-hash-only ratio codec (bounded regex, clamp, replaceState, no localStorage)"
+- "allocRatios threaded like `mode` through the single memo → buildEstateView → aggregateClusters"
+- "ClusterAggregate.capacityVcpu / capacityRamMib (headroom verdict; vcpuPerPcpu untouched — ALC-04)"
+- "AllocationSliders toolbar (native ranges + preset aria-pressed group) wired into GlobalDashboard"
+- "alloc i18n namespace (EN/FR parity)"
+  affects: [04-04-dr, 07-exports]
 
 tech-stack:
-  added: []
-  patterns:
-    - "URL-hash state-sync hook = inverted useTheme skeleton; event-driven (hashchange), explicitly NOT a useMemo"
-    - "allocRatios passed as a scalar arg (Open-Q 3), never a store mirror"
+added: []
+patterns:
+- "URL-hash state-sync hook = inverted useTheme skeleton; event-driven (hashchange), explicitly NOT a useMemo"
+- "allocRatios passed as a scalar arg (Open-Q 3), never a store mirror"
 
 key-files:
-  created:
-    - src/hooks/useAllocationHash.ts
-    - src/hooks/useAllocationHash.test.ts
-    - src/components/allocation/AllocationSliders.tsx
-    - src/i18n/locales/en/alloc.json
-    - src/i18n/locales/fr/alloc.json
+created:
+- src/hooks/useAllocationHash.ts
+- src/hooks/useAllocationHash.test.ts
+- src/components/allocation/AllocationSliders.tsx
+- src/i18n/locales/en/alloc.json
+- src/i18n/locales/fr/alloc.json
   modified:
-    - src/hooks/useEstateView.ts
-    - src/engines/aggregation/estateView.ts
-    - src/engines/aggregation/aggregateClusters.ts
-    - src/types/estate.ts
-    - src/components/dashboard/GlobalDashboard.tsx
-    - src/i18n/index.ts
+- src/hooks/useEstateView.ts
+- src/engines/aggregation/estateView.ts
+- src/engines/aggregation/aggregateClusters.ts
+- src/types/estate.ts
+- src/components/dashboard/GlobalDashboard.tsx
+- src/i18n/index.ts
 
 key-decisions:
-  - "vcpuPerPcpu deliberately UNCHANGED — ALC-04 satisfied structurally since Phase 2; guard test added"
-  - "Codec parses via String.prototype.match (not the RegExp match-method) to avoid a false-positive security hook"
+- "vcpuPerPcpu deliberately UNCHANGED — ALC-04 satisfied structurally since Phase 2; guard test added"
+- "Codec parses via String.prototype.match (not the RegExp match-method) to avoid a false-positive security hook"
 
 patterns-established:
-  - "Bounded anchored regex + 64-char length guard + numeric clamp + default-on-fail = the project's hash-parse contract"
+- "Bounded anchored regex + 64-char length guard + numeric clamp + default-on-fail = the project's hash-parse contract"
 
 requirements-completed: [ALC-01, ALC-02, ALC-03, ALC-04]
 

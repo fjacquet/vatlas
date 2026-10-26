@@ -1,56 +1,57 @@
 ---
+
 phase: 04-multi-vcenter-stretched-allocation-dr
 plan: 04
 subsystem: aggregation
 tags: [dr-simulation, scenario, zustand, react-i18next, what-if]
 
 requires:
-  - phase: 04-01
-    provides: merged estate (vCenter-loss filters by viSdkUuid)
-  - phase: 04-02
-    provides: per-site stretched reservation (subtracted on survivors)
-  - phase: 04-03
-    provides: allocRatios threaded through aggregateClusters (capacity verdict)
-provides:
-  - "engines/drSim: pure runScenario (host/cluster/vCenter loss) re-running shipped aggregation on survivors"
-  - "survivorVerdict absorbs|tight|overflows (worse-of CPU+RAM, no library)"
-  - "DrSimResult + DrScenario + Verdict types; EstateView.drSim + EstateView.vcenters"
-  - "scenario inputs-only store slice threaded through the single useEstateView memo"
-  - "DrSimPanel: 3-mode selector + reversible fail-select + before/after + evacuee + assumptions + caveats"
-  - "dr i18n namespace (EN/FR parity, 23 keys)"
-affects: [07-exports]
+- phase: 04-01
+  provides: merged estate (vCenter-loss filters by viSdkUuid)
+- phase: 04-02
+  provides: per-site stretched reservation (subtracted on survivors)
+- phase: 04-03
+  provides: allocRatios threaded through aggregateClusters (capacity verdict)
+  provides:
+- "engines/drSim: pure runScenario (host/cluster/vCenter loss) re-running shipped aggregation on survivors"
+- "survivorVerdict absorbs|tight|overflows (worse-of CPU+RAM, no library)"
+- "DrSimResult + DrScenario + Verdict types; EstateView.drSim + EstateView.vcenters"
+- "scenario inputs-only store slice threaded through the single useEstateView memo"
+- "DrSimPanel: 3-mode selector + reversible fail-select + before/after + evacuee + assumptions + caveats"
+- "dr i18n namespace (EN/FR parity, 23 keys)"
+  affects: [07-exports]
 
 tech-stack:
-  added: []
-  patterns:
-    - "DR = the shipped aggregation re-run on a survivor row subset (estateView compose pattern; never re-derive, never mutate)"
-    - "confidence + caveats[] (i18n keys) + always-visible assumptions panel = the #1-risk disclosure mitigation"
+added: []
+patterns:
+- "DR = the shipped aggregation re-run on a survivor row subset (estateView compose pattern; never re-derive, never mutate)"
+- "confidence + caveats[] (i18n keys) + always-visible assumptions panel = the #1-risk disclosure mitigation"
 
 key-files:
-  created:
-    - src/engines/drSim/allocate.ts
-    - src/engines/drSim/runScenario.ts
-    - src/engines/drSim/index.ts
-    - src/engines/drSim/allocate.test.ts
-    - src/engines/drSim/runScenario.test.ts
-    - src/components/dr/DrSimPanel.tsx
-    - src/i18n/locales/en/dr.json
-    - src/i18n/locales/fr/dr.json
+created:
+- src/engines/drSim/allocate.ts
+- src/engines/drSim/runScenario.ts
+- src/engines/drSim/index.ts
+- src/engines/drSim/allocate.test.ts
+- src/engines/drSim/runScenario.test.ts
+- src/components/dr/DrSimPanel.tsx
+- src/i18n/locales/en/dr.json
+- src/i18n/locales/fr/dr.json
   modified:
-    - src/types/estate.ts
-    - src/engines/aggregation/estateView.ts
-    - src/store/snapshotStore.ts
-    - src/hooks/useEstateView.ts
-    - src/components/dashboard/GlobalDashboard.tsx
-    - src/i18n/index.ts
+- src/types/estate.ts
+- src/engines/aggregation/estateView.ts
+- src/store/snapshotStore.ts
+- src/hooks/useEstateView.ts
+- src/components/dashboard/GlobalDashboard.tsx
+- src/i18n/index.ts
 
 key-decisions:
-  - "vCenter-loss folds the failed vCenter's clusters into the cluster filter so host rows (no viSdkUuid) drop consistently"
-  - "evacuee = before − after under one accounting mode (no separate re-derivation — DRY)"
-  - "EstateView gained vcenters[] (plan-in-scope: estate.ts/estateView.ts) so the vCenter-loss picker has labels"
+- "vCenter-loss folds the failed vCenter's clusters into the cluster filter so host rows (no viSdkUuid) drop consistently"
+- "evacuee = before − after under one accounting mode (no separate re-derivation — DRY)"
+- "EstateView gained vcenters[] (plan-in-scope: estate.ts/estateView.ts) so the vCenter-loss picker has labels"
 
 patterns-established:
-  - "drSim engine pure (no React/Zustand/Zod); survivor verdict consumes ratio-applied capacity from aggregateClusters"
+- "drSim engine pure (no React/Zustand/Zod); survivor verdict consumes ratio-applied capacity from aggregateClusters"
 
 requirements-completed: [DRS-01, DRS-02, DRS-03, DRS-04, DRS-05, DRS-06]
 

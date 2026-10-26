@@ -15,33 +15,33 @@
 
 ## File Classification
 
-| New/Modified File | Role | Data Flow | Closest Analog | Match Quality |
-|-------------------|------|-----------|----------------|---------------|
-| `src/engines/parser/adapters/rvtools.ts` (EXTEND) | parser/adapter | transform | self — `adaptRvtoolsVDatastore`/`adaptRvtoolsVPartition` + `adaptRvtools` OPTIONAL-sheet block | exact |
-| `src/engines/parser/schemas.ts` (EXTEND) | model/validation | transform | self — `VDatastoreRowSchema` / `VPartitionRowSchema` | exact |
-| `src/types/snapshot.ts` (EXTEND) | model | — | self — `VDatastoreRow` / `VPartitionRow` interfaces; `Snapshot` array fields | exact |
-| `src/types/vinfo.ts` (EXTEND) | model | — | self — `VInfoRow` (add `path: string`) | exact |
-| `src/engines/aggregation/vsanRelink.ts` (NEW) | engine | transform | `perDatastore.ts` (`datastoreCountByCluster` Map-accumulate join) | role+flow match |
-| `src/engines/aggregation/storageByX.ts` (NEW) | engine | transform | `perDatastore.ts` / `perEsx.ts` (Map-accumulate rollup) | role+flow match |
-| `src/engines/aggregation/thresholdFlags.ts` (NEW) | engine | transform | `guestData.ts` / `osFamily.ts` (pure projection helper) | role match |
-| `src/engines/aggregation/network.ts` (NEW) | engine | transform | `perDatastore.ts` (Map-accumulate rollup) | role+flow match |
-| `src/engines/aggregation/estateView.ts` (EXTEND) | engine/composition | transform | self — the established `const x = pureCall(...)` + extend return + `EMPTY_*` frozen | exact |
-| `src/engines/aggregation/index.ts` (EXTEND) | barrel | — | self — `export { perDatastore } from './perDatastore'` | exact |
-| `src/engines/snapshotMerge/mergeSnapshotsToEstate.ts` (EXTEND) | engine | transform | self — `outVdatastore`/`outVpartition` flatten loop + `MergedEstate` shape | exact |
-| `src/store/snapshotStore.ts` (EXTEND) | store | event-driven | self — `plannedRatios` slice + `setPlannedRatios` + selectors + `clearAll` | exact |
-| `src/hooks/useEstateView.ts` (EXTEND) | hook | request-response | self — `selectPlannedRatios` read + `opts` thread + memo dep | exact |
-| `src/components/ViewToggle.tsx` (EXTEND) | component/nav | event-driven | self — `AppView` union + `VIEWS` array (P5/P6/P7/P8 one-segment-per-commit) | exact |
-| `src/components/Chart.tsx` (EXTEND) | component | — | self — `echarts.use([...])` registry (one-line `TreemapChart` add) | exact |
-| `src/components/storage/StorageView.tsx` (NEW) | component/view-shell | request-response | `GlobalDashboard.tsx` / `HostsView.tsx` (single `useEstateView` consumer + lifted drill state) | role match |
-| `src/components/storage/StorageLensToggle.tsx` (NEW) | component/toggle | event-driven | `AccountingModeToggle.tsx` | exact |
-| `src/components/storage/DatastoreDetail.tsx` (NEW) | component/detail-drill | request-response | `cluster/ClusterDetail.tsx` | exact |
-| `src/components/storage/VmDetail.tsx` (NEW) | component/detail-drill | request-response | `cluster/ClusterDetail.tsx` | exact |
-| `src/components/storage/ThresholdConfig.tsx` (NEW) | component/config | event-driven | `planning/PlannedRatiosControl.tsx` | exact |
-| `src/components/network/NetworkView.tsx` (NEW) | component/view-shell | request-response | `HostsView.tsx` + `inventory/DatastoreTable.tsx` | role match |
-| `src/components/hosts/HostsView.tsx` (EXTEND) + ESX-detail | component/detail-drill | request-response | `cluster/ClusterDetail.tsx` (the drill shape) + `GlobalDashboard` drill wiring | exact |
-| `src/components/inventory/columns/*.ts` (NEW col defs) | config | — | `inventory/columns/datastoreColumns.ts` + `DatastoreTable.tsx` | exact |
-| `src/App.tsx` (EXTEND) | view router | event-driven | self — `activeView ===` chain | exact |
-| `src/i18n/index.ts` (EXTEND) + `locales/{en,fr}/{storage,network,alerts}.json` (NEW) | config/i18n | — | self — `NAMESPACES` + `resources` registration | exact |
+| New/Modified File                                                                    | Role                   | Data Flow        | Closest Analog                                                                                 | Match Quality   |
+| ------------------------------------------------------------------------------------ | ---------------------- | ---------------- | ---------------------------------------------------------------------------------------------- | --------------- |
+| `src/engines/parser/adapters/rvtools.ts` (EXTEND)                                    | parser/adapter         | transform        | self — `adaptRvtoolsVDatastore`/`adaptRvtoolsVPartition` + `adaptRvtools` OPTIONAL-sheet block | exact           |
+| `src/engines/parser/schemas.ts` (EXTEND)                                             | model/validation       | transform        | self — `VDatastoreRowSchema` / `VPartitionRowSchema`                                           | exact           |
+| `src/types/snapshot.ts` (EXTEND)                                                     | model                  | —                | self — `VDatastoreRow` / `VPartitionRow` interfaces; `Snapshot` array fields                   | exact           |
+| `src/types/vinfo.ts` (EXTEND)                                                        | model                  | —                | self — `VInfoRow` (add `path: string`)                                                         | exact           |
+| `src/engines/aggregation/vsanRelink.ts` (NEW)                                        | engine                 | transform        | `perDatastore.ts` (`datastoreCountByCluster` Map-accumulate join)                              | role+flow match |
+| `src/engines/aggregation/storageByX.ts` (NEW)                                        | engine                 | transform        | `perDatastore.ts` / `perEsx.ts` (Map-accumulate rollup)                                        | role+flow match |
+| `src/engines/aggregation/thresholdFlags.ts` (NEW)                                    | engine                 | transform        | `guestData.ts` / `osFamily.ts` (pure projection helper)                                        | role match      |
+| `src/engines/aggregation/network.ts` (NEW)                                           | engine                 | transform        | `perDatastore.ts` (Map-accumulate rollup)                                                      | role+flow match |
+| `src/engines/aggregation/estateView.ts` (EXTEND)                                     | engine/composition     | transform        | self — the established `const x = pureCall(...)` + extend return + `EMPTY_*` frozen            | exact           |
+| `src/engines/aggregation/index.ts` (EXTEND)                                          | barrel                 | —                | self — `export { perDatastore } from './perDatastore'`                                         | exact           |
+| `src/engines/snapshotMerge/mergeSnapshotsToEstate.ts` (EXTEND)                       | engine                 | transform        | self — `outVdatastore`/`outVpartition` flatten loop + `MergedEstate` shape                     | exact           |
+| `src/store/snapshotStore.ts` (EXTEND)                                                | store                  | event-driven     | self — `plannedRatios` slice + `setPlannedRatios` + selectors + `clearAll`                     | exact           |
+| `src/hooks/useEstateView.ts` (EXTEND)                                                | hook                   | request-response | self — `selectPlannedRatios` read + `opts` thread + memo dep                                   | exact           |
+| `src/components/ViewToggle.tsx` (EXTEND)                                             | component/nav          | event-driven     | self — `AppView` union + `VIEWS` array (P5/P6/P7/P8 one-segment-per-commit)                    | exact           |
+| `src/components/Chart.tsx` (EXTEND)                                                  | component              | —                | self — `echarts.use([...])` registry (one-line `TreemapChart` add)                             | exact           |
+| `src/components/storage/StorageView.tsx` (NEW)                                       | component/view-shell   | request-response | `GlobalDashboard.tsx` / `HostsView.tsx` (single `useEstateView` consumer + lifted drill state) | role match      |
+| `src/components/storage/StorageLensToggle.tsx` (NEW)                                 | component/toggle       | event-driven     | `AccountingModeToggle.tsx`                                                                     | exact           |
+| `src/components/storage/DatastoreDetail.tsx` (NEW)                                   | component/detail-drill | request-response | `cluster/ClusterDetail.tsx`                                                                    | exact           |
+| `src/components/storage/VmDetail.tsx` (NEW)                                          | component/detail-drill | request-response | `cluster/ClusterDetail.tsx`                                                                    | exact           |
+| `src/components/storage/ThresholdConfig.tsx` (NEW)                                   | component/config       | event-driven     | `planning/PlannedRatiosControl.tsx`                                                            | exact           |
+| `src/components/network/NetworkView.tsx` (NEW)                                       | component/view-shell   | request-response | `HostsView.tsx` + `inventory/DatastoreTable.tsx`                                               | role match      |
+| `src/components/hosts/HostsView.tsx` (EXTEND) + ESX-detail                           | component/detail-drill | request-response | `cluster/ClusterDetail.tsx` (the drill shape) + `GlobalDashboard` drill wiring                 | exact           |
+| `src/components/inventory/columns/*.ts` (NEW col defs)                               | config                 | —                | `inventory/columns/datastoreColumns.ts` + `DatastoreTable.tsx`                                 | exact           |
+| `src/App.tsx` (EXTEND)                                                               | view router            | event-driven     | self — `activeView ===` chain                                                                  | exact           |
+| `src/i18n/index.ts` (EXTEND) + `locales/{en,fr}/{storage,network,alerts}.json` (NEW) | config/i18n            | —                | self — `NAMESPACES` + `resources` registration                                                 | exact           |
 
 ---
 
@@ -87,7 +87,7 @@ The four new network sheets are OPTIONAL — copy this `findSheet(...)` -> `if (
 export const VDatastoreRowSchema: z.ZodType<VDatastoreRow> = z.object({
   name: z.string().trim().min(1),
   capacityMib: MibSchema,
-  clusterName: z.string().trim(),   // empty allowed — do NOT .min(1) optional text
+  clusterName: z.string().trim(), // empty allowed — do NOT .min(1) optional text
 })
 ```
 
@@ -114,12 +114,13 @@ New `VNetworkRowSchema`/`VSwitchRowSchema`/`VDvSwitchRowSchema`/`VDvPortRowSchem
 **The relink-specific join** (empirically derived, 09-RESEARCH Pattern 5 — `vInfo.Path` is the key, NOT `vDisk."Disk Path"`):
 
 ```ts
-const BRACKET = /^\[([^\]]+)\]/                         // anchored, linear — do NOT rewrite into a backtracking pattern (ReDoS)
+const BRACKET = /^\[([^\]]+)\]/ // anchored, linear — do NOT rewrite into a backtracking pattern (ReDoS)
 const dsToClusters = new Map<string, Set<string>>()
 for (const vm of merged.vinfo) {
-  const m = BRACKET.exec(vm.path ?? '')                 // vInfo.Path, e.g. "[SITEL12_SILVER_08] vm/vm.vmx"
-  if (!m) continue                                       // ~2% unparseable — skip, factual
-  const ds = m[1].trim(), cl = vm.cluster.trim()
+  const m = BRACKET.exec(vm.path ?? '') // vInfo.Path, e.g. "[SITEL12_SILVER_08] vm/vm.vmx"
+  if (!m) continue // ~2% unparseable — skip, factual
+  const ds = m[1].trim(),
+    cl = vm.cluster.trim()
   if (!cl) continue
   ;(dsToClusters.get(ds) ?? dsToClusters.set(ds, new Set()).get(ds)!).add(cl)
 }
@@ -225,8 +226,8 @@ Add `const thresholds = useSnapshotStore(selectThresholds)`, pass `thresholds` i
 **Analog:** self (lines 3-5 — the P5/P6/P7/P8 one-segment-per-commit precedent).
 
 ```ts
-export type AppView = 'dashboard'|'inventory'|'hosts'|'planning'|'eos'|'trends'   // line 3 — add 'storage'|'network'
-const VIEWS = ['dashboard','inventory','hosts','planning','eos','trends'] as const // line 5 — append 'storage','network'
+export type AppView = 'dashboard' | 'inventory' | 'hosts' | 'planning' | 'eos' | 'trends' // line 3 — add 'storage'|'network'
+const VIEWS = ['dashboard', 'inventory', 'hosts', 'planning', 'eos', 'trends'] as const // line 5 — append 'storage','network'
 ```
 
 Add `'storage'` then `'network'` to BOTH the union (line 3) and the `VIEWS` array (line 5), in order. NO new component — the `<fieldset role="group">` + `<legend sr-only>` + `map(button aria-pressed)` + Arrow-wraparound + the literal `biome-ignore`/`role="group"` (lines 48-55, grep-gated) are reused unchanged. Labels: ViewToggle reads `t('nav.<view>')` from the **`inventory`** namespace (lines 28, 70) -> add `nav.storage`/`nav.network` to `locales/{en,fr}/inventory.json` (NOT a new namespace). Active segment is gold `bg-accent-500 text-surface-900` (line 65) — UI-SPEC section Color reserved-list rule, unchanged.
@@ -263,7 +264,9 @@ Copy the `<section className="panel flex flex-col gap-4">` + `<h2 text-xl font-s
 const Row = ({ label, value }: { label: string; value: string }) => (
   <div className="flex items-baseline justify-between gap-3 border-b border-slate-100 py-1.5 dark:border-surface-800">
     <span className="text-sm text-slate-600 dark:text-slate-400">{label}</span>
-    <span className="font-mono text-sm font-semibold tabular-nums text-slate-900 dark:text-slate-100">{value}</span>
+    <span className="font-mono text-sm font-semibold tabular-nums text-slate-900 dark:text-slate-100">
+      {value}
+    </span>
   </div>
 )
 ```

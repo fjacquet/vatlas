@@ -28,21 +28,21 @@ The reference tool is the legacy RVTools Analyser desktop application (Windows, 
 
 ### 2.2 Non-Goals (explicit Out of Scope)
 
-| Excluded | Reason |
-|----------|--------|
-| Live Optics ingestion | RVTools-only is an explicit narrowing vs. vsizer; reduces parser surface |
-| Cross-session persistence (database / IndexedDB / OPFS / `localStorage` of dataset rows) | Breaks the privacy invariant — refresh = data gone |
-| Backend / server / file upload | 100% client-side is a hard product invariant |
-| Telemetry of parsed contents (even anonymous) | Same privacy invariant |
-| Editorial recommendations in reports | vatlas carries numbers only — narrative stays with the presenter |
-| Real-time vCenter API connection | RVTools workbook is the only input |
-| Right-sizing recommendation engine | RVTools snapshots lack peak-active data |
-| Saved scenarios / accounts / shared dashboards | Requires backend, breaks privacy invariant |
-| Mobile / touch-first UX | 10k+ row tables are not a mobile use case |
-| In-browser editing of inventory rows | RVTools is source of truth |
-| Source-map upload in CI | Could leak repo internals |
-| Service worker | Increases attack surface; no value for ephemeral data |
-| `.zip` bundle ingestion of multiple workbooks | Deferred to v2 (ZIP-01); not in v1 |
+| Excluded                                                                                 | Reason                                                                   |
+| ---------------------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| Live Optics ingestion                                                                    | RVTools-only is an explicit narrowing vs. vsizer; reduces parser surface |
+| Cross-session persistence (database / IndexedDB / OPFS / `localStorage` of dataset rows) | Breaks the privacy invariant — refresh = data gone                       |
+| Backend / server / file upload                                                           | 100% client-side is a hard product invariant                             |
+| Telemetry of parsed contents (even anonymous)                                            | Same privacy invariant                                                   |
+| Editorial recommendations in reports                                                     | vatlas carries numbers only — narrative stays with the presenter         |
+| Real-time vCenter API connection                                                         | RVTools workbook is the only input                                       |
+| Right-sizing recommendation engine                                                       | RVTools snapshots lack peak-active data                                  |
+| Saved scenarios / accounts / shared dashboards                                           | Requires backend, breaks privacy invariant                               |
+| Mobile / touch-first UX                                                                  | 10k+ row tables are not a mobile use case                                |
+| In-browser editing of inventory rows                                                     | RVTools is source of truth                                               |
+| Source-map upload in CI                                                                  | Could leak repo internals                                                |
+| Service worker                                                                           | Increases attack surface; no value for ephemeral data                    |
+| `.zip` bundle ingestion of multiple workbooks                                            | Deferred to v2 (ZIP-01); not in v1                                       |
 
 ---
 
@@ -87,7 +87,6 @@ Status: all 6 requirements Complete.
 ### 4.4 Multi-vCenter Merge & Factual Labels — Phase 4 (Shipped 2026-05-17, re-derived)
 
 > Phase 4 was redefined under the analytics-core replan. The validated merge engine spine is kept as baseline; its allocation and DR-UI parts moved to Phase 6; stretched was reworked per UAT decision G1 (ADR-0022).
-
 - **MVC-01..04:** Multiple RVTools workbooks from different vCenters treated as one logical estate, keyed on `(VI SDK UUID, vm_bios_uuid)` for cross-vCenter vMotion dedupe; visual suffix (no silent merge) on colliding cluster names; per-snapshot vCenter label and RVTools version in the snapshot list.
 - **STR-01..03:** User toggles a cluster's "Étendu / Stretched" pill; per-site CPU/RAM reservation applied factually (asymmetric splits honoured, e.g. 6+4) when fault-domain data is present; provenance shown factually as "detected" vs "assumed" — no high/medium/low verdict, no warning chip. The former STR-04 low-confidence-chip requirement is retired and merged into the factual STR-03.
 
@@ -104,7 +103,6 @@ Status: all 5 requirements Complete.
 ### 4.6 Allocation / Capacity Planning — Phase 6 (Shipped 2026-05-17, re-derived)
 
 > The original ALC-01..04 ("Allocated Resources") slider/preset/URL-hash design was rejected at Phase-4 UAT (decision G2 / OPEN-1) and is retired (ADR-0020). The realized "measured" consolidation ratio is satisfied by Phase 5 RCI-01 (calculated, no input); Phase 6 builds no new realized-ratio UI (DRY). The capacity-planning what-if is the new, explicitly-distinct surface (PLN-01..04). The killed slider / URL-hash mechanism is forbidden to reintroduce.
-
 - **PLN-01:** A separate, explicitly-labelled "Capacity planning — what-if (planned)" surface as a 4th top-level ViewToggle segment, structurally distinct from the realized "measured" value and never overwriting or hiding it.
 - **PLN-02:** Planned CPU and RAM ratios via named preset buttons (CPU 1:1 / 4:1 / 8:1 / VDI 10:1; RAM same pattern) filling an editable numeric field; defaults CPU 4:1 / RAM 1:1; no slider widget.
 - **PLN-03:** Planned ratios held in-memory only (Zustand inputs slice); no URL-hash codec, no `localStorage` — refresh = data gone.
@@ -115,7 +113,6 @@ Status: PLN-01..04 Complete. (Old ALC-01..04 retired/re-derived.)
 ### 4.7 Disaster Recovery Simulation — Phase 6 (Shipped 2026-05-17, re-derived)
 
 > The original DRS-01..06 four-mode, vCPU-impact, confidence-graded design was rejected at Phase-4 UAT (decision G3 / D-09 / D-10) and re-derived as DRX-01..06 (ADR-0021). Cluster-loss (old DRS-02) and vCenter-loss (old DRS-03) are dropped. The high/medium/low confidence clause is dropped entirely. The validated `engines/drSim` engine is evolved, not rewritten.
-
 - **DRX-01:** Server loss — individual named-host multi-select AND a per-cluster "N of M hosts in cluster X" stepper; reversible/neutral failed-selection UI (no red, no alarm icon, no confirmation dialog).
 - **DRX-02:** Site loss — site = the fault-domain value of clusters the user declared stretched (Site A / Site B); the engine removes that site's physical hosts; non-stretched workload physically at the lost site is surfaced as an explicit factual "lost — no DR target" line; no fault-domain metadata ⇒ symmetric 50% split.
 - **DRX-03:** DR impact reported as physical CPU removed (GHz / cores) + physical RAM removed (MiB) — never vCPU; per-survivor verdict against physical headroom using the reused `Verdict` enum, rendered as a factual word + numbers with no color/traffic-light.
@@ -153,19 +150,19 @@ Status: not started (Phase 10).
 
 ### 4.12 Requirement Status Summary
 
-| Area | IDs | Phase | Status |
-|------|-----|-------|--------|
-| Foundation / Parser / Privacy | FND-01..05, PAR-01..05, PRV-01..03 | 1 | Shipped 2026-05-15 |
-| Aggregation / Dashboard / Viz | DSH-01..06, VIZ-01..03 | 2 | Shipped 2026-05-16 |
-| Inventory Navigation | INV-01..06 | 3 | Shipped 2026-05-16 |
-| Multi-vCenter / Stretched | MVC-01..04, STR-01..03 | 4 | Shipped 2026-05-17 (re-derived) |
-| Rich Cluster / Host / ESX Intelligence | RCI-01..05 | 5 | Shipped 2026-05-17 |
-| Capacity Planning (what-if) | PLN-01..04 | 6 | Shipped 2026-05-17 (re-derived; old ALC-01..04 retired) |
-| DR Simulation | DRX-01..06 | 6 | Shipped 2026-05-17 (re-derived; old DRS-01..06 retired/dropped) |
-| OS End-of-Support Forecast | EOS-01..06 | 7 | Planned |
-| In-Session Trends | TRD-01..05 | 8 | Planned |
-| Storage / Network / Detailed Views | TBD (RVTools-Analyser #10/#12/#14) | 9 | Planned (scope per OPEN-2/3) |
-| HTML / PPTX Exports + Deploy | HTM-01..05, PPT-01..04, DEP-01..02 | 10 | Planned |
+| Area                                   | IDs                                | Phase | Status                                                          |
+| -------------------------------------- | ---------------------------------- | ----- | --------------------------------------------------------------- |
+| Foundation / Parser / Privacy          | FND-01..05, PAR-01..05, PRV-01..03 | 1     | Shipped 2026-05-15                                              |
+| Aggregation / Dashboard / Viz          | DSH-01..06, VIZ-01..03             | 2     | Shipped 2026-05-16                                              |
+| Inventory Navigation                   | INV-01..06                         | 3     | Shipped 2026-05-16                                              |
+| Multi-vCenter / Stretched              | MVC-01..04, STR-01..03             | 4     | Shipped 2026-05-17 (re-derived)                                 |
+| Rich Cluster / Host / ESX Intelligence | RCI-01..05                         | 5     | Shipped 2026-05-17                                              |
+| Capacity Planning (what-if)            | PLN-01..04                         | 6     | Shipped 2026-05-17 (re-derived; old ALC-01..04 retired)         |
+| DR Simulation                          | DRX-01..06                         | 6     | Shipped 2026-05-17 (re-derived; old DRS-01..06 retired/dropped) |
+| OS End-of-Support Forecast             | EOS-01..06                         | 7     | Planned                                                         |
+| In-Session Trends                      | TRD-01..05                         | 8     | Planned                                                         |
+| Storage / Network / Detailed Views     | TBD (RVTools-Analyser #10/#12/#14) | 9     | Planned (scope per OPEN-2/3)                                    |
+| HTML / PPTX Exports + Deploy           | HTM-01..05, PPT-01..04, DEP-01..02 | 10    | Planned                                                         |
 
 v1 requirement total: 68 (counted in `.planning/REQUIREMENTS.md`). 6 of 10 phases shipped.
 

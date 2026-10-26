@@ -36,13 +36,13 @@ What vatlas parses **today** (from `vInfo` only): configured `vcpu`, configured 
 
 What it does **not** parse today, but RVTools provides:
 
-| Signal | RVTools sheet · column | Notes |
-|---|---|---|
-| Active memory | `vMemory` · Active | working-set estimate (MiB) |
-| Consumed memory | `vMemory` · Consumed | host RAM backing the VM (≈ vInfo "In Use") |
-| Ballooned memory | `vMemory` · Ballooned/Balloon | host reclaiming guest RAM (MiB) |
-| Swapped memory | `vMemory` · Swapped | (MiB) |
-| CPU usage | `vCPU` · Overall CPU usage | current usage (MHz) |
+| Signal           | RVTools sheet · column        | Notes                                      |
+| ---------------- | ----------------------------- | ------------------------------------------ |
+| Active memory    | `vMemory` · Active            | working-set estimate (MiB)                 |
+| Consumed memory  | `vMemory` · Consumed          | host RAM backing the VM (≈ vInfo "In Use") |
+| Ballooned memory | `vMemory` · Ballooned/Balloon | host reclaiming guest RAM (MiB)            |
+| Swapped memory   | `vMemory` · Swapped           | (MiB)                                      |
+| CPU usage        | `vCPU` · Overall CPU usage    | current usage (MHz)                        |
 
 CPU utilization denominator uses `vcpu × host-core-MHz` (`VHostRow.speedMhz`, already parsed),
 **not** any RVTools "Max CPU" column (whose semantics are ambiguous across versions).
@@ -55,17 +55,17 @@ Sources consulted:
 
 ## Decisions (settled during brainstorm)
 
-| Decision | Choice |
-|---|---|
-| Parser scope | Parse **`vMemory` + `vCPU`** |
-| Labeling | **Neutral measurement** + editable thresholds (ADR-0012; no verdict adjectives) |
-| Placement | **Dedicated "Right-sizing" view + new PPTX slide** |
-| Memory basis | Show **Active% and Consumed%**; threshold on **Active** |
-| Data model | **Parallel `VmUsage` record** (config stays on `VInfoRow`) |
-| "max" semantics | **Max across loaded snapshots**; single export = single reading |
-| Powered state | **Powered-on VMs only** |
-| HTML report | **Excluded** — web + PPTX only |
-| de + it | **Folded into this spec** (Workstream B); right-sizing ships in 4 locales |
+| Decision        | Choice                                                                          |
+| --------------- | ------------------------------------------------------------------------------- |
+| Parser scope    | Parse **`vMemory` + `vCPU`**                                                    |
+| Labeling        | **Neutral measurement** + editable thresholds (ADR-0012; no verdict adjectives) |
+| Placement       | **Dedicated "Right-sizing" view + new PPTX slide**                              |
+| Memory basis    | Show **Active% and Consumed%**; threshold on **Active**                         |
+| Data model      | **Parallel `VmUsage` record** (config stays on `VInfoRow`)                      |
+| "max" semantics | **Max across loaded snapshots**; single export = single reading                 |
+| Powered state   | **Powered-on VMs only**                                                         |
+| HTML report     | **Excluded** — web + PPTX only                                                  |
+| de + it         | **Folded into this spec** (Workstream B); right-sizing ships in 4 locales       |
 
 ---
 
@@ -91,12 +91,12 @@ Each category is evaluated **per-resource** (CPU and/or memory, independently), 
 - CPU: `cpuReadinessPercent > 5 %` — **reuses** `CONTENTION_THRESHOLDS.warning`; **no new
   constant**
 
-**Conceptual split (never collapsed):** Oversized/Undersized measure *allocation vs
-utilization*; Stressed measures *pressure symptoms*. A VM can be Undersized **and** Stressed —
+**Conceptual split (never collapsed):** Oversized/Undersized measure _allocation vs
+utilization_; Stressed measures _pressure symptoms_. A VM can be Undersized **and** Stressed —
 both flags show.
 
 **Binding caveats (ADR-0012 discipline):**
-- A VM whose usage cell is **absent/blank** is *"not derivable"* — excluded from every flag,
+- A VM whose usage cell is **absent/blank** is _"not derivable"_ — excluded from every flag,
   **never** coerced to `0 %` (which would falsely mark it oversized). Same null discipline
   `parseReadinessCell` / `cpuReadinessPercent` already use.
 - **Point-in-time honesty:** with a single snapshot the "max" is one sample; the view + slide
@@ -228,12 +228,11 @@ Trends / Planning). Built from existing primitives — no new table/toggle primi
 ```
 > The words "Oversized/Undersized/Stressed" in this sketch are **shorthand** for
 > the neutral visible strings defined below — they are not the literal UI labels.
-
 - **VM table:** reuse `components/inventory/DataTable` + CSV export (`VmTable` pattern). New
   column `id`s require `inventory:col.<id>` keys in **every** locale (the DataTable header
   gotcha). `<thead>` matches the flex `<tbody>` layout.
-- **Visible category labels are neutral** measured phrasings (e.g. *"Allocation ≫ usage"*,
-  *"Usage near allocation"*, *"Ballooning / CPU-ready"*). `oversized/undersized/stressed` are
+- **Visible category labels are neutral** measured phrasings (e.g. _"Allocation ≫ usage"_,
+  _"Usage near allocation"_, _"Ballooning / CPU-ready"_). `oversized/undersized/stressed` are
   code identifiers only.
 - **Filter toggles:** the `ThemeToggle` `<fieldset role="group">` + `aria-pressed` idiom.
 - **Threshold controls:** number inputs bound to the store threshold slice (in-memory; refresh

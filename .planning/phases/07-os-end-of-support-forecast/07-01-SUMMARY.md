@@ -1,44 +1,45 @@
 ---
+
 phase: 07-os-end-of-support-forecast
 plan: 01
 subsystem: infra
 tags: [zod, endoflife.date, eos, ci, build-time-data]
 
 requires:
-  - phase: 02-aggregation
-    provides: engines-stay-pure / Zod-only-at-boundary precedent (parser/schemas.ts)
-provides:
-  - Committed, Zod-validated endoflife.date snapshot (src/engines/eos/catalogue.json, 11 products)
-  - EosCatalogueSchema + EosCatalogue type — the single zod importer under src/engines/eos/
-  - loadEosCatalogue() parse-once boundary
-  - npm run sync:eos maintainer fetcher (fail-closed, off the deploy path)
-  - Warn-only CI freshness step (>90d ::warning::, never blocks)
-affects: [07-02 engines consume EosCatalogue, 07-03 EstateView wiring + freshness UI]
+- phase: 02-aggregation
+  provides: engines-stay-pure / Zod-only-at-boundary precedent (parser/schemas.ts)
+  provides:
+- Committed, Zod-validated endoflife.date snapshot (src/engines/eos/catalogue.json, 11 products)
+- EosCatalogueSchema + EosCatalogue type — the single zod importer under src/engines/eos/
+- loadEosCatalogue() parse-once boundary
+- npm run sync:eos maintainer fetcher (fail-closed, off the deploy path)
+- Warn-only CI freshness step (>90d ::warning::, never blocks)
+  affects: [07-02 engines consume EosCatalogue, 07-03 EstateView wiring + freshness UI]
 
 tech-stack:
-  added: []
-  patterns:
-    - "Zod only at the catalogue boundary (mirrors parser/schemas.ts)"
-    - "Build-time third-party data: maintainer sync script decoupled from the CI deploy"
+added: []
+patterns:
+- "Zod only at the catalogue boundary (mirrors parser/schemas.ts)"
+- "Build-time third-party data: maintainer sync script decoupled from the CI deploy"
 
 key-files:
-  created:
-    - src/engines/eos/catalogueSchema.ts
-    - src/engines/eos/catalogue.ts
-    - src/engines/eos/catalogue.json
-    - src/engines/eos/catalogue.test.ts
-    - scripts/sync-eos.mjs
+created:
+- src/engines/eos/catalogueSchema.ts
+- src/engines/eos/catalogue.ts
+- src/engines/eos/catalogue.json
+- src/engines/eos/catalogue.test.ts
+- scripts/sync-eos.mjs
   modified:
-    - package.json
-    - .github/workflows/static.yml
+- package.json
+- .github/workflows/static.yml
 
 key-decisions:
-  - "D-01: catalogue is a static import Zod-validated once at catalogue.ts; zero runtime fetch"
-  - "D-02: sync:eos fail-closed (non-zero, no write); CI freshness is exit-0 warn-only — outage never blocks deploy"
-  - "D-04: single standard-support EOL model — no paid-tier fields in schema, snapshot, or sync projection"
+- "D-01: catalogue is a static import Zod-validated once at catalogue.ts; zero runtime fetch"
+- "D-02: sync:eos fail-closed (non-zero, no write); CI freshness is exit-0 warn-only — outage never blocks deploy"
+- "D-04: single standard-support EOL model — no paid-tier fields in schema, snapshot, or sync projection"
 
 patterns-established:
-  - "Pattern: EOS catalogue boundary = the parser-schema boundary applied to bundled third-party data"
+- "Pattern: EOS catalogue boundary = the parser-schema boundary applied to bundled third-party data"
 
 requirements-completed: [EOS-06]
 

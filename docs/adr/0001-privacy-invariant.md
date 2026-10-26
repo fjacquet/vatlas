@@ -23,7 +23,7 @@ by a dependency or a contributor.
    synchronously on any non-same-origin URL (`PrivacyViolation`) and on any
    cleartext WebSocket scheme — only `wss:` is accepted
    (`InsecureTransportViolation`, CWE-319). For WebSocket the transport-security
-   check runs *before* the origin check, so a cleartext `ws://localhost:port`
+   check runs _before_ the origin check, so a cleartext `ws://localhost:port`
    dev socket is reported as `InsecureTransportViolation`, not mislabelled as a
    cross-origin `PrivacyViolation`.
 2. `index.html` carries
@@ -34,7 +34,7 @@ by a dependency or a contributor.
 3. A CI step `node scripts/check-supply-chain.mjs` denies all known telemetry
    SDKs (`@sentry/*`, `posthog-*`, `@amplitude/*`, `mixpanel*`, `@datadog/*`,
    `logrocket*`, `@bugsnag/*`, `@segment/*`, `fullstory*`, `@hotjar/*`, etc.)
-   and verifies the SheetJS tarball pin. It runs *before* `npm ci` so a tainted
+   and verifies the SheetJS tarball pin. It runs _before_ `npm ci` so a tainted
    `package.json` never installs in CI, and as a local `prebuild` hook.
 4. The Zustand store holds no `persist` middleware. Only `vatlas-lang` (locale
    code) and `vatlas-theme` (theme preference) may write to `localStorage`. No
@@ -79,7 +79,7 @@ monkey-patch, CI denylist — are intentionally redundant.
 
 v1.0 forbade service workers outright. v2.0 makes vatlas installable and fully
 offline, which is impossible without a service worker. The objection in
-"Alternatives Considered" is specific — *register, intercept, and POST data* —
+"Alternatives Considered" is specific — _register, intercept, and POST data_ —
 and is neutralized by a tightly-bounded envelope rather than waived:
 
 1. **Own code, not a black box.** `vite-plugin-pwa` is used in `injectManifest`
@@ -104,7 +104,7 @@ and is neutralized by a tightly-bounded envelope rather than waived:
    `vite-plugin-pwa` + `workbox-*`, denies any other service-worker-named
    dependency, and — when `vite-plugin-pwa` is present — fails the build unless
    `src/sw.ts` exists and imports the privacy guard first. The three-layer model
-   (CSP, runtime guard, CI denylist) is *extended into the SW*, not weakened.
+   (CSP, runtime guard, CI denylist) is _extended into the SW_, not weakened.
 
 This envelope is binding: any change that adds `runtimeCaching`, removes the
 guard-first import, or caches a non-same-origin response re-opens the original

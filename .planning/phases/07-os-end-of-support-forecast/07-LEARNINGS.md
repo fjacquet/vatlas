@@ -1,16 +1,18 @@
 ---
+
 phase: 07
 phase_name: "os-end-of-support-forecast"
 project: "vatlas"
 generated: "2026-05-17"
 counts:
-  decisions: 6
-  lessons: 5
-  patterns: 5
-  surprises: 4
+decisions: 6
+lessons: 5
+patterns: 5
+surprises: 4
 missing_artifacts:
-  - "07-VERIFICATION.md"
-  - "07-UAT.md"
+- "07-VERIFICATION.md"
+- "07-UAT.md"
+
 ---
 
 # Phase 07 Learnings: os-end-of-support-forecast
@@ -21,7 +23,7 @@ missing_artifacts:
 
 A maintainer-run `npm run sync:eos` regenerates a committed `catalogue.json`; CI only Zod-validates it and emits a warn-only freshness annotation. The deploy path never fetches.
 
-**Rationale:** Makes "third-party outage never blocks deploy" (D-02) a *structural* guarantee rather than error-handling — the deploy can't fetch, so it can't fail on a fetch. Decided on the determinism-vs-freshness tradeoff (D-01 was Claude's discretion).
+**Rationale:** Makes "third-party outage never blocks deploy" (D-02) a _structural_ guarantee rather than error-handling — the deploy can't fetch, so it can't fail on a fetch. Decided on the determinism-vs-freshness tradeoff (D-01 was Claude's discretion).
 **Source:** 07-01-PLAN.md, 07-01-SUMMARY.md, 07-RESEARCH.md
 
 ### Single standard-support EOL model (no paid-tier fields)
@@ -65,7 +67,7 @@ The engine produces a disjoint 7-bucket partition that sums exactly to the VM to
 
 ### `grep -c "<token>" == 0` acceptance gates trip on doc-comments that name the forbidden token
 
-Multiple plans gated on a literal token count being 0 (paid-tier field names, `new Date(`, the catalogue domain, VM-OS field names, the React raw-HTML prop). Doc-comments documenting a token's *deliberate absence* contain the token and fail the gate.
+Multiple plans gated on a literal token count being 0 (paid-tier field names, `new Date(`, the catalogue domain, VM-OS field names, the React raw-HTML prop). Doc-comments documenting a token's _deliberate absence_ contain the token and fail the gate.
 
 **Context:** Recurred in 07-01, 07-02, 07-03 and again in the SUMMARY/LEARNINGS docs (a security hook blocks the raw-HTML token in prose too). Each fix reworded the comment to preserve the rationale without the literal token — pure documentation change, no behavior impact. Future plans: write grep-gated absence comments without the literal token, or gate on source AST not raw grep.
 **Source:** 07-01-SUMMARY.md, 07-02-SUMMARY.md, 07-03-SUMMARY.md
@@ -125,7 +127,7 @@ Compute one disjoint partition that sums to the entity total (the reconcilable t
 
 ### Virtualized table header must mirror the body's flex column sizing
 
-A `@tanstack/react-virtual` body uses `flex w-full` rows with `flex-1` cells; the `<thead>` must use the *same* flex layout (`flex w-full` row, `flex flex-1 … px-3` cells), not default table-cell sizing, or header and body columns desync.
+A `@tanstack/react-virtual` body uses `flex w-full` rows with `flex-1` cells; the `<thead>` must use the _same_ flex layout (`flex w-full` row, `flex flex-1 … px-3` cells), not default table-cell sizing, or header and body columns desync.
 
 **When to use:** Any virtualized table where header and body are separate DOM subtrees — share the exact column-sizing mechanism between them.
 **Source:** 07-03-SUMMARY.md
@@ -159,12 +161,12 @@ The flex/table-cell header desync affected the shipped VM/ESX/datastore tables (
 
 Live verification confirmed ESXi releases are `9.0/8.0/7.0/…` with one `eolFrom` per major; there is no patch/build EOL field anywhere.
 
-**Impact:** D-09c's "patch level = em-dash sentinel" is a confirmed catalogue *fact*, not an implementation gap — it removed an entire risky lookup path (EOS-04 could not have done per-build EOL even if asked).
+**Impact:** D-09c's "patch level = em-dash sentinel" is a confirmed catalogue _fact_, not an implementation gap — it removed an entire risky lookup path (EOS-04 could not have done per-build EOL even if asked).
 **Source:** 07-02-SUMMARY.md, 07-RESEARCH.md
 
 ### `npm run sync:eos` reached endoflife.date live during execution
 
-The privacy guard is a runtime *app* guard; Node scripts are not subject to it, so the sync script fetched the real 11-product catalogue rather than falling back to the hand-authored minimal snapshot.
+The privacy guard is a runtime _app_ guard; Node scripts are not subject to it, so the sync script fetched the real 11-product catalogue rather than falling back to the hand-authored minimal snapshot.
 
 **Impact:** The committed `catalogue.json` is the real live snapshot (lastVerified 2026-05-17, ESXi 8.0→2027-10-11 / 7.0→2025-10-02, RHEL 10–4) — higher fidelity than the plan's fallback path assumed.
 **Source:** 07-01-SUMMARY.md

@@ -62,7 +62,15 @@ export function ExportButtons() {
     }
   }
 
-  const Btn = ({ kind, label, aria }: { kind: 'html' | 'pptx'; label: string; aria: string }) => {
+  const renderBtn = ({
+    kind,
+    label,
+    aria,
+  }: {
+    kind: 'html' | 'pptx'
+    label: string
+    aria: string
+  }) => {
     const isPending = pending === kind
     return (
       <button
@@ -87,8 +95,8 @@ export function ExportButtons() {
       className="flex items-center gap-1 rounded-md border border-slate-200 bg-white p-0.5 text-xs dark:border-surface-700 dark:bg-surface-900"
     >
       <legend className="sr-only">{groupLabel}</legend>
-      <Btn kind="html" label={t('action.html')} aria={t('action.ariaHtml')} />
-      <Btn kind="pptx" label={t('action.pptx')} aria={t('action.ariaPptx')} />
+      {renderBtn({ kind: 'html', label: t('action.html'), aria: t('action.ariaHtml') })}
+      {renderBtn({ kind: 'pptx', label: t('action.pptx'), aria: t('action.ariaPptx') })}
     </fieldset>
   )
 }
