@@ -43,7 +43,7 @@
   },
   "overrides": {
     "size-sensor": "1.0.3",
-    "fast-uri": "3.1.7",
+    "fast-uri": "^3.1.9",
     "image-size": "^2.0.4"
   },
   "devDependencies": {
